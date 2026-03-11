@@ -12,7 +12,7 @@ assignees: []
 
 ## 브랜치 이름
 
-`feature/`
+`Feature/`
 
 ## 구현할 기능
 
