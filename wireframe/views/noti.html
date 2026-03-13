@@ -1,0 +1,264 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Job-Moa - 알림</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;600;700;800;900&family=DM+Mono:wght@400;500&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --bg: #f4f5f8;
+        --white: #ffffff;
+        --surface2: #f8f9fc;
+        --border: #e8eaf0;
+        --border2: #d4d7e3;
+
+        --indigo: #4f46e5;
+        --indigo-light: #eef2ff;
+        --indigo-dark: #3730a3;
+        --emerald-light: #ecfdf5;
+        --amber-light: #fffbeb;
+        --rose: #f43f5e;
+        --rose-light: #fff1f2;
+        --violet: #8b5cf6;
+
+        --text: #111827;
+        --text2: #6b7280;
+        --text3: #9ca3af;
+
+        --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.06), 0 1px 2px rgba(0, 0, 0, 0.04);
+        --radius: 12px;
+        --topbar-h: 62px;
+      }
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      body {
+        font-family: 'Noto Sans KR', sans-serif;
+        background: var(--bg);
+        color: var(--text);
+        height: 100vh;
+        overflow: hidden;
+        display: flex;
+      }
+      ::-webkit-scrollbar {
+        width: 5px;
+        height: 5px;
+      }
+      ::-webkit-scrollbar-track {
+        background: transparent;
+      }
+      ::-webkit-scrollbar-thumb {
+        background: var(--border2);
+        border-radius: 99px;
+      }
+      .main {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+      }
+
+      #topbar-root {
+        height: var(--topbar-h);
+        flex-shrink: 0;
+      }
+
+      .content {
+        flex: 1;
+        overflow-y: auto;
+        padding: 24px;
+      }
+      .btn {
+        padding: 8px 16px;
+        border-radius: 9px;
+        font-size: 13px;
+        font-weight: 700;
+        cursor: pointer;
+        border: none;
+        font-family: 'Noto Sans KR', sans-serif;
+        transition: all 0.15s;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+      }
+      .btn-primary {
+        background: var(--indigo);
+        color: #fff;
+      }
+      .btn-primary:hover {
+        opacity: 0.9;
+      }
+      .btn-outline {
+        background: #fff;
+        color: var(--text2);
+        border: 1.5px solid var(--border);
+      }
+      .btn-outline:hover {
+        border-color: var(--indigo);
+        color: var(--indigo);
+      }
+      .btn-sm {
+        padding: 6px 12px;
+        font-size: 12px;
+      }
+
+      .noti-wrap {
+        max-width: 680px;
+        display: flex;
+        flex-direction: column;
+        gap: 9px;
+      }
+      .noti {
+        background: var(--white);
+        border: 1.5px solid var(--border);
+        border-radius: var(--radius);
+        padding: 16px 18px;
+        display: flex;
+        gap: 13px;
+        align-items: flex-start;
+        transition: all 0.15s;
+        box-shadow: var(--shadow-sm);
+        cursor: pointer;
+      }
+      .noti:hover {
+        border-color: var(--indigo-mid);
+        transform: translateY(-1px);
+      }
+      .noti.unread {
+        border-left: 3px solid var(--indigo);
+      }
+      .nicon {
+        width: 36px;
+        height: 36px;
+        border-radius: 9px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 17px;
+        flex-shrink: 0;
+      }
+      .nbody {
+        flex: 1;
+      }
+      .ntitle {
+        font-size: 13.5px;
+        font-weight: 700;
+        color: var(--text);
+      }
+      .ndesc {
+        font-size: 12.5px;
+        color: var(--text2);
+        margin-top: 2px;
+        line-height: 1.5;
+      }
+      .ntime {
+        font-size: 11px;
+        color: var(--text3);
+        margin-top: 4px;
+      }
+      .ndot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: var(--indigo);
+        flex-shrink: 0;
+        margin-top: 6px;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="sidebar-root"></div>
+
+    <main class="main">
+      <div id="topbar-root"></div>
+
+      <div class="content">
+        <div
+          style="
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 18px;
+            max-width: 680px;
+          "
+        >
+          <div style="font-size: 14px; color: var(--text2)">
+            읽지 않은 알림 <strong style="color: var(--rose)">3개</strong>
+          </div>
+          <button class="btn btn-outline btn-sm">모두 읽음</button>
+        </div>
+
+        <div class="noti-wrap">
+          <div class="noti unread">
+            <div class="nicon" style="background: var(--rose-light)">🔥</div>
+            <div class="nbody">
+              <div class="ntitle">네이버 서류 마감 D-3</div>
+              <div class="ndesc">네이버 프론트엔드 개발자 공고가 3일 후 마감됩니다.</div>
+              <div class="ntime">방금 전</div>
+            </div>
+            <div class="ndot"></div>
+          </div>
+
+          <div class="noti unread">
+            <div class="nicon" style="background: var(--amber-light)">📅</div>
+            <div class="nbody">
+              <div class="ntitle">배달의민족 면접 D-2</div>
+              <div class="ndesc">3월 12일 배달의민족 iOS 개발자 면접이 예정되어 있습니다.</div>
+              <div class="ntime">1시간 전</div>
+            </div>
+            <div class="ndot"></div>
+          </div>
+
+          <div class="noti unread">
+            <div class="nicon" style="background: var(--emerald-light)">🎉</div>
+            <div class="nbody">
+              <div class="ntitle">현대오토에버 최종 합격!</div>
+              <div class="ndesc">현대오토에버 임베디드 개발 직군에 최종 합격하셨습니다.</div>
+              <div class="ntime">어제</div>
+            </div>
+            <div class="ndot"></div>
+          </div>
+
+          <div class="noti">
+            <div class="nicon" style="background: var(--surface2)">📋</div>
+            <div class="nbody">
+              <div class="ntitle">토스 서류 접수 완료</div>
+              <div class="ndesc">토스 프론트엔드 개발자 지원서가 성공적으로 접수되었습니다.</div>
+              <div class="ntime">3일 전</div>
+            </div>
+          </div>
+
+          <div class="noti">
+            <div class="nicon" style="background: var(--rose-light)">😢</div>
+            <div class="nbody">
+              <div class="ntitle">우아한형제들 불합격</div>
+              <div class="ndesc">
+                우아한형제들 백엔드 개발자 최종 면접에서 아쉽게 탈락하셨습니다.
+              </div>
+              <div class="ntime">7일 전</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <script src="../components/common/Sidebar.js"></script>
+    <script src="../components/common/Topbar.js"></script>
+    <script>
+      loadSidebar('nav-noti');
+
+      loadTopbar({
+        title: '알림',
+        badge: 'ALERTS',
+        showSearch: true,
+        showAddButton: true,
+      });
+    </script>
+  </body>
+</html>

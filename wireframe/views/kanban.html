@@ -1,0 +1,860 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Job-Moa - 지원 현황</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;600;700;800;900&family=DM+Mono:wght@400;500&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --bg: #f4f5f8;
+        --white: #ffffff;
+        --surface: #ffffff;
+        --surface2: #f8f9fc;
+        --border: #e8eaf0;
+        --border2: #d4d7e3;
+        --indigo: #4f46e5;
+        --indigo-light: #eef2ff;
+        --indigo-mid: #c7d2fe;
+        --indigo-dark: #3730a3;
+        --emerald: #10b981;
+        --emerald-light: #ecfdf5;
+        --amber: #f59e0b;
+        --amber-light: #fffbeb;
+        --rose: #f43f5e;
+        --rose-light: #fff1f2;
+        --violet: #8b5cf6;
+        --violet-light: #f5f3ff;
+        --sky: #0ea5e9;
+        --sky-light: #f0f9ff;
+        --text: #111827;
+        --text2: #6b7280;
+        --text3: #9ca3af;
+        --text4: #d1d5db;
+        --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.06), 0 1px 2px rgba(0, 0, 0, 0.04);
+        --shadow: 0 4px 12px rgba(0, 0, 0, 0.06), 0 2px 4px rgba(0, 0, 0, 0.04);
+        --shadow-lg: 0 10px 30px rgba(0, 0, 0, 0.1), 0 4px 8px rgba(0, 0, 0, 0.05);
+        --shadow-indigo: 0 4px 14px rgba(79, 70, 229, 0.25);
+        --sidebar-w: 230px;
+        --topbar-h: 62px;
+        --radius: 12px;
+      }
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      body {
+        font-family: 'Noto Sans KR', sans-serif;
+        background: var(--bg);
+        color: var(--text);
+        height: 100vh;
+        overflow: hidden;
+        display: flex;
+      }
+      ::-webkit-scrollbar {
+        width: 5px;
+        height: 5px;
+      }
+      ::-webkit-scrollbar-track {
+        background: transparent;
+      }
+      ::-webkit-scrollbar-thumb {
+        background: var(--border2);
+        border-radius: 99px;
+      }
+
+      .main {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+      }
+      #topbar-root {
+        height: var(--topbar-h);
+        flex-shrink: 0;
+      }
+
+      .content {
+        flex: 1;
+        overflow-y: auto;
+        padding: 24px;
+      }
+      .stats-row {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 14px;
+        margin-bottom: 24px;
+      }
+      .sc {
+        background: var(--white);
+        border: 1.5px solid var(--border);
+        border-radius: var(--radius);
+        padding: 18px 20px;
+        position: relative;
+        overflow: hidden;
+      }
+      .sc::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 3px;
+      }
+      .sc.i1::before {
+        background: linear-gradient(90deg, var(--indigo), var(--violet));
+      }
+      .sc.i2::before {
+        background: linear-gradient(90deg, var(--emerald), #34d399);
+      }
+      .sc.i3::before {
+        background: linear-gradient(90deg, var(--amber), #fbbf24);
+      }
+      .sc.i4::before {
+        background: linear-gradient(90deg, var(--rose), #fb7185);
+      }
+
+      .sc-n {
+        font-family: 'DM Mono', monospace;
+        font-size: 30px;
+        font-weight: 700;
+      }
+      .i1 .sc-n {
+        color: var(--indigo);
+      }
+      .i2 .sc-n {
+        color: var(--emerald);
+      }
+      .i3 .sc-n {
+        color: var(--amber);
+      }
+      .i4 .sc-n {
+        color: var(--rose);
+      }
+
+      .sc-l {
+        font-size: 12px;
+        color: var(--text3);
+        margin-top: 5px;
+        font-weight: 500;
+      }
+      .sc-t {
+        font-size: 11px;
+        color: var(--emerald);
+        margin-top: 3px;
+        font-weight: 600;
+      }
+
+      .tab-row {
+        display: flex;
+        gap: 4px;
+        margin-bottom: 18px;
+        background: var(--surface2);
+        padding: 4px;
+        border-radius: 10px;
+        width: fit-content;
+      }
+      .tab {
+        padding: 7px 18px;
+        border-radius: 7px;
+        font-size: 13px;
+        font-weight: 600;
+        cursor: pointer;
+        color: var(--text3);
+        transition: all 0.15s;
+      }
+      .tab.on {
+        background: var(--white);
+        color: var(--text);
+        box-shadow: var(--shadow-sm);
+      }
+
+      .kanban {
+        display: flex;
+        gap: 14px;
+        overflow-x: auto;
+        padding-bottom: 12px;
+      }
+      .kcol {
+        width: 240px;
+        flex-shrink: 0;
+        background: var(--surface2);
+        border: 1.5px solid var(--border);
+        border-radius: var(--radius);
+        padding: 14px;
+      }
+      .khead {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 12px;
+      }
+      .kdot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        flex-shrink: 0;
+      }
+      .ktitle {
+        font-size: 13px;
+        font-weight: 700;
+        color: var(--text);
+      }
+      .kcnt {
+        margin-left: auto;
+        font-size: 10.5px;
+        color: var(--text3);
+        background: var(--white);
+        border: 1px solid var(--border);
+        padding: 1px 8px;
+        border-radius: 99px;
+        font-family: 'DM Mono', monospace;
+      }
+
+      .card {
+        background: var(--white);
+        border: 1.5px solid var(--border);
+        border-radius: 10px;
+        padding: 13px;
+        margin-bottom: 8px;
+        cursor: pointer;
+        transition: all 0.15s;
+        box-shadow: var(--shadow-sm);
+      }
+      .card:hover {
+        border-color: var(--indigo);
+        box-shadow:
+          var(--shadow),
+          0 0 0 3px var(--indigo-light);
+        transform: translateY(-1px);
+      }
+      .ctop {
+        display: flex;
+        gap: 10px;
+        align-items: flex-start;
+      }
+      .clogo {
+        width: 33px;
+        height: 33px;
+        border-radius: 8px;
+        flex-shrink: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 13px;
+        font-weight: 900;
+        color: #fff;
+      }
+      .cname {
+        font-size: 13px;
+        font-weight: 700;
+        color: var(--text);
+      }
+      .crole {
+        font-size: 11.5px;
+        color: var(--text2);
+        margin-top: 2px;
+      }
+      .ctags {
+        display: flex;
+        gap: 4px;
+        flex-wrap: wrap;
+        margin-top: 9px;
+      }
+      .tag {
+        font-size: 10.5px;
+        font-weight: 600;
+        padding: 3px 8px;
+        border-radius: 5px;
+      }
+      .tg {
+        background: #f3f4f6;
+        color: #6b7280;
+      }
+      .tb {
+        background: var(--indigo-light);
+        color: var(--indigo);
+      }
+      .tgreen {
+        background: var(--emerald-light);
+        color: var(--emerald);
+      }
+      .tyellow {
+        background: var(--amber-light);
+        color: #d97706;
+      }
+      .tred {
+        background: var(--rose-light);
+        color: var(--rose);
+      }
+
+      .cfoot {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-top: 10px;
+        padding-top: 8px;
+        border-top: 1px solid var(--border);
+      }
+      .dday {
+        font-family: 'DM Mono', monospace;
+        font-size: 11px;
+        font-weight: 700;
+      }
+      .dd-r {
+        color: var(--rose);
+      }
+      .dd-y {
+        color: var(--amber);
+      }
+      .dd-g {
+        color: var(--emerald);
+      }
+      .cdt {
+        font-size: 10.5px;
+        color: var(--text3);
+      }
+
+      .add-card {
+        width: 100%;
+        padding: 9px;
+        border: 1.5px dashed var(--border2);
+        border-radius: 9px;
+        background: transparent;
+        color: var(--text3);
+        font-size: 13px;
+        cursor: pointer;
+        transition: all 0.15s;
+        margin-top: 2px;
+        font-family: 'Noto Sans KR', sans-serif;
+        font-weight: 500;
+      }
+      .add-card:hover {
+        border-color: var(--indigo);
+        color: var(--indigo);
+        background: var(--indigo-light);
+      }
+
+      .ltable {
+        width: 100%;
+        border-collapse: collapse;
+        background: var(--white);
+        border-radius: var(--radius);
+        overflow: hidden;
+        box-shadow: var(--shadow-sm);
+        border: 1.5px solid var(--border);
+      }
+      .ltable th {
+        text-align: left;
+        padding: 11px 16px;
+        font-size: 11px;
+        color: var(--text3);
+        font-weight: 700;
+        letter-spacing: 1px;
+        text-transform: uppercase;
+        background: var(--surface2);
+        border-bottom: 1.5px solid var(--border);
+      }
+      .ltable td {
+        padding: 13px 16px;
+        font-size: 13.5px;
+        border-bottom: 1px solid var(--border);
+      }
+      .ltable tbody tr:hover td {
+        background: #fafbff;
+      }
+
+      .slov {
+        position: fixed;
+        inset: 0;
+        background: rgba(17, 24, 39, 0.4);
+        backdrop-filter: blur(2px);
+        z-index: 200;
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.2s;
+      }
+      .slov.show {
+        opacity: 1;
+        pointer-events: all;
+      }
+      .slpanel {
+        position: fixed;
+        top: 0;
+        right: -450px;
+        height: 100vh;
+        width: 430px;
+        background: var(--white);
+        border-left: 1.5px solid var(--border);
+        box-shadow: -10px 0 40px rgba(0, 0, 0, 0.1);
+        z-index: 201;
+        transition: right 0.28s cubic-bezier(0.4, 0, 0.2, 1);
+        overflow-y: auto;
+        padding: 26px;
+      }
+      .slov.show .slpanel {
+        right: 0;
+      }
+      .slhead {
+        display: flex;
+        align-items: center;
+        gap: 13px;
+        margin-bottom: 22px;
+      }
+      .sllogo {
+        width: 48px;
+        height: 48px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 20px;
+        font-weight: 900;
+        color: #fff;
+        flex-shrink: 0;
+      }
+      .slco {
+        font-size: 19px;
+        font-weight: 800;
+        color: var(--text);
+      }
+      .slrole {
+        font-size: 13.5px;
+        color: var(--text2);
+        margin-top: 2px;
+      }
+      .xbtn {
+        margin-left: auto;
+        background: var(--surface2);
+        border: 1.5px solid var(--border);
+        color: var(--text2);
+        width: 32px;
+        height: 32px;
+        border-radius: 8px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      .sec {
+        margin-bottom: 20px;
+      }
+      .sec-t {
+        font-size: 10px;
+        font-weight: 700;
+        color: var(--text3);
+        letter-spacing: 1.5px;
+        text-transform: uppercase;
+        margin-bottom: 10px;
+      }
+      .ptrack {
+        background: var(--surface2);
+        border-radius: 99px;
+        height: 5px;
+        margin-top: 8px;
+        overflow: hidden;
+      }
+      .pfill {
+        height: 100%;
+        background: linear-gradient(90deg, var(--indigo), var(--violet));
+      }
+      .tl {
+        padding-left: 18px;
+        position: relative;
+      }
+      .tlline {
+        position: absolute;
+        left: 7px;
+        top: 8px;
+        bottom: 8px;
+        width: 1px;
+        background: var(--border);
+      }
+      .tli {
+        position: relative;
+        margin-bottom: 14px;
+      }
+      .tldot {
+        position: absolute;
+        left: -14px;
+        top: 4px;
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: var(--border);
+      }
+      .tldot.done {
+        background: var(--emerald);
+      }
+      .tldot.now {
+        background: var(--indigo);
+        box-shadow: 0 0 0 3px var(--indigo-light);
+      }
+      .tll {
+        font-size: 12.5px;
+        font-weight: 600;
+        color: var(--text);
+      }
+      .tld {
+        font-size: 11px;
+        color: var(--text3);
+        margin-top: 1px;
+      }
+      .memo {
+        background: var(--surface2);
+        border: 1.5px solid var(--border);
+        border-radius: 9px;
+        padding: 13px;
+        font-size: 13px;
+        color: var(--text2);
+        line-height: 1.7;
+      }
+      .btn {
+        padding: 8px 16px;
+        border-radius: 9px;
+        font-size: 13px;
+        font-weight: 700;
+        cursor: pointer;
+        border: none;
+        font-family: 'Noto Sans KR', sans-serif;
+        transition: all 0.15s;
+      }
+      .btn-primary {
+        background: var(--indigo);
+        color: #fff;
+      }
+      .btn-outline {
+        background: #fff;
+        color: var(--text2);
+        border: 1.5px solid var(--border);
+      }
+      .btn-danger {
+        background: var(--rose-light);
+        color: var(--rose);
+        border: 1.5px solid #fecdd3;
+        width: 100%;
+        justify-content: center;
+        margin-top: 9px;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="sidebar-root"></div>
+
+    <main class="main">
+      <div id="topbar-root"></div>
+
+      <div class="content">
+        <div class="stats-row">
+          <div class="sc i1">
+            <div class="sc-n">24</div>
+            <div class="sc-l">총 지원</div>
+            <div class="sc-t">↑ 이번달 8건</div>
+          </div>
+          <div class="sc i2">
+            <div class="sc-n">8</div>
+            <div class="sc-l">서류 합격</div>
+            <div class="sc-t">합격률 33%</div>
+          </div>
+          <div class="sc i3">
+            <div class="sc-n">3</div>
+            <div class="sc-l">면접 예정</div>
+            <div class="sc-t">이번주 2건</div>
+          </div>
+          <div class="sc i4">
+            <div class="sc-n">2</div>
+            <div class="sc-l">결과 대기</div>
+            <div class="sc-t">평균 D+7</div>
+          </div>
+        </div>
+
+        <div class="tab-row">
+          <div class="tab on" onclick="sv('kv', this)">칸반 보드</div>
+          <div class="tab" onclick="sv('lv', this)">리스트</div>
+        </div>
+
+        <div id="kv">
+          <div class="kanban">
+            <div class="kcol">
+              <div class="khead">
+                <div class="kdot" style="background: #9ca3af"></div>
+                <div class="ktitle">서류 준비</div>
+                <div class="kcnt">3</div>
+              </div>
+              <div class="card" onclick="openSlide('naver')">
+                <div class="ctop">
+                  <div class="clogo" style="background: linear-gradient(135deg, #00c853, #009624)">
+                    N
+                  </div>
+                  <div>
+                    <div class="cname">네이버</div>
+                    <div class="crole">프론트엔드 개발자</div>
+                  </div>
+                </div>
+                <div class="ctags">
+                  <span class="tag tb">신입</span><span class="tag tg">React</span>
+                </div>
+                <div class="cfoot">
+                  <span class="dday dd-r">D-3</span><span class="cdt">마감 3.13</span>
+                </div>
+              </div>
+              <div class="card" onclick="openSlide('kakao')">
+                <div class="ctop">
+                  <div class="clogo" style="background: linear-gradient(135deg, #ff8f00, #e65100)">
+                    K
+                  </div>
+                  <div>
+                    <div class="cname">카카오</div>
+                    <div class="crole">서버 개발자</div>
+                  </div>
+                </div>
+                <div class="ctags">
+                  <span class="tag tb">신입</span><span class="tag tg">Node.js</span>
+                </div>
+                <div class="cfoot">
+                  <span class="dday dd-y">D-8</span><span class="cdt">마감 3.18</span>
+                </div>
+              </div>
+              <button class="add-card" onclick="openJobModal()">＋ 추가</button>
+            </div>
+
+            <div class="kcol">
+              <div class="khead">
+                <div class="kdot" style="background: #6366f1"></div>
+                <div class="ktitle">지원 완료</div>
+                <div class="kcnt">4</div>
+              </div>
+              <div class="card">
+                <div class="ctop">
+                  <div class="clogo" style="background: linear-gradient(135deg, #0288d1, #006064)">
+                    T
+                  </div>
+                  <div>
+                    <div class="cname">토스</div>
+                    <div class="crole">프론트엔드 개발자</div>
+                  </div>
+                </div>
+                <div class="ctags">
+                  <span class="tag tb">신입</span><span class="tag tg">React</span
+                  ><span class="tag tg">TS</span>
+                </div>
+                <div class="cfoot"><span class="cdt">지원일 3.5</span></div>
+              </div>
+              <button class="add-card" onclick="openJobModal()">＋ 추가</button>
+            </div>
+
+            <div class="kcol">
+              <div class="khead">
+                <div class="kdot" style="background: #10b981"></div>
+                <div class="ktitle">서류 합격</div>
+                <div class="kcnt">2</div>
+              </div>
+              <div class="card" style="border-color: #a7f3d0">
+                <div class="ctop">
+                  <div class="clogo" style="background: linear-gradient(135deg, #00bfa5, #00695c)">
+                    B
+                  </div>
+                  <div>
+                    <div class="cname">배달의민족</div>
+                    <div class="crole">iOS 개발자</div>
+                  </div>
+                </div>
+                <div class="ctags"><span class="tag tgreen">서류합격 ✓</span></div>
+                <div class="cfoot">
+                  <span class="dday dd-r">면접 D-2</span><span class="cdt">면접 3.12</span>
+                </div>
+              </div>
+              <button class="add-card" onclick="openJobModal()">＋ 추가</button>
+            </div>
+
+            <div class="kcol">
+              <div class="khead">
+                <div class="kdot" style="background: #f59e0b"></div>
+                <div class="ktitle">면접 진행</div>
+                <div class="kcnt">2</div>
+              </div>
+              <div class="card" style="border-color: #fde68a">
+                <div class="ctop">
+                  <div class="clogo" style="background: linear-gradient(135deg, #f59e0b, #d97706)">
+                    S
+                  </div>
+                  <div>
+                    <div class="cname">삼성SDS</div>
+                    <div class="crole">SW 개발자</div>
+                  </div>
+                </div>
+                <div class="ctags"><span class="tag tyellow">2차 면접</span></div>
+                <div class="cfoot"><span class="cdt">3.7 진행완료</span></div>
+              </div>
+              <button class="add-card" onclick="openJobModal()">＋ 추가</button>
+            </div>
+
+            <div class="kcol">
+              <div class="khead">
+                <div class="kdot" style="background: #f43f5e"></div>
+                <div class="ktitle">결과 완료</div>
+                <div class="kcnt">3</div>
+              </div>
+              <div class="card" style="border-color: #a7f3d0">
+                <div class="ctop">
+                  <div class="clogo" style="background: linear-gradient(135deg, #00897b, #004d40)">
+                    H
+                  </div>
+                  <div>
+                    <div class="cname">현대오토에버</div>
+                    <div class="crole">임베디드 개발</div>
+                  </div>
+                </div>
+                <div class="ctags"><span class="tag tgreen">✓ 최종 합격</span></div>
+                <div class="cfoot"><span class="cdt">합격 2.28</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div id="lv" style="display: none">
+          <table class="ltable">
+            <thead>
+              <tr>
+                <th>회사</th>
+                <th>직군</th>
+                <th>단계</th>
+                <th>마감일</th>
+                <th>D-day</th>
+                <th>지원일</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr onclick="openSlide('naver')">
+                <td style="font-weight: 700">네이버</td>
+                <td style="color: var(--text2)">프론트엔드 개발자</td>
+                <td><span class="tag tg">서류 준비</span></td>
+                <td style="color: var(--text2)">2026.03.13</td>
+                <td><span class="dday dd-r" style="font-size: 12px">D-3</span></td>
+                <td style="color: var(--text3)">—</td>
+              </tr>
+              <tr>
+                <td style="font-weight: 700">토스</td>
+                <td style="color: var(--text2)">프론트엔드 개발자</td>
+                <td><span class="tag tb">지원 완료</span></td>
+                <td style="color: var(--text2)">—</td>
+                <td style="color: var(--text3)">—</td>
+                <td style="color: var(--text3)">2026.03.05</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </main>
+
+    <div class="slov" id="slov" onclick="closeSlide(event)">
+      <div class="slpanel" onclick="event.stopPropagation()">
+        <div class="slhead">
+          <div
+            class="sllogo"
+            id="sllogo"
+            style="background: linear-gradient(135deg, #00c853, #009624)"
+          >
+            N
+          </div>
+          <div>
+            <div class="slco" id="slco">네이버</div>
+            <div class="slrole" id="slrole">프론트엔드 개발자</div>
+          </div>
+          <button class="xbtn" onclick="closeSlide()">✕</button>
+        </div>
+        <div class="sec">
+          <div class="sec-t">진행 단계</div>
+          <div style="display: flex; gap: 5px; flex-wrap: wrap; align-items: center">
+            <span class="tag tg">서류 준비</span>
+            <span style="color: var(--text4); font-size: 12px">→</span>
+            <span class="tag tb">지원 완료</span>
+            <span style="color: var(--text4); font-size: 12px">→</span>
+            <span class="tag tg" style="opacity: 0.35">서류 합격</span>
+          </div>
+          <div class="ptrack"><div class="pfill" style="width: 25%"></div></div>
+        </div>
+        <div class="sec">
+          <div class="sec-t">타임라인</div>
+          <div class="tl">
+            <div class="tlline"></div>
+            <div class="tli">
+              <div class="tldot done"></div>
+              <div class="tll">서류 준비 시작</div>
+              <div class="tld">2026.03.05</div>
+            </div>
+            <div class="tli">
+              <div class="tldot now"></div>
+              <div class="tll">지원 완료</div>
+              <div class="tld">2026.03.08</div>
+            </div>
+          </div>
+        </div>
+        <div class="sec">
+          <div class="sec-t">메모</div>
+          <div class="memo">
+            • React, TypeScript 중심 포지션<br />• 코딩테스트 필요 (알고리즘)<br />• 포트폴리오
+            프로젝트 2개 첨부
+          </div>
+        </div>
+        <div class="slactions">
+          <button class="btn btn-outline" style="flex: 1">단계 변경</button>
+          <button class="btn btn-primary" style="flex: 1">수정하기</button>
+        </div>
+        <button class="btn btn-danger">삭제하기</button>
+      </div>
+    </div>
+
+    <script src="../components/common/Sidebar.js"></script>
+    <script src="../components/common/Topbar.js"></script>
+    <script>
+      loadSidebar('nav-kanban');
+
+      loadTopbar({
+        title: '지원 현황',
+        badge: 'KANBAN',
+        showSearch: true,
+        showAddButton: true,
+      });
+
+      function sv(viewId, tab) {
+        document.querySelectorAll('.tab-row .tab').forEach((t) => t.classList.remove('on'));
+        tab.classList.add('on');
+        document.getElementById('kv').style.display = viewId === 'kv' ? '' : 'none';
+        document.getElementById('lv').style.display = viewId === 'lv' ? '' : 'none';
+      }
+
+      const SLIDES = {
+        naver: {
+          l: 'N',
+          g: 'linear-gradient(135deg,#00c853,#009624)',
+          co: '네이버',
+          role: '프론트엔드 개발자',
+        },
+        kakao: {
+          l: 'K',
+          g: 'linear-gradient(135deg,#ff8f00,#e65100)',
+          co: '카카오',
+          role: '서버 개발자',
+        },
+      };
+      function openSlide(id) {
+        const d = SLIDES[id] || SLIDES.naver;
+        document.getElementById('sllogo').textContent = d.l;
+        document.getElementById('sllogo').style.background = d.g;
+        document.getElementById('slco').textContent = d.co;
+        document.getElementById('slrole').textContent = d.role;
+        document.getElementById('slov').classList.add('show');
+      }
+      function closeSlide(e) {
+        if (!e || e.target === document.getElementById('slov')) {
+          document.getElementById('slov').classList.remove('show');
+        }
+      }
+    </script>
+  </body>
+</html>

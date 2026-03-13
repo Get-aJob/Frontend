@@ -1,0 +1,389 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Job-Moa - 문서 관리</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;600;700;800;900&family=DM+Mono:wght@400;500&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --bg: #f4f5f8;
+        --white: #ffffff;
+        --surface2: #f8f9fc;
+        --border: #e8eaf0;
+        --border2: #d4d7e3;
+        --indigo: #4f46e5;
+        --indigo-light: #eef2ff;
+        --indigo-dark: #3730a3;
+        --emerald: #10b981;
+        --emerald-light: #ecfdf5;
+        --text: #111827;
+        --text2: #6b7280;
+        --text3: #9ca3af;
+        --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.06);
+        --shadow-lg: 0 10px 30px rgba(0, 0, 0, 0.1);
+        --radius: 12px;
+        --topbar-h: 62px;
+      }
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      body {
+        font-family: 'Noto Sans KR', sans-serif;
+        background: var(--bg);
+        color: var(--text);
+        height: 100vh;
+        overflow: hidden;
+        display: flex;
+      }
+
+      /* ══════ MAIN ══════ */
+      .main {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+      }
+
+      /* 공통 탑바 루트 */
+      #topbar-root {
+        height: var(--topbar-h);
+        flex-shrink: 0;
+      }
+
+      .content {
+        flex: 1;
+        overflow-y: auto;
+        padding: 24px;
+      }
+
+      /* 문서 리스트 스타일 */
+      .doc-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 14px;
+      }
+      .doc-card {
+        background: var(--white);
+        border: 1.5px solid var(--border);
+        border-radius: var(--radius);
+        padding: 18px;
+        cursor: pointer;
+        transition: 0.15s;
+        box-shadow: var(--shadow-sm);
+      }
+      .doc-card:hover {
+        border-color: var(--indigo);
+        transform: translateY(-1px);
+      }
+      .dicon {
+        font-size: 26px;
+        margin-bottom: 10px;
+      }
+      .dname {
+        font-size: 14px;
+        font-weight: 700;
+        color: var(--text);
+      }
+      .dmeta {
+        font-size: 11.5px;
+        color: var(--text3);
+        margin-top: 3px;
+      }
+      .tag {
+        font-size: 10px;
+        font-weight: 600;
+        padding: 2px 7px;
+        border-radius: 4px;
+        margin-right: 4px;
+      }
+      .tb {
+        background: var(--indigo-light);
+        color: var(--indigo);
+      }
+      .tgreen {
+        background: var(--emerald-light);
+        color: var(--emerald);
+      }
+
+      .resume-form {
+        display: none;
+        max-width: 800px;
+        margin: 0 auto;
+        background: var(--white);
+        border: 1.5px solid var(--border);
+        border-radius: 16px;
+        padding: 32px;
+        box-shadow: var(--shadow-sm);
+      }
+      .ssect-title {
+        font-size: 15px;
+        font-weight: 800;
+        margin-bottom: 16px;
+        padding-bottom: 10px;
+        border-bottom: 1.5px solid var(--border);
+      }
+      .fi {
+        width: 100%;
+        background: var(--surface2);
+        border: 1.5px solid var(--border);
+        border-radius: 9px;
+        padding: 10px 14px;
+        font-size: 14px;
+        outline: none;
+        margin-bottom: 12px;
+      }
+      .fl {
+        font-size: 12px;
+        font-weight: 600;
+        color: var(--text2);
+        display: block;
+        margin-bottom: 6px;
+      }
+      .frow2 {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 12px;
+      }
+
+      .btn {
+        padding: 10px 20px;
+        border-radius: 9px;
+        font-size: 13.5px;
+        font-weight: 700;
+        cursor: pointer;
+        border: none;
+        transition: 0.15s;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        font-family: 'Noto Sans KR', sans-serif;
+      }
+      .btn-primary {
+        background: var(--indigo);
+        color: #fff;
+      }
+      .btn-outline {
+        background: #fff;
+        color: var(--text2);
+        border: 1.5px solid var(--border);
+      }
+
+      .overlay {
+        position: fixed;
+        inset: 0;
+        background: rgba(17, 24, 39, 0.5);
+        backdrop-filter: blur(3px);
+        z-index: 300;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        opacity: 0;
+        pointer-events: none;
+        transition: 0.2s;
+      }
+      .overlay.show {
+        opacity: 1;
+        pointer-events: all;
+      }
+      .modal {
+        background: var(--white);
+        border-radius: 16px;
+        padding: 28px;
+        width: 420px;
+        box-shadow: var(--shadow-lg);
+      }
+      .mtitle {
+        font-size: 18px;
+        font-weight: 800;
+        margin-bottom: 16px;
+      }
+      .upload-area {
+        border: 2px dashed var(--border2);
+        border-radius: 12px;
+        padding: 30px;
+        text-align: center;
+        color: var(--text3);
+        transition: 0.2s;
+        cursor: pointer;
+      }
+      .upload-area:hover {
+        border-color: var(--indigo);
+        background: var(--indigo-light);
+        color: var(--indigo);
+      }
+    </style>
+  </head>
+  <body>
+    <div id="sidebar-root"></div>
+
+    <main class="main">
+      <div id="topbar-root"></div>
+
+      <div class="content">
+        <div id="docs-list-view">
+          <div
+            style="
+              display: flex;
+              justify-content: space-between;
+              align-items: center;
+              margin-bottom: 20px;
+            "
+          >
+            <div style="font-size: 14px; color: var(--text2)">총 <strong>5개</strong>의 문서</div>
+            <button class="btn btn-primary" onclick="toggleView('form')">＋ 이력서 생성</button>
+          </div>
+
+          <div class="doc-grid">
+            <div class="doc-card">
+              <div class="dicon">📝</div>
+              <div class="dname">이력서_최종_v3.pdf</div>
+              <div class="dmeta">수정일: 2026.03.08 · 2.1MB</div>
+              <div style="margin-top: 10px">
+                <span class="tag tb">v3 최신</span><span class="tag tgreen">활성</span>
+              </div>
+            </div>
+            <div
+              class="doc-card"
+              style="
+                border-style: dashed;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                flex-direction: column;
+                gap: 8px;
+                color: var(--text3);
+                min-height: 125px;
+                box-shadow: none;
+              "
+              onclick="openUploadModal()"
+            >
+              <div style="font-size: 24px">＋</div>
+              <div style="font-size: 13px; font-weight: 500">파일 업로드 (PDF)</div>
+            </div>
+          </div>
+        </div>
+
+        <div id="resume-form-view" class="resume-form">
+          <div
+            style="
+              display: flex;
+              justify-content: space-between;
+              align-items: center;
+              margin-bottom: 24px;
+            "
+          >
+            <h2 style="font-size: 18px; font-weight: 800">새 이력서 작성</h2>
+            <button class="btn btn-outline" onclick="toggleView('list')">돌아가기</button>
+          </div>
+          <div class="ssect">
+            <div class="ssect-title">👤 기본 정보</div>
+            <div class="frow2">
+              <div><label class="fl">이름</label><input class="fi" placeholder="김개발" /></div>
+              <div>
+                <label class="fl">연락처</label><input class="fi" placeholder="010-0000-0000" />
+              </div>
+            </div>
+          </div>
+          <button
+            class="btn btn-primary"
+            style="width: 100%; justify-content: center"
+            onclick="saveResume()"
+          >
+            저장하기
+          </button>
+        </div>
+      </div>
+    </main>
+
+    <div class="overlay" id="uploadModal" onclick="closeUploadModal(event)">
+      <div class="modal" onclick="event.stopPropagation()">
+        <div class="mtitle">문서 업로드</div>
+        <p style="font-size: 13px; color: var(--text3); margin-bottom: 20px">
+          PDF 형식의 파일만 업로드 가능합니다.
+        </p>
+
+        <label for="fileInput">
+          <div class="upload-area" id="dropZone">
+            <div style="font-size: 32px; margin-bottom: 10px">📄</div>
+            <div id="fileNameDisplay">파일을 드래그하거나 클릭하여 선택</div>
+            <input
+              type="file"
+              id="fileInput"
+              accept=".pdf"
+              style="display: none"
+              onchange="handleFileSelect(this)"
+            />
+          </div>
+        </label>
+
+        <div style="display: flex; gap: 10px; margin-top: 24px">
+          <button class="btn btn-outline" style="flex: 1" onclick="closeUploadModal()">취소</button>
+          <button class="btn btn-primary" style="flex: 1" onclick="handleUpload()">
+            업로드 시작
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <script src="../components/common/Sidebar.js"></script>
+    <script src="../components/common/Topbar.js"></script>
+    <script>
+      loadSidebar('nav-docs');
+
+      loadTopbar({
+        title: '이력서 관리',
+        badge: 'DOCS',
+        showSearch: true,
+        showAddButton: true,
+      });
+
+      function toggleView(view) {
+        document.getElementById('docs-list-view').style.display =
+          view === 'form' ? 'none' : 'block';
+        document.getElementById('resume-form-view').style.display =
+          view === 'form' ? 'block' : 'none';
+      }
+
+      function openUploadModal() {
+        document.getElementById('uploadModal').classList.add('show');
+      }
+      function closeUploadModal(e) {
+        if (!e || e.target.id === 'uploadModal' || e.type === 'click') {
+          document.getElementById('uploadModal').classList.remove('show');
+          document.getElementById('fileNameDisplay').textContent =
+            '파일을 드래그하거나 클릭하여 선택';
+        }
+      }
+
+      function handleFileSelect(input) {
+        if (input.files.length > 0) {
+          const fileNameEl = document.getElementById('fileNameDisplay');
+          fileNameEl.textContent = input.files[0].name;
+          fileNameEl.style.color = 'var(--indigo)';
+          fileNameEl.style.fontWeight = '700';
+        }
+      }
+
+      function handleUpload() {
+        const file = document.getElementById('fileInput').files[0];
+        if (!file) {
+          alert('업로드할 파일을 선택해주세요.');
+          return;
+        }
+        alert(file.name + ' 파일이 성공적으로 업로드되었습니다.');
+        closeUploadModal();
+      }
+
+      function saveResume() {
+        alert('이력서가 저장되었습니다.');
+        toggleView('list');
+      }
+    </script>
+  </body>
+</html>

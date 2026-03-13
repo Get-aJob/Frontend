@@ -1,0 +1,463 @@
+<aside
+  class="sidebar"
+  style="
+    width: 230px;
+    background: #ffffff;
+    border-right: 1px solid #e8eaf0;
+    display: flex;
+    flex-direction: column;
+    flex-shrink: 0;
+    box-shadow: 2px 0 8px rgba(0, 0, 0, 0.03);
+    z-index: 20;
+    height: 100vh;
+  "
+>
+  <div
+    class="logo"
+    style="padding: 20px 18px 16px; border-bottom: 1px solid #e8eaf0"
+  >
+    <div
+      class="logo-wrap"
+      style="display: flex; align-items: center; gap: 10px"
+    >
+      <div
+        class="logo-icon"
+        style="
+          width: 36px;
+          height: 36px;
+          border-radius: 10px;
+          background: linear-gradient(135deg, #4f46e5, #8b5cf6);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-size: 17px;
+          font-weight: 900;
+          color: #fff;
+          font-family: &quot;DM Mono&quot;, monospace;
+          box-shadow: 0 4px 14px rgba(79, 70, 229, 0.25);
+        "
+      >
+        JT
+      </div>
+      <div>
+        <div
+          class="logo-text"
+          style="
+            font-size: 17px;
+            font-weight: 800;
+            color: #111827;
+            letter-spacing: -0.3px;
+          "
+        >
+          Job-Moa
+        </div>
+        <div
+          class="logo-sub"
+          style="font-size: 10px; color: #9ca3af; margin-top: 2px"
+        >
+          취업 지원 관리
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <nav class="nav" style="flex: 1; padding: 12px 10px; overflow-y: auto">
+    <div class="nav-sec" style="margin-bottom: 18px">
+      <div
+        class="nav-label"
+        style="
+          font-size: 9.5px;
+          font-weight: 700;
+          color: #9ca3af;
+          letter-spacing: 1.5px;
+          text-transform: uppercase;
+          padding: 0 10px;
+          margin-bottom: 5px;
+        "
+      >
+        메인
+      </div>
+      <div
+        class="nav-item"
+        id="nav-calendar"
+        onclick="location.href = 'calendar.html'"
+        style="
+          display: flex;
+          align-items: center;
+          gap: 9px;
+          padding: 9px 10px;
+          border-radius: 9px;
+          font-size: 13.5px;
+          font-weight: 500;
+          color: #6b7280;
+          cursor: pointer;
+          transition: all 0.15s;
+          margin-bottom: 1px;
+        "
+      >
+        <span
+          class="ni"
+          style="
+            font-size: 16px;
+            width: 20px;
+            text-align: center;
+            flex-shrink: 0;
+          "
+          >📅</span
+        >캘린더
+      </div>
+      <div
+        class="nav-item"
+        id="nav-kanban"
+        onclick="location.href = 'kanban.html'"
+        style="
+          display: flex;
+          align-items: center;
+          gap: 9px;
+          padding: 9px 10px;
+          border-radius: 9px;
+          font-size: 13.5px;
+          font-weight: 500;
+          color: #6b7280;
+          cursor: pointer;
+          transition: all 0.15s;
+          margin-bottom: 1px;
+        "
+      >
+        <span
+          class="ni"
+          style="
+            font-size: 16px;
+            width: 20px;
+            text-align: center;
+            flex-shrink: 0;
+          "
+          >📋</span
+        >지원 현황<span
+          class="nbadge"
+          style="
+            margin-left: auto;
+            font-size: 10px;
+            font-weight: 700;
+            padding: 1px 7px;
+            border-radius: 99px;
+            background: #4f46e5;
+            color: #fff;
+          "
+          >12</span
+        >
+      </div>
+      <div
+        class="nav-item"
+        id="nav-jobboard"
+        onclick="location.href = 'jobboard.html'"
+        style="
+          display: flex;
+          align-items: center;
+          gap: 9px;
+          padding: 9px 10px;
+          border-radius: 9px;
+          font-size: 13.5px;
+          font-weight: 500;
+          color: #6b7280;
+          cursor: pointer;
+          transition: all 0.15s;
+          margin-bottom: 1px;
+        "
+      >
+        <span
+          class="ni"
+          style="
+            font-size: 16px;
+            width: 20px;
+            text-align: center;
+            flex-shrink: 0;
+          "
+          >🔍</span
+        >전체 공고
+      </div>
+      <div
+        class="nav-item"
+        id="nav-stats"
+        onclick="location.href = 'stats.html'"
+        style="
+          display: flex;
+          align-items: center;
+          gap: 9px;
+          padding: 9px 10px;
+          border-radius: 9px;
+          font-size: 13.5px;
+          font-weight: 500;
+          color: #6b7280;
+          cursor: pointer;
+          transition: all 0.15s;
+          margin-bottom: 1px;
+        "
+      >
+        <span
+          class="ni"
+          style="
+            font-size: 16px;
+            width: 20px;
+            text-align: center;
+            flex-shrink: 0;
+          "
+          >📊</span
+        >통계 분석
+      </div>
+    </div>
+
+    <div class="nav-sec" style="margin-bottom: 18px">
+      <div
+        class="nav-label"
+        style="
+          font-size: 9.5px;
+          font-weight: 700;
+          color: #9ca3af;
+          letter-spacing: 1.5px;
+          text-transform: uppercase;
+          padding: 0 10px;
+          margin-bottom: 5px;
+        "
+      >
+        관리
+      </div>
+      <div
+        class="nav-item"
+        id="nav-resume"
+        onclick="location.href = 'resume.html'"
+        style="
+          display: flex;
+          align-items: center;
+          gap: 9px;
+          padding: 9px 10px;
+          border-radius: 9px;
+          font-size: 13.5px;
+          font-weight: 500;
+          color: #6b7280;
+          cursor: pointer;
+          transition: all 0.15s;
+          margin-bottom: 1px;
+        "
+      >
+        <span
+          class="ni"
+          style="
+            font-size: 16px;
+            width: 20px;
+            text-align: center;
+            flex-shrink: 0;
+          "
+          >🗂️</span
+        >이력서 관리
+      </div>
+      <div
+        class="nav-item"
+        id="nav-scrap"
+        onclick="location.href = 'scrap.html'"
+        style="
+          display: flex;
+          align-items: center;
+          gap: 9px;
+          padding: 9px 10px;
+          border-radius: 9px;
+          font-size: 13.5px;
+          font-weight: 500;
+          color: #6b7280;
+          cursor: pointer;
+          transition: all 0.15s;
+          margin-bottom: 1px;
+        "
+      >
+        <span
+          class="ni"
+          style="
+            font-size: 16px;
+            width: 20px;
+            text-align: center;
+            flex-shrink: 0;
+          "
+          >🔖</span
+        >공고 스크랩<span
+          class="nbadge"
+          style="
+            margin-left: auto;
+            font-size: 10px;
+            font-weight: 700;
+            padding: 1px 7px;
+            border-radius: 99px;
+            background: #f59e0b;
+            color: #fff;
+          "
+          >5</span
+        >
+      </div>
+    </div>
+
+    <div class="nav-sec">
+      <div
+        class="nav-label"
+        style="
+          font-size: 9.5px;
+          font-weight: 700;
+          color: #9ca3af;
+          letter-spacing: 1.5px;
+          text-transform: uppercase;
+          padding: 0 10px;
+          margin-bottom: 5px;
+        "
+      >
+        기타
+      </div>
+      <div
+        class="nav-item"
+        id="nav-noti"
+        onclick="location.href = 'noti.html'"
+        style="
+          display: flex;
+          align-items: center;
+          gap: 9px;
+          padding: 9px 10px;
+          border-radius: 9px;
+          font-size: 13.5px;
+          font-weight: 500;
+          color: #6b7280;
+          cursor: pointer;
+          transition: all 0.15s;
+          margin-bottom: 1px;
+        "
+      >
+        <span
+          class="ni"
+          style="
+            font-size: 16px;
+            width: 20px;
+            text-align: center;
+            flex-shrink: 0;
+          "
+          >🔔</span
+        >알림<span
+          class="nbadge"
+          style="
+            margin-left: auto;
+            font-size: 10px;
+            font-weight: 700;
+            padding: 1px 7px;
+            border-radius: 99px;
+            background: #f43f5e;
+            color: #fff;
+          "
+          >3</span
+        >
+      </div>
+      <div
+        class="nav-item"
+        id="nav-settings"
+        onclick="location.href = 'settings.html'"
+        style="
+          display: flex;
+          align-items: center;
+          gap: 9px;
+          padding: 9px 10px;
+          border-radius: 9px;
+          font-size: 13.5px;
+          font-weight: 500;
+          color: #6b7280;
+          cursor: pointer;
+          transition: all 0.15s;
+          margin-bottom: 1px;
+        "
+      >
+        <span
+          class="ni"
+          style="
+            font-size: 16px;
+            width: 20px;
+            text-align: center;
+            flex-shrink: 0;
+          "
+          >⚙️</span
+        >계정 설정
+      </div>
+    </div>
+  </nav>
+
+  <div
+    class="sidebar-bottom"
+    style="border-top: 1px solid #e8eaf0; padding: 16px"
+  >
+    <div id="auth-logged-out">
+      <button
+        onclick="location.href = '../views/jobtracker-auth.html'"
+        style="
+          width: 100%;
+          padding: 10px;
+          border-radius: 10px;
+          border: none;
+          background: linear-gradient(135deg, #4f46e5, #8b5cf6);
+          color: #fff;
+          font-size: 13px;
+          font-weight: 700;
+          cursor: pointer;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: 8px;
+          box-shadow: 0 4px 12px rgba(79, 70, 229, 0.2);
+        "
+      >
+        <span>🔐</span> 로그인 / 시작하기
+      </button>
+    </div>
+
+    <div id="auth-logged-in" style="display: none">
+      <div
+        class="user-row"
+        style="display: flex; align-items: center; gap: 10px"
+      >
+        <div
+          class="avatar"
+          style="
+            width: 34px;
+            height: 34px;
+            border-radius: 50%;
+            background: #6366f1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 13px;
+            font-weight: 800;
+            color: #fff;
+            flex-shrink: 0;
+          "
+        >
+          김
+        </div>
+        <div>
+          <div
+            class="uname"
+            style="font-size: 13px; font-weight: 700; color: #111827"
+          >
+            김개발
+          </div>
+          <div class="urole" style="font-size: 11px; color: #9ca3af">
+            프론트엔드 지망
+          </div>
+        </div>
+        <span
+          class="ugear"
+          style="
+            margin-left: auto;
+            color: #9ca3af;
+            cursor: pointer;
+            font-size: 16px;
+            padding: 4px;
+          "
+          onclick="location.href = 'settings.html'"
+        >
+          ⚙
+        </span>
+      </div>
+    </div>
+  </div>
+</aside>
