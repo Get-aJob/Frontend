@@ -1,0 +1,198 @@
+<style>
+  .topbar {
+    height: 62px;
+    background: #ffffff;
+    border-bottom: 1px solid #e8eaf0;
+    display: flex;
+    align-items: center;
+    padding: 0 24px;
+    gap: 12px;
+    width: 100%;
+    box-sizing: border-box;
+    z-index: 100;
+  }
+  .ptitle {
+    font-size: 17px;
+    font-weight: 800;
+    color: #111827;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .pbadge {
+    font-size: 10px;
+    font-weight: 700;
+    padding: 3px 9px;
+    border-radius: 5px;
+    background: #eef2ff;
+    color: #4f46e5;
+  }
+  .tright {
+    margin-left: auto;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .search-box {
+    background: #f8f9fc;
+    border: 1.5px solid #e8eaf0;
+    border-radius: 10px;
+    padding: 8px 14px;
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    width: 220px;
+  }
+  .search-box input {
+    background: none;
+    border: none;
+    outline: none;
+    font-size: 13px;
+    width: 100%;
+  }
+
+  /* 모달 스타일 (kanban.html 기반) */
+  .modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(17, 24, 39, 0.5);
+    backdrop-filter: blur(3px);
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s;
+  }
+  .modal-overlay.show {
+    opacity: 1;
+    pointer-events: all;
+  }
+  .modal-content {
+    background: #fff;
+    border-radius: 16px;
+    padding: 28px;
+    width: 500px;
+    max-height: 86vh;
+    overflow-y: auto;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+  }
+  .m-title {
+    font-size: 18px;
+    font-weight: 800;
+    margin-bottom: 22px;
+  }
+  .fg {
+    margin-bottom: 13px;
+  }
+  .fl {
+    font-size: 12px;
+    color: #6b7280;
+    font-weight: 600;
+    margin-bottom: 6px;
+    display: block;
+  }
+  .fi {
+    width: 100%;
+    background: #f8f9fc;
+    border: 1.5px solid #e8eaf0;
+    border-radius: 9px;
+    padding: 9px 13px;
+    font-size: 13.5px;
+    outline: none;
+    box-sizing: border-box;
+  }
+  .fi:focus {
+    border-color: #4f46e5;
+  }
+  .frow2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+  }
+  .m-foot {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-top: 20px;
+    padding-top: 18px;
+    border-top: 1.5px solid #e8eaf0;
+  }
+
+  /* 크롤링 바 */
+  .crawl-bar {
+    display: flex;
+    gap: 8px;
+    padding: 11px 14px;
+    background: #eef2ff;
+    border: 1.5px dashed #c7d2fe;
+    border-radius: 10px;
+    margin-bottom: 16px;
+    align-items: center;
+  }
+</style>
+
+<div class="topbar">
+  <div class="ptitle">
+    <span id="topbar-title">페이지 제목</span>
+    <span class="pbadge" id="topbar-badge" style="display: none">BADGE</span>
+  </div>
+  <div class="tright">
+    <div class="search-box" id="topbar-search" style="display: none">
+      <span>🔍</span><input placeholder="검색어를 입력하세요..." />
+    </div>
+    <div id="topbar-actions"></div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="addJobModal" onclick="closeJobModal(event)">
+  <div class="modal-content" onclick="event.stopPropagation()">
+    <div class="m-title">✚ 새 공고 등록</div>
+    <div class="crawl-bar">
+      <span style="color: #4f46e5">🔗</span>
+      <input
+        style="
+          flex: 1;
+          background: none;
+          border: none;
+          outline: none;
+          font-size: 12.5px;
+        "
+        placeholder="사람인 / 잡코리아 / 원티드 URL 붙여넣기"
+      />
+      <button
+        class="btn btn-primary"
+        style="padding: 6px 13px; font-size: 12px"
+      >
+        파싱
+      </button>
+    </div>
+    <div class="frow2">
+      <div class="fg">
+        <label class="fl">회사명 *</label
+        ><input class="fi" placeholder="예: 네이버" />
+      </div>
+      <div class="fg">
+        <label class="fl">직군 *</label
+        ><input class="fi" placeholder="예: 프론트엔드" />
+      </div>
+    </div>
+    <div class="fg">
+      <label class="fl">태그</label
+      ><input class="fi" placeholder="예: React, 신입" />
+    </div>
+    <div class="m-foot">
+      <button class="btn btn-outline" onclick="closeJobModal()">취소</button>
+      <button
+        class="btn btn-primary"
+        onclick="
+          alert('등록되었습니다!');
+          closeJobModal();
+        "
+      >
+        등록하기
+      </button>
+    </div>
+  </div>
+</div>

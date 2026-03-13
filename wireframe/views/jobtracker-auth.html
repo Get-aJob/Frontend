@@ -1,0 +1,820 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Job-Moa — 로그인 / 회원가입</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;600;700;800;900&family=DM+Mono:wght@400;500&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --bg: #f4f5f8;
+        --white: #fff;
+        --surface2: #f8f9fc;
+        --border: #e8eaf0;
+        --border2: #d4d7e3;
+        --indigo: #4f46e5;
+        --indigo-light: #eef2ff;
+        --indigo-mid: #c7d2fe;
+        --indigo-dark: #3730a3;
+        --emerald: #10b981;
+        --emerald-light: #ecfdf5;
+        --rose: #f43f5e;
+        --rose-light: #fff1f2;
+        --violet: #8b5cf6;
+        --text: #111827;
+        --text2: #6b7280;
+        --text3: #9ca3af;
+        --sh-sm: 0 1px 3px rgba(0, 0, 0, 0.06), 0 1px 2px rgba(0, 0, 0, 0.04);
+        --sh: 0 4px 16px rgba(0, 0, 0, 0.08);
+        --sh-lg: 0 20px 60px rgba(0, 0, 0, 0.1), 0 8px 20px rgba(0, 0, 0, 0.06);
+        --sh-ind: 0 4px 14px rgba(79, 70, 229, 0.3);
+      }
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      body {
+        font-family: 'Noto Sans KR', sans-serif;
+        background: var(--bg);
+        color: var(--text);
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+      }
+      .bg-deco {
+        position: fixed;
+        inset: 0;
+        pointer-events: none;
+        overflow: hidden;
+        z-index: 0;
+      }
+      .bg-circle {
+        position: absolute;
+        border-radius: 50%;
+        opacity: 0.06;
+      }
+      .bg-c1 {
+        width: 600px;
+        height: 600px;
+        background: var(--indigo);
+        top: -150px;
+        right: -150px;
+      }
+      .bg-c2 {
+        width: 400px;
+        height: 400px;
+        background: var(--violet);
+        bottom: -100px;
+        left: -100px;
+      }
+      .wrap {
+        flex: 1;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 40px 20px;
+        position: relative;
+        z-index: 1;
+      }
+      .card {
+        background: var(--white);
+        border: 1.5px solid var(--border);
+        border-radius: 20px;
+        box-shadow: var(--sh-lg);
+        width: 100%;
+        max-width: 420px;
+        padding: 40px;
+      }
+      .logo {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        justify-content: center;
+        margin-bottom: 32px;
+      }
+      .logo-icon {
+        width: 40px;
+        height: 40px;
+        border-radius: 11px;
+        background: linear-gradient(135deg, var(--indigo), var(--violet));
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 16px;
+        font-weight: 900;
+        color: #fff;
+        font-family: 'DM Mono', monospace;
+        box-shadow: var(--sh-ind);
+      }
+      .logo-text {
+        font-size: 20px;
+        font-weight: 900;
+        letter-spacing: -0.4px;
+      }
+      .logo-sub {
+        font-size: 10px;
+        color: var(--text3);
+        letter-spacing: 0.5px;
+        text-align: center;
+        margin-top: 1px;
+      }
+      .page {
+        display: none;
+        animation: fadeUp 0.2s ease;
+      }
+      .page.show {
+        display: block;
+      }
+      @keyframes fadeUp {
+        from {
+          opacity: 0;
+          transform: translateY(5px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+      .pg-title {
+        text-align: center;
+        font-size: 22px;
+        font-weight: 900;
+        color: var(--text);
+        margin-bottom: 6px;
+      }
+      .pg-sub {
+        text-align: center;
+        font-size: 13.5px;
+        color: var(--text2);
+        margin-bottom: 24px;
+        line-height: 1.5;
+      }
+      .field {
+        margin-bottom: 16px;
+      }
+      .label {
+        font-size: 12px;
+        font-weight: 700;
+        color: var(--text2);
+        display: block;
+        margin-bottom: 6px;
+      }
+      .input-wrap {
+        position: relative;
+      }
+      .input {
+        width: 100%;
+        padding: 11px 14px;
+        background: var(--surface2);
+        border: 1.5px solid var(--border);
+        border-radius: 10px;
+        font-size: 14px;
+        font-family: 'Noto Sans KR', sans-serif;
+        color: var(--text);
+        outline: none;
+        transition: all 0.15s;
+      }
+      .input:focus {
+        border-color: var(--indigo);
+        background: var(--white);
+        box-shadow: 0 0 0 3px var(--indigo-light);
+      }
+      .input.error {
+        border-color: var(--rose);
+        background: var(--rose-light);
+      }
+      .input.ok {
+        border-color: var(--emerald);
+      }
+      .input-icon {
+        position: absolute;
+        right: 12px;
+        top: 50%;
+        transform: translateY(-50%);
+        font-size: 16px;
+        color: var(--text3);
+        cursor: pointer;
+        user-select: none;
+      }
+      .input-hint {
+        font-size: 11.5px;
+        margin-top: 5px;
+        padding-left: 2px;
+      }
+      .hint-error {
+        color: var(--rose);
+      }
+      .hint-ok {
+        color: var(--emerald);
+      }
+      .hint-gray {
+        color: var(--text3);
+      }
+      .forgot-row {
+        display: flex;
+        justify-content: flex-end;
+        margin-top: -8px;
+        margin-bottom: 18px;
+      }
+      .forgot-link {
+        font-size: 12.5px;
+        color: var(--indigo);
+        font-weight: 600;
+        cursor: pointer;
+        text-decoration: none;
+        transition: opacity 0.15s;
+      }
+      .forgot-link:hover {
+        opacity: 0.7;
+        text-decoration: underline;
+      }
+      .divider {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin: 20px 0;
+      }
+      .div-line {
+        flex: 1;
+        height: 1px;
+        background: var(--border);
+      }
+      .div-text {
+        font-size: 12px;
+        color: var(--text3);
+        font-weight: 600;
+        white-space: nowrap;
+      }
+      .btn {
+        width: 100%;
+        padding: 13px;
+        border-radius: 11px;
+        font-size: 15px;
+        font-weight: 700;
+        cursor: pointer;
+        border: none;
+        font-family: 'Noto Sans KR', sans-serif;
+        transition: all 0.15s;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+      }
+      .btn-primary {
+        background: linear-gradient(135deg, var(--indigo), var(--violet));
+        color: #fff;
+        box-shadow: var(--sh-ind);
+        margin-bottom: 12px;
+      }
+      .btn-primary:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 6px 20px rgba(79, 70, 229, 0.35);
+      }
+      .btn-google {
+        background: var(--white);
+        color: var(--text);
+        border: 1.5px solid var(--border);
+        box-shadow: var(--sh-sm);
+      }
+      .btn-google:hover {
+        border-color: var(--border2);
+        box-shadow: var(--sh);
+      }
+      .g-icon {
+        width: 18px;
+        height: 18px;
+        flex-shrink: 0;
+      }
+      .switch-row {
+        text-align: center;
+        margin-top: 22px;
+        font-size: 13px;
+        color: var(--text2);
+      }
+      .switch-link {
+        color: var(--indigo);
+        font-weight: 700;
+        cursor: pointer;
+        transition: opacity 0.15s;
+      }
+      .switch-link:hover {
+        opacity: 0.7;
+        text-decoration: underline;
+      }
+      .pw-strength {
+        margin-top: 8px;
+      }
+      .pw-bars {
+        display: flex;
+        gap: 4px;
+        margin-bottom: 5px;
+      }
+      .pw-bar {
+        height: 3px;
+        flex: 1;
+        border-radius: 99px;
+        background: var(--border);
+        transition: background 0.2s;
+      }
+      .pw-bar.weak {
+        background: var(--rose);
+      }
+      .pw-bar.mid {
+        background: #f59e0b;
+      }
+      .pw-bar.strong {
+        background: var(--emerald);
+      }
+      .pw-label {
+        font-size: 11px;
+        color: var(--text3);
+        font-weight: 600;
+      }
+      .pw-label.weak {
+        color: var(--rose);
+      }
+      .pw-label.mid {
+        color: #d97706;
+      }
+      .pw-label.strong {
+        color: var(--emerald);
+      }
+      .check-list {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+        margin-top: 8px;
+      }
+      .check-item {
+        font-size: 11.5px;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        color: var(--text3);
+      }
+      .check-item.pass {
+        color: var(--emerald);
+      }
+      .check-dot {
+        width: 14px;
+        height: 14px;
+        border-radius: 50%;
+        border: 1.5px solid var(--border2);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 8px;
+        flex-shrink: 0;
+        transition: all 0.2s;
+      }
+      .check-item.pass .check-dot {
+        background: var(--emerald);
+        border-color: var(--emerald);
+        color: #fff;
+      }
+      .back-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 13px;
+        font-weight: 600;
+        color: var(--text2);
+        cursor: pointer;
+        margin-bottom: 22px;
+        transition: color 0.15s;
+        border: none;
+        background: none;
+        font-family: 'Noto Sans KR', sans-serif;
+        padding: 0;
+      }
+      .back-btn:hover {
+        color: var(--indigo);
+      }
+      .info-box {
+        background: var(--indigo-light);
+        border: 1.5px solid var(--indigo-mid);
+        border-radius: 10px;
+        padding: 13px 15px;
+        font-size: 13px;
+        color: var(--indigo);
+        line-height: 1.6;
+        margin-bottom: 20px;
+      }
+      footer {
+        text-align: center;
+        padding: 16px;
+        font-size: 11.5px;
+        color: var(--text3);
+        position: relative;
+        z-index: 1;
+      }
+      footer span {
+        color: var(--text2);
+        font-weight: 600;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="bg-deco">
+      <div class="bg-circle bg-c1"></div>
+      <div class="bg-circle bg-c2"></div>
+    </div>
+    <div class="wrap">
+      <div class="card">
+        <div class="logo">
+          <div class="logo-icon">JT</div>
+          <div>
+            <div class="logo-text">JobTracker</div>
+            <div class="logo-sub">취업 지원 관리 서비스</div>
+          </div>
+        </div>
+
+        <div class="page show" id="page-login">
+          <div class="pg-title">다시 돌아오셨군요 👋</div>
+          <div class="pg-sub">취업 여정을 이어가세요</div>
+          <div class="field">
+            <label class="label">이메일 아이디</label>
+            <div class="input-wrap">
+              <input
+                class="input"
+                type="email"
+                placeholder="example@email.com"
+                id="login-email"
+                oninput="validateLoginEmail(this)"
+                style="padding-right: 40px"
+              />
+              <span class="input-icon" id="login-email-icon"></span>
+            </div>
+            <div class="input-hint hint-gray" id="login-email-hint"></div>
+          </div>
+          <div class="field">
+            <label class="label">비밀번호</label>
+            <div class="input-wrap">
+              <input
+                class="input"
+                type="password"
+                placeholder="비밀번호를 입력하세요"
+                id="login-pw"
+                style="padding-right: 40px"
+              />
+              <span class="input-icon" onclick="togglePw('login-pw', this)">👁</span>
+            </div>
+          </div>
+          <div class="forgot-row">
+            <a class="forgot-link" onclick="showPage('forgot')">비밀번호를 잊으셨나요?</a>
+          </div>
+          <button class="btn btn-primary" onclick="handleLogin()">로그인</button>
+          <div class="divider">
+            <div class="div-line"></div>
+            <div class="div-text">또는 소셜 로그인</div>
+            <div class="div-line"></div>
+          </div>
+          <button class="btn btn-google">
+            <svg class="g-icon" viewBox="0 0 24 24">
+              <path
+                d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
+                fill="#4285F4"
+              />
+              <path
+                d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
+                fill="#34A853"
+              />
+              <path
+                d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"
+                fill="#FBBC05"
+              />
+              <path
+                d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
+                fill="#EA4335"
+              />
+            </svg>
+            Google로 로그인
+          </button>
+          <div class="switch-row">
+            아직 계정이 없으신가요?
+            <span class="switch-link" onclick="showPage('signup')">회원가입</span>
+          </div>
+        </div>
+
+        <div class="page" id="page-signup">
+          <div class="pg-title">시작해볼까요! 🚀</div>
+          <div class="pg-sub">취업 여정을 체계적으로 관리하세요</div>
+          <div class="field">
+            <label class="label">이름</label>
+            <div class="input-wrap">
+              <input
+                class="input"
+                type="text"
+                placeholder="실명을 입력하세요"
+                id="su-name"
+                oninput="validateName(this)"
+                style="padding-right: 40px"
+              />
+              <span class="input-icon" id="su-name-icon"></span>
+            </div>
+            <div class="input-hint" id="su-name-hint"></div>
+          </div>
+          <div class="field">
+            <label class="label">이메일 아이디</label>
+            <div class="input-wrap">
+              <input
+                class="input"
+                type="email"
+                placeholder="example@email.com"
+                id="su-email"
+                oninput="validateEmail(this)"
+                style="padding-right: 40px"
+              />
+              <span class="input-icon" id="su-email-icon"></span>
+            </div>
+            <div class="input-hint" id="su-email-hint"></div>
+          </div>
+          <div class="field">
+            <label class="label">비밀번호</label>
+            <div class="input-wrap">
+              <input
+                class="input"
+                type="password"
+                placeholder="8자 이상, 영문+숫자+특수문자"
+                id="su-pw"
+                oninput="validatePw(this)"
+                style="padding-right: 40px"
+              />
+              <span class="input-icon" onclick="togglePw('su-pw', this)">👁</span>
+            </div>
+            <div class="pw-strength" id="pw-strength" style="display: none">
+              <div class="pw-bars">
+                <div class="pw-bar" id="bar1"></div>
+                <div class="pw-bar" id="bar2"></div>
+                <div class="pw-bar" id="bar3"></div>
+                <div class="pw-bar" id="bar4"></div>
+              </div>
+              <div class="pw-label" id="pw-label">입력 중...</div>
+              <div class="check-list">
+                <div class="check-item" id="chk-len">
+                  <div class="check-dot">✓</div>
+                  8자 이상
+                </div>
+                <div class="check-item" id="chk-eng">
+                  <div class="check-dot">✓</div>
+                  영문 포함
+                </div>
+                <div class="check-item" id="chk-num">
+                  <div class="check-dot">✓</div>
+                  숫자 포함
+                </div>
+                <div class="check-item" id="chk-sym">
+                  <div class="check-dot">✓</div>
+                  특수문자 포함
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="field">
+            <label class="label">비밀번호 확인</label>
+            <div class="input-wrap">
+              <input
+                class="input"
+                type="password"
+                placeholder="비밀번호를 다시 입력하세요"
+                id="su-pw2"
+                oninput="validatePw2(this)"
+                style="padding-right: 40px"
+              />
+              <span class="input-icon" onclick="togglePw('su-pw2', this)">👁</span>
+            </div>
+            <div class="input-hint" id="su-pw2-hint"></div>
+          </div>
+          <button class="btn btn-primary" onclick="handleSignup()" style="margin-top: 6px">
+            회원가입하기
+          </button>
+          <div class="switch-row">
+            이미 계정이 있으신가요?
+            <span class="switch-link" onclick="showPage('login')">로그인</span>
+          </div>
+        </div>
+
+        <div class="page" id="page-forgot">
+          <button class="back-btn" onclick="showPage('login')">← 로그인으로 돌아가기</button>
+          <div class="pg-title">비밀번호 찾기 🔑</div>
+          <div class="pg-sub">
+            가입 시 사용한 이메일 주소를 입력하시면<br />재설정 링크를 보내드립니다.
+          </div>
+          <div class="info-box">
+            📧 입력한 이메일로 비밀번호 재설정 링크가 발송됩니다. 메일함을 확인해주세요.
+          </div>
+          <div class="field">
+            <label class="label">가입 이메일</label>
+            <div class="input-wrap">
+              <input
+                class="input"
+                type="email"
+                placeholder="example@email.com"
+                id="forgot-email"
+                oninput="validateForgotEmail(this)"
+                style="padding-right: 40px"
+              />
+              <span class="input-icon" id="forgot-email-icon"></span>
+            </div>
+            <div class="input-hint" id="forgot-email-hint"></div>
+          </div>
+          <button class="btn btn-primary" onclick="handleForgot()">재설정 링크 보내기</button>
+          <div class="switch-row" style="margin-top: 16px">
+            <span class="switch-link" onclick="showPage('signup')">아직 계정이 없으신가요?</span>
+          </div>
+        </div>
+      </div>
+    </div>
+    <footer>© 2026 <span>JobTracker</span> · 취업 지원 관리 서비스</footer>
+    <script>
+      function showPage(id) {
+        document.querySelectorAll('.page').forEach((p) => p.classList.remove('show'));
+        document.getElementById('page-' + id).classList.add('show');
+      }
+      function togglePw(id, el) {
+        const i = document.getElementById(id);
+        const h = i.type === 'password';
+        i.type = h ? 'text' : 'password';
+        el.textContent = h ? '🙈' : '👁';
+      }
+      function isEmail(v) {
+        return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v);
+      }
+      function validateLoginEmail(el) {
+        const v = el.value.trim();
+        const hint = document.getElementById('login-email-hint');
+        const icon = document.getElementById('login-email-icon');
+        if (!v) {
+          el.className = 'input';
+          hint.textContent = '';
+          icon.textContent = '';
+          return;
+        }
+        if (isEmail(v)) {
+          el.className = 'input ok';
+          hint.textContent = '';
+          icon.textContent = '✅';
+        } else {
+          el.className = 'input error';
+          hint.className = 'input-hint hint-error';
+          hint.textContent = '올바른 이메일 형식이 아닙니다';
+          icon.textContent = '❌';
+        }
+      }
+      function validateForgotEmail(el) {
+        const v = el.value.trim();
+        const hint = document.getElementById('forgot-email-hint');
+        const icon = document.getElementById('forgot-email-icon');
+        if (!v) {
+          el.className = 'input';
+          hint.textContent = '';
+          icon.textContent = '';
+          return;
+        }
+        if (isEmail(v)) {
+          el.className = 'input ok';
+          hint.textContent = '';
+          icon.textContent = '✅';
+        } else {
+          el.className = 'input error';
+          hint.className = 'input-hint hint-error';
+          hint.textContent = '올바른 이메일 형식이 아닙니다';
+          icon.textContent = '❌';
+        }
+      }
+      function validateName(el) {
+        const v = el.value.trim();
+        const hint = document.getElementById('su-name-hint');
+        const icon = document.getElementById('su-name-icon');
+        if (!v) {
+          el.className = 'input';
+          hint.textContent = '';
+          icon.textContent = '';
+          return;
+        }
+        if (v.length >= 2) {
+          el.className = 'input ok';
+          hint.textContent = '';
+          icon.textContent = '✅';
+        } else {
+          el.className = 'input error';
+          hint.className = 'input-hint hint-error';
+          hint.textContent = '이름은 2자 이상 입력해주세요';
+          icon.textContent = '❌';
+        }
+      }
+      function validateEmail(el) {
+        const v = el.value.trim();
+        const hint = document.getElementById('su-email-hint');
+        const icon = document.getElementById('su-email-icon');
+        if (!v) {
+          el.className = 'input';
+          hint.textContent = '';
+          icon.textContent = '';
+          return;
+        }
+        if (isEmail(v)) {
+          el.className = 'input ok';
+          hint.className = 'input-hint hint-ok';
+          hint.textContent = '사용 가능한 이메일입니다';
+          icon.textContent = '✅';
+        } else {
+          el.className = 'input error';
+          hint.className = 'input-hint hint-error';
+          hint.textContent = '올바른 이메일 형식이 아닙니다';
+          icon.textContent = '❌';
+        }
+      }
+      function validatePw(el) {
+        const v = el.value;
+        const s = document.getElementById('pw-strength');
+        if (!v) {
+          s.style.display = 'none';
+          el.className = 'input';
+          return;
+        }
+        s.style.display = 'block';
+        const c = {
+          len: v.length >= 8,
+          eng: /[a-zA-Z]/.test(v),
+          num: /[0-9]/.test(v),
+          sym: /[!@#$%^&*(),.?":{}|<>]/.test(v),
+        };
+        document.getElementById('chk-len').classList.toggle('pass', c.len);
+        document.getElementById('chk-eng').classList.toggle('pass', c.eng);
+        document.getElementById('chk-num').classList.toggle('pass', c.num);
+        document.getElementById('chk-sym').classList.toggle('pass', c.sym);
+        const score = Object.values(c).filter(Boolean).length;
+        const cls = ['', 'weak', 'weak', 'mid', 'strong'];
+        const txt = ['', '매우 약함', '약함', '보통', '강함'];
+        [1, 2, 3, 4].forEach((n) => {
+          const b = document.getElementById('bar' + n);
+          b.className = 'pw-bar' + (n <= score ? ' ' + cls[score] : '');
+        });
+        const lbl = document.getElementById('pw-label');
+        lbl.className = 'pw-label ' + cls[score];
+        lbl.textContent = txt[score];
+        el.className = 'input' + (score >= 3 ? ' ok' : '');
+      }
+      function validatePw2(el) {
+        const pw = document.getElementById('su-pw').value;
+        const v = el.value;
+        const hint = document.getElementById('su-pw2-hint');
+        if (!v) {
+          el.className = 'input';
+          hint.textContent = '';
+          return;
+        }
+        if (v === pw) {
+          el.className = 'input ok';
+          hint.className = 'input-hint hint-ok';
+          hint.textContent = '✓ 비밀번호가 일치합니다';
+        } else {
+          el.className = 'input error';
+          hint.className = 'input-hint hint-error';
+          hint.textContent = '비밀번호가 일치하지 않습니다';
+        }
+      }
+      function handleLogin() {
+        const btn = event.currentTarget;
+        const orig = btn.innerHTML;
+        btn.innerHTML = '⏳ 로그인 중...';
+        btn.style.background = 'linear-gradient(135deg,#3730a3,#4f46e5)';
+        btn.disabled = true;
+        setTimeout(() => {
+          location.href = 'calendar.html';
+        }, 1000);
+      }
+      function handleSignup() {
+        const btn = event.currentTarget;
+        const orig = btn.innerHTML;
+        btn.innerHTML = '✅ 가입 완료!';
+        btn.style.background = 'linear-gradient(135deg,#10b981,#059669)';
+        btn.disabled = true;
+        setTimeout(() => {
+          showPage('login');
+          btn.innerHTML = orig;
+          btn.style.background = '';
+          btn.disabled = false;
+        }, 1500);
+      }
+      function handleForgot() {
+        const btn = event.currentTarget;
+        const orig = btn.innerHTML;
+        btn.innerHTML = '📧 링크 발송 완료!';
+        btn.style.background = 'linear-gradient(135deg,#10b981,#059669)';
+        btn.disabled = true;
+        setTimeout(() => {
+          showPage('login');
+          btn.innerHTML = orig;
+          btn.style.background = '';
+          btn.disabled = false;
+        }, 2000);
+      }
+    </script>
+  </body>
+</html>

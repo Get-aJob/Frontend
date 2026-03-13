@@ -1,0 +1,383 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Job-Moa - 계정 설정</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;600;700;800;900&family=DM+Mono:wght@400;500&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --bg: #f4f5f8;
+        --white: #ffffff;
+        --surface2: #f8f9fc;
+        --border: #e8eaf0;
+        --border2: #d4d7e3;
+        --indigo: #4f46e5;
+        --indigo-light: #eef2ff;
+        --indigo-dark: #3730a3;
+        --text: #111827;
+        --text2: #6b7280;
+        --text3: #9ca3af;
+        --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.06);
+        --shadow-lg: 0 10px 30px rgba(0, 0, 0, 0.1);
+        --radius: 12px;
+        --topbar-h: 62px;
+      }
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      body {
+        font-family: 'Noto Sans KR', sans-serif;
+        background: var(--bg);
+        color: var(--text);
+        height: 100vh;
+        overflow: hidden;
+        display: flex;
+      }
+
+      .main {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+      }
+
+      #topbar-root {
+        height: var(--topbar-h);
+        flex-shrink: 0;
+      }
+
+      .content {
+        flex: 1;
+        overflow-y: auto;
+        padding: 32px;
+        display: flex;
+        justify-content: center;
+      }
+
+      .settings-card {
+        background: var(--white);
+        border: 1.5px solid var(--border);
+        border-radius: 16px;
+        padding: 32px;
+        width: 100%;
+        max-width: 600px;
+        box-shadow: var(--shadow-sm);
+        height: fit-content;
+      }
+      .ssect-title {
+        font-size: 16px;
+        font-weight: 800;
+        color: var(--text);
+        margin-bottom: 20px;
+        padding-bottom: 12px;
+        border-bottom: 1.5px solid var(--border);
+      }
+
+      .profile-header {
+        display: flex;
+        align-items: center;
+        gap: 20px;
+        margin-bottom: 30px;
+        background: var(--surface2);
+        padding: 20px;
+        border-radius: var(--radius);
+        border: 1px solid var(--border);
+      }
+      .avatar-wrapper {
+        position: relative;
+        width: 75px;
+        height: 75px;
+      }
+      .avatar-large {
+        width: 100%;
+        height: 100%;
+        border-radius: 50%;
+        background: linear-gradient(135deg, var(--indigo), #8b5cf6);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 24px;
+        font-weight: 800;
+        color: #fff;
+        box-shadow: 0 4px 10px rgba(79, 70, 229, 0.2);
+      }
+      .img-edit-btn {
+        position: absolute;
+        bottom: 0;
+        right: 0;
+        width: 26px;
+        height: 26px;
+        border-radius: 50%;
+        background: #fff;
+        border: 1px solid var(--border2);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        font-size: 14px;
+        box-shadow: var(--shadow-sm);
+        transition: 0.2s;
+      }
+      .img-edit-btn:hover {
+        background: var(--surface2);
+        transform: scale(1.1);
+      }
+      .profile-info div:first-child {
+        font-size: 18px;
+        font-weight: 800;
+        color: var(--text);
+      }
+      .profile-info div:last-child {
+        font-size: 14px;
+        color: var(--text3);
+        margin-top: 2px;
+      }
+
+      .srow {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 14px 0;
+        border-bottom: 1px solid var(--border);
+      }
+      .srow:last-child {
+        border-bottom: none;
+      }
+      .slabel {
+        font-size: 14px;
+        font-weight: 600;
+        color: var(--text);
+      }
+      .sdesc {
+        font-size: 12px;
+        color: var(--text3);
+        margin-top: 2px;
+      }
+
+      .toggle {
+        width: 44px;
+        height: 24px;
+        background: var(--border2);
+        border-radius: 99px;
+        cursor: pointer;
+        position: relative;
+        transition: 0.2s;
+      }
+      .toggle.on {
+        background: var(--indigo);
+      }
+      .tthumb {
+        position: absolute;
+        top: 3px;
+        left: 3px;
+        width: 18px;
+        height: 18px;
+        border-radius: 50%;
+        background: #fff;
+        transition: 0.2s;
+      }
+      .toggle.on .tthumb {
+        transform: translateX(20px);
+      }
+
+      .btn {
+        padding: 10px 20px;
+        border-radius: 9px;
+        font-size: 13.5px;
+        font-weight: 700;
+        cursor: pointer;
+        border: none;
+        transition: 0.15s;
+        display: inline-flex;
+        align-items: center;
+        font-family: 'Noto Sans KR', sans-serif;
+      }
+      .btn-primary {
+        background: var(--indigo);
+        color: #fff;
+      }
+      .btn-outline {
+        background: #fff;
+        color: var(--text2);
+        border: 1.5px solid var(--border);
+      }
+
+      .overlay {
+        position: fixed;
+        inset: 0;
+        background: rgba(17, 24, 39, 0.5);
+        backdrop-filter: blur(3px);
+        z-index: 300;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        opacity: 0;
+        pointer-events: none;
+        transition: 0.2s;
+      }
+      .overlay.show {
+        opacity: 1;
+        pointer-events: all;
+      }
+      .modal {
+        background: var(--white);
+        border-radius: 16px;
+        padding: 28px;
+        width: 400px;
+        box-shadow: var(--shadow-lg);
+      }
+      .mtitle {
+        font-size: 18px;
+        font-weight: 800;
+        margin-bottom: 20px;
+      }
+      .fg {
+        margin-bottom: 16px;
+      }
+      .fl {
+        font-size: 12px;
+        font-weight: 600;
+        color: var(--text2);
+        display: block;
+        margin-bottom: 6px;
+      }
+      .fi {
+        width: 100%;
+        background: var(--surface2);
+        border: 1.5px solid var(--border);
+        border-radius: 9px;
+        padding: 10px 14px;
+        font-size: 14px;
+        outline: none;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="sidebar-root"></div>
+
+    <main class="main">
+      <div id="topbar-root"></div>
+
+      <div class="content">
+        <div class="settings-card">
+          <div class="ssect-title">내 프로필</div>
+          <div class="profile-header">
+            <div class="avatar-wrapper">
+              <div class="avatar-large">김</div>
+              <div class="img-edit-btn" onclick="openSettingsModal('imgModal')">📷</div>
+            </div>
+
+            <div class="profile-info">
+              <div>김개발</div>
+              <div>kim@dev.com</div>
+            </div>
+            <button
+              class="btn btn-outline"
+              style="margin-left: auto"
+              onclick="openSettingsModal('pwModal')"
+            >
+              비밀번호 변경
+            </button>
+          </div>
+
+          <div class="ssect-title" style="margin-top: 40px">알림 설정</div>
+          <div class="srow">
+            <div>
+              <div class="slabel">마감일 D-3 알림</div>
+              <div class="sdesc">서류 마감 3일 전 이메일 발송</div>
+            </div>
+            <div class="toggle on" onclick="this.classList.toggle('on')">
+              <div class="tthumb"></div>
+            </div>
+          </div>
+          <div class="srow">
+            <div>
+              <div class="slabel">면접 D-1 알림</div>
+              <div class="sdesc">면접 전날 푸시 알림 발송</div>
+            </div>
+            <div class="toggle on" onclick="this.classList.toggle('on')">
+              <div class="tthumb"></div>
+            </div>
+          </div>
+          <div class="srow">
+            <div>
+              <div class="slabel">결과 발표 알림</div>
+              <div class="sdesc">공고 결과 업데이트 시 즉시 알림</div>
+            </div>
+            <div class="toggle" onclick="this.classList.toggle('on')">
+              <div class="tthumb"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <div class="overlay" id="imgModal" onclick="closeSettingsModal('imgModal', event)">
+      <div class="modal" onclick="event.stopPropagation()">
+        <div class="mtitle">프로필 사진 변경</div>
+        <div class="fg">
+          <label class="fl">새 이미지 선택</label>
+          <input type="file" class="fi" accept="image/*" />
+        </div>
+        <div style="display: flex; gap: 10px; margin-top: 24px">
+          <button class="btn btn-outline" style="flex: 1" onclick="closeSettingsModal('imgModal')">
+            취소
+          </button>
+          <button class="btn btn-primary" style="flex: 1" onclick="closeSettingsModal('imgModal')">
+            사진 저장
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div class="overlay" id="pwModal" onclick="closeSettingsModal('pwModal', event)">
+      <div class="modal" onclick="event.stopPropagation()">
+        <div class="mtitle">비밀번호 변경</div>
+        <div class="fg">
+          <label class="fl">새 비밀번호</label>
+          <input type="password" class="fi" placeholder="변경할 비밀번호 입력" />
+        </div>
+        <div class="fg">
+          <label class="fl">비밀번호 확인</label>
+          <input type="password" class="fi" placeholder="비밀번호 재입력" />
+        </div>
+        <div style="display: flex; gap: 10px; margin-top: 24px">
+          <button class="btn btn-outline" style="flex: 1" onclick="closeSettingsModal('pwModal')">
+            취소
+          </button>
+          <button class="btn btn-primary" style="flex: 1" onclick="closeSettingsModal('pwModal')">
+            비밀번호 저장
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <script src="../components/common/Sidebar.js"></script>
+    <script src="../components/common/Topbar.js"></script>
+    <script>
+      loadSidebar('nav-settings');
+
+      loadTopbar({
+        title: '계정 설정',
+        badge: 'SETTINGS',
+        showSearch: true,
+        showAddButton: true,
+      });
+
+      function openSettingsModal(id) {
+        document.getElementById(id).classList.add('show');
+      }
+      function closeSettingsModal(id, e) {
+        if (!e || e.target.id === id || e.type === 'click') {
+          document.getElementById(id).classList.remove('show');
+        }
+      }
+    </script>
+  </body>
+</html>
