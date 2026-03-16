@@ -4,5 +4,4 @@ import router from './router/Path-Router';
 function App() {
   return <RouterProvider router={router} />;
 }
-
 export default App;
