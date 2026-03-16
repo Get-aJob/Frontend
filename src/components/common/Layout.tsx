@@ -5,6 +5,9 @@ import { PATH } from '@/router/Path';
 
 const Layout = () => {
   const location = useLocation();
+
+  const isLoggedIn = false;
+
   const getTopbarConfig = () => {
     switch (location.pathname) {
       case PATH.CALENDAR:
@@ -32,7 +35,7 @@ const Layout = () => {
 
   return (
     <div className="flex h-screen bg-[#f8f9fc] overflow-hidden">
-      <Sidebar isLoggedIn />
+      <Sidebar isLoggedIn={isLoggedIn} />
       <div className="flex flex-col flex-1 overflow-hidden">
         <Topbar
           title={config.title}
