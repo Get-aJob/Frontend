@@ -32,7 +32,7 @@ const Layout = () => {
 
   return (
     <div className="flex h-screen bg-[#f8f9fc] overflow-hidden">
-      <Sidebar />
+      <Sidebar isLoggedIn />
       <div className="flex flex-col flex-1 overflow-hidden">
         <Topbar
           title={config.title}
@@ -40,7 +40,7 @@ const Layout = () => {
           showSearch={config.showSearch}
           showAddButton={config.showAddButton}
         />
-        <main className="flex-1 overflow-y-auto p-6">
+        <main className="flex-1 overflow-y-auto">
           <Outlet />
         </main>
       </div>

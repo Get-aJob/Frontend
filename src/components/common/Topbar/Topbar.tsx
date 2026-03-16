@@ -18,7 +18,7 @@ const Topbar = ({
 
   return (
     <>
-      <header className="flex items-center px-6 gap-3 w-full py-4 bg-white border-b border-[#e8eaf0] z-100 shrink-0">
+      <header className="flex items-center px-6 gap-3 min-h-20 w-full py-4 bg-white border-b border-[#e8eaf0] z-100 shrink-0">
         <div className="flex items-center gap-2 text-lg font-extrabold text-[#111827]">
           <span>{title}</span>
           {badge && (
