@@ -1,9 +1,18 @@
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import MainLayout from './views/MainLayout';
+import Calendar from './views/Calendar';
+import Resume from './views/Resume';
+
 function App() {
   return (
-    <div className="flex flex-col items-center justify-center h-screen text-3xl text-cyan-100 bg-amber-600">
-      <p>Hello World</p>
-      <p>Code Rabbit</p>
-    </div>
+    <BrowserRouter>
+      <Routes>
+        <Route element={<MainLayout />}>
+          <Route path="/" element={<Calendar />} />
+          <Route path="/resume" element={<Resume />} />
+        </Route>
+      </Routes>
+    </BrowserRouter>
   );
 }
 
