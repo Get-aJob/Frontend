@@ -30,9 +30,14 @@ const Topbar = ({
         <div className="flex items-center gap-2.5 ml-auto">
           {showSearch && (
             <div className="flex items-center gap-1.75 w-55 px-3.5 py-2 bg-[#f8f9fc] border-[1.5px] border-[#e8eaf0] rounded-[10px]">
-              <span>🔍</span>
+              <label htmlFor="topbar-search" className="sr-only">
+                공고 검색
+              </label>
+              <span aria-hidden="true">🔍</span>
               <input
-                className="w-full bg-transparent border-none outline-none text-[13px]"
+                id="topbar-search"
+                aria-label="공고 검색"
+                className="w-full bg-transparent border-none outline-none text-[13px] focus-visible:ring-2 focus-visible:ring-[`#4f46e5`] rounded-sm"
                 placeholder="검색어를 입력하세요..."
               />
             </div>

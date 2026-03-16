@@ -1,5 +1,3 @@
-// src/components/common/Topbar/AddJobModal.tsx
-
 interface AddJobModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -30,17 +28,29 @@ const AddJobModal = ({ isOpen, onClose }: AddJobModalProps) => {
         </div>
         <div className="grid grid-cols-2 gap-3 mb-3.25">
           <div>
-            <label className="block text-[12px] text-[#6b7280] font-semibold mb-1.5">
+            +{' '}
+            <label
+              htmlFor="company-name"
+              className="block text-[12px] text-[`#6b7280`] font-semibold mb-1.5"
+            >
               회사명 *
             </label>
             <input
+              id="company-name"
               className="w-full bg-[#f8f9fc] border-[1.5px] border-[#e8eaf0] rounded-[9px] px-3.25 py-2.25 text-[13.5px] outline-none focus:border-[#4f46e5] transition-colors"
               placeholder="예: 네이버"
             />
           </div>
           <div>
-            <label className="block text-[12px] text-[#6b7280] font-semibold mb-1.5">직군 *</label>
+            +{' '}
+            <label
+              htmlFor="job-category"
+              className="block text-[12px] text-[`#6b7280`] font-semibold mb-1.5"
+            >
+              직군 *
+            </label>
             <input
+              id="job-category"
               className="w-full bg-[#f8f9fc] border-[1.5px] border-[#e8eaf0] rounded-[9px] px-3.25 py-2.25 text-[13.5px] outline-none focus:border-[#4f46e5] transition-colors"
               placeholder="예: 프론트엔드"
             />

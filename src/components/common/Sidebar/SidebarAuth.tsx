@@ -19,7 +19,7 @@ const SidebarAuth = ({ isLoggedIn = false }: SidebarAuthProps) => {
         </Link>
       ) : (
         <div className="flex items-center gap-2.5">
-          <div className="flex items-center justify-center w-8.5 h-8.5rounded-full bg-[#6366f1] text-[13px] font-extrabold text-white shrink-0">
+          <div className="flex items-center justify-center w-8.5 h-8.5 rounded-full bg-[#6366f1] text-[13px] font-extrabold text-white shrink-0">
             김
           </div>
           <div>
