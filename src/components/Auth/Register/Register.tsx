@@ -1,14 +1,31 @@
 import React from 'react';
+import axios from 'axios';
 import RegisterForm from './RegisterForm';
+import { joinApi } from '@/api/Auth';
+import type { JoinField } from '@/types/Auth';
 
 interface RegisterProps {
   onSwitchLogin: () => void;
 }
 
 const Register: React.FC<RegisterProps> = ({ onSwitchLogin }) => {
-  const handleRegister = (e: React.FormEvent) => {
-    e.preventDefault();
-    alert('회원가입 기능은 현재 준비 중입니다! 폼 구조를 확인해 보세요.');
+  const handleRegister = async (data: JoinField) => {
+    try {
+      const response = await joinApi(data);
+
+      alert(response.message || '회원가입에 성공했습니다.');
+
+      onSwitchLogin();
+    } catch (error: unknown) {
+      let errorMessage = '회원가입 중 오류가 발생했습니다.';
+
+      if (axios.isAxiosError(error)) {
+        errorMessage = error.response?.data?.error || errorMessage;
+      }
+
+      alert(errorMessage);
+      console.error('회원가입 에러 상세:', error);
+    }
   };
 
   return (
