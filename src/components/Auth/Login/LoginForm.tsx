@@ -1,46 +1,58 @@
 import React from 'react';
+import { useForm } from 'react-hook-form';
+import type { LoginField } from '@/types/Auth';
 
 interface LoginFormProps {
-  email: string;
-  setEmail: (value: string) => void;
-  password: string;
-  setPassword: (value: string) => void;
-  onSubmit: (e: React.FormEvent) => void;
-  onSwitchRegister: () => void; // 회원가입 전환을 위해 추가
+  onSubmit: (data: LoginField) => void;
+  onSwitchRegister: () => void;
 }
 
-const LoginForm: React.FC<LoginFormProps> = ({
-  email,
-  setEmail,
-  password,
-  setPassword,
-  onSubmit,
-  onSwitchRegister,
-}) => {
+const LoginForm: React.FC<LoginFormProps> = ({ onSubmit, onSwitchRegister }) => {
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<LoginField>({
+    mode: 'onChange',
+  });
+
   return (
-    <form onSubmit={onSubmit} className="flex flex-col gap-4">
+    <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
+      {/* 이메일 필드 */}
       <div className="flex flex-col gap-1.5">
         <label className="text-[13px] font-medium text-[#4b5563] ml-1">이메일</label>
         <input
           type="email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
           placeholder="example@email.com"
-          className="w-full p-3 rounded-xl border border-[#e8eaf0] bg-[#f9fafb] text-[14px] focus:outline-none focus:ring-2 focus:ring-[#4f46e5]/20 focus:border-[#4f46e5] transition-all"
-          required
+          className={`w-full p-3 rounded-xl border ${errors.email ? 'border-red-500' : 'border-[#e8eaf0]'} bg-[#f9fafb] text-[14px] focus:outline-none focus:ring-2 focus:ring-[#4f46e5]/20 focus:border-[#4f46e5] transition-all`}
+          {...register('email', {
+            required: '이메일을 입력해주세요.',
+            pattern: {
+              value: /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/,
+              message: '올바른 이메일 형식이 아닙니다.',
+            },
+          })}
         />
+        {errors.email && (
+          <span className="text-red-500 text-[11px] ml-1">{errors.email.message}</span>
+        )}
       </div>
 
+      {/* 비밀번호 필드 */}
       <div className="flex flex-col gap-1.5">
         <label className="text-[13px] font-medium text-[#4b5563] ml-1">비밀번호</label>
         <input
           type="password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
           placeholder="••••••••"
-          className="w-full p-3 rounded-xl border border-[#e8eaf0] bg-[#f9fafb] text-[14px] focus:outline-none focus:ring-2 focus:ring-[#4f46e5]/20 focus:border-[#4f46e5] transition-all"
-          required
+          className={`w-full p-3 rounded-xl border ${errors.password ? 'border-red-500' : 'border-[#e8eaf0]'} bg-[#f9fafb] text-[14px] focus:outline-none focus:ring-2 focus:ring-[#4f46e5]/20 focus:border-[#4f46e5] transition-all`}
+          {...register('password', {
+            required: '비밀번호를 입력해주세요.',
+            minLength: { value: 8, message: '비밀번호는 8자 이상이어야 합니다.' },
+          })}
         />
+        {errors.password && (
+          <span className="text-red-500 text-[11px] ml-1">{errors.password.message}</span>
+        )}
       </div>
 
       <button
@@ -51,12 +63,6 @@ const LoginForm: React.FC<LoginFormProps> = ({
       </button>
 
       <div className="mt-4 flex flex-col items-center gap-4">
-        <div className="flex items-center gap-3 text-[12px] text-[#9ca3af]">
-          <button type="button" className="hover:text-[#6366f1] transition-colors cursor-pointer">
-            비밀번호 찾기
-          </button>
-        </div>
-
         <div className="text-[13px] text-[#9ca3af]">
           아직 계정이 없으신가요?
           <button
