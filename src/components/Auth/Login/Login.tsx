@@ -15,10 +15,9 @@ const Login: React.FC<LoginProps> = ({ onSwitchRegister }) => {
 
   const handleLogin = async (data: LoginField) => {
     try {
-      const response = await loginApi(data);
+      await loginApi(data);
 
       alert('로그인 성공!');
-      console.log('로그인 응답 데이터:', response);
 
       navigate(PATH.CALENDAR);
     } catch (error: unknown) {
@@ -29,7 +28,10 @@ const Login: React.FC<LoginProps> = ({ onSwitchRegister }) => {
       }
 
       alert(errorMessage);
-      console.error('로그인 에러 상세:', error);
+      console.error('로그인 실패', {
+        status: axios.isAxiosError(error) ? error.response?.status : undefined,
+        message: errorMessage,
+      });
     }
   };
 

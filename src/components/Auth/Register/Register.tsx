@@ -24,7 +24,10 @@ const Register: React.FC<RegisterProps> = ({ onSwitchLogin }) => {
       }
 
       alert(errorMessage);
-      console.error('회원가입 에러 상세:', error);
+      console.error('회원가입 실패', {
+        status: axios.isAxiosError(error) ? error.response?.status : undefined,
+        message: errorMessage,
+      });
     }
   };
 

@@ -21,8 +21,12 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ onSwitchLogin, onSubmit }) 
     mode: 'onChange',
   });
 
-  return (
-    <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
+  const handleFormSubmit = ({ name, email, password }: RegisterFormData) => {
+    onSubmit({ name, email, password });
+  };
+
+  return +(
+    <form onSubmit={handleSubmit(handleFormSubmit)} className="flex flex-col gap-4">
       <div className="flex flex-col gap-1.5">
         <label className="text-[13px] font-medium text-[#4b5563] ml-1">이름</label>
         <input
@@ -79,6 +83,7 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ onSwitchLogin, onSubmit }) 
           className={`w-full p-3 rounded-xl border ${errors.passwordConfirm ? 'border-red-500' : 'border-[#e8eaf0]'} bg-[#f9fafb] text-[14px] focus:outline-none focus:ring-2 focus:ring-[#4f46e5]/20 focus:border-[#4f46e5] transition-all`}
           {...register('passwordConfirm', {
             required: '비밀번호 확인이 필요합니다.',
+            deps: ['password'],
             validate: (value) => value === getValues('password') || '비밀번호가 일치하지 않습니다.',
           })}
         />
