@@ -25,7 +25,7 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ onSwitchLogin, onSubmit }) 
     onSubmit({ name, email, password });
   };
 
-  return +(
+  return (
     <form onSubmit={handleSubmit(handleFormSubmit)} className="flex flex-col gap-4">
       <div className="flex flex-col gap-1.5">
         <label className="text-[13px] font-medium text-[#4b5563] ml-1">이름</label>
