@@ -4,12 +4,12 @@ interface CreateButtonProps {
   icon: string;
   title: string;
   sub: string;
-  path?: string;
+  path: string;
 }
 
-const CreateButton = ({ icon, title, sub }: CreateButtonProps) => {
+const CreateButton = ({ icon, title, sub, path }: CreateButtonProps) => {
   return (
-    <Link to="/">
+    <Link to={path}>
       <div className="w-full h-75 relative">
         <div className="flex w-full h-full items-center justify-center relative">
           <div className="text-center">

@@ -12,6 +12,7 @@ import Scrap from '@/view/Scrap';
 import Notification from '@/view/Notification';
 import Settings from '@/view/Settings';
 import Auth from '@/view/Auth';
+import ResumeForm from '@/view/ResumeForm';
 
 // 라우터 설정
 const router = createBrowserRouter([
@@ -60,6 +61,10 @@ const router = createBrowserRouter([
   {
     path: PATH.AUTH,
     element: <Auth />,
+  },
+  {
+    path: PATH.RESUME_CREATE_FORM,
+    element: <ResumeForm />,
   },
   {
     path: '*',
