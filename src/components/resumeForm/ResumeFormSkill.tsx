@@ -7,8 +7,11 @@ const ResumeFormSkill = () => {
   const { register, control } = useFormContext<ResumeFormInputs>();
   return (
     <div className="w-full mt-20 group has-focus:outline-2 outline-blue-200 rounded-lg p-3 hover:outline-2">
-      <label className="text-xl">스킬</label>
+      <label htmlFor="skill" className="text-xl">
+        스킬
+      </label>
       <TextAreaAutosize
+        id="skill"
         {...register('skill')}
         maxLength={100}
         placeholder=", 로 구분하여 작성해주세요."

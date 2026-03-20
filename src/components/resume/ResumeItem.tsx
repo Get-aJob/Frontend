@@ -42,7 +42,7 @@ const ResumeItem = ({ title, memo, updatedAt }: ResumeItemProps) => {
           if (!isAnyMenuOpen && !isOpen) {
             navigate('/');
           } else {
-            setIsOpen((value) => value - 1);
+            setIsOpen((value) => Math.max(0, value - 1));
             setIsAnyMenuOpen(false);
           }
         }}

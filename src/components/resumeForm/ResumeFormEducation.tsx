@@ -27,8 +27,15 @@ const ResumeFormEducation = () => {
               className="w-full outline-none resize-none"
             />
             <div className="w-full flex">
-              <input {...register(`education.${index}.period.startDate`)} type="date" />
-              <p>-</p> <input {...register(`education.${index}.period.endDate`)} type="date" />
+              <input
+                {...register(`education.${index}.period.startDate`, { valueAsDate: true })}
+                type="date"
+              />
+              <p>-</p>{' '}
+              <input
+                {...register(`education.${index}.period.endDate`, { valueAsDate: true })}
+                type="date"
+              />
             </div>
             <TextAreaAutosize
               {...register(`education.${index}.description`)}

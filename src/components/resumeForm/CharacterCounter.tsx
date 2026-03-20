@@ -9,7 +9,7 @@ import {
 interface CharacterCounterProps<T extends FieldValues> {
   control: Control<T>;
   name: FieldPath<T>;
-  limit?: number;
+  limit: number;
 }
 
 const CharacterCounter = <T extends FieldValues>({

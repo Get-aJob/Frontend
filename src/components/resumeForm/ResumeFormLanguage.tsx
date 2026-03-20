@@ -35,7 +35,7 @@ const ResumeFormLanguage = () => {
                 className="w-1/3 outline-none resize-none"
               />
               <select
-                {...register(`additionalInfo.${index}.type`)}
+                {...register(`language.${index}.level`)}
                 defaultValue=""
                 className="py-2 px-1 rounded-md bg-white hover:bg-black/10 appearance-none [text-align-last:center]"
               >
@@ -43,7 +43,9 @@ const ResumeFormLanguage = () => {
                   수준
                 </option>
                 {typeOption.map((option) => (
-                  <option value={option.value}>{option.label}</option>
+                  <option key={option.value} value={option.value}>
+                    {option.label}
+                  </option>
                 ))}
               </select>
             </div>
@@ -68,7 +70,6 @@ const ResumeFormLanguage = () => {
           <button
             type="button"
             onClick={() => {
-              remove(index);
               if (fields.length === 1) {
                 append({
                   name: '',
@@ -76,6 +77,7 @@ const ResumeFormLanguage = () => {
                   test: [],
                 });
               }
+              remove(index);
             }}
             className="absolute top-4 right-4 w-8 h-8 p-1.5 hidden group-hover:flex items-center justify-center bg-blue-100 rounded-sm hover:bg-blue-200"
           >

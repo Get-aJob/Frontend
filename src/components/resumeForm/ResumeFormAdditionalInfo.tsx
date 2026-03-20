@@ -44,13 +44,15 @@ const ResumeFormAdditionalInfo = () => {
                   타입
                 </option>
                 {typeOption.map((option) => (
-                  <option value={option.value}>{option.label}</option>
+                  <option key={option.value} value={option.value}>
+                    {option.label}
+                  </option>
                 ))}
               </select>
             </div>
             <TextAreaAutosize
               {...register(`additionalInfo.${index}.description`)}
-              maxLength={5000}
+              maxLength={1000}
               placeholder="description"
               className="w-full outline-none mt-5 resize-none"
             />
@@ -79,7 +81,6 @@ const ResumeFormAdditionalInfo = () => {
           <button
             type="button"
             onClick={() => {
-              remove(index);
               if (fields.length === 1) {
                 append({
                   name: '',
@@ -88,6 +89,7 @@ const ResumeFormAdditionalInfo = () => {
                   description: '',
                 });
               }
+              remove(index);
             }}
             className="absolute top-4 right-4 w-8 h-8 p-1.5 hidden group-hover:flex items-center justify-center bg-blue-100 rounded-sm hover:bg-blue-200"
           >

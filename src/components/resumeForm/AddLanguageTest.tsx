@@ -34,11 +34,13 @@ const AddLanguageTest = ({ fieldIndex }: { fieldIndex: number }) => {
               placeholder="점수/등급"
             />
           </div>
-          <input {...register(`language.${fieldIndex}.test.${index}.date`)} type="date" />
+          <input
+            {...register(`language.${fieldIndex}.test.${index}.date`, { valueAsDate: true })}
+            type="date"
+          />
           <button
             type="button"
             onClick={() => {
-              remove(index);
               if (fields.length === 1) {
                 append({
                   testName: '',
@@ -46,6 +48,7 @@ const AddLanguageTest = ({ fieldIndex }: { fieldIndex: number }) => {
                   date: null,
                 });
               }
+              remove(index);
             }}
             className="absolute top-2 right-2 w-8 h-8 p-1.5 hidden group-hover:flex items-center shadow-sm justify-center bg-white rounded-sm hover:bg-black/5"
           >

@@ -27,8 +27,15 @@ const ResumeFormWorkHistory = () => {
               className="w-full outline-none resize-none"
             />
             <div className="w-full flex gap-3">
-              <input {...register(`workHistory.${index}.period.startDate`)} type="date" />
-              <p>-</p> <input {...register(`workHistory.${index}.period.endDate`)} type="date" />
+              <input
+                {...register(`workHistory.${index}.period.startDate`, { valueAsDate: true })}
+                type="date"
+              />
+              <p>-</p>{' '}
+              <input
+                {...register(`workHistory.${index}.period.endDate`, { valueAsDate: true })}
+                type="date"
+              />
               <input
                 {...register(`workHistory.${index}.position`)}
                 type="text"
