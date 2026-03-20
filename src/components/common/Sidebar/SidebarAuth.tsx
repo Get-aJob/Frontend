@@ -1,12 +1,28 @@
 import { Link, useNavigate } from 'react-router-dom';
 import { PATH } from '@/router/Path';
+import { useAuthStore } from '@/store/useAuthStore';
+import { logoutApi } from '@/api/Auth';
 
-interface SidebarAuthProps {
-  isLoggedIn?: boolean;
-}
-
-const SidebarAuth = ({ isLoggedIn = false }: SidebarAuthProps) => {
+const SidebarAuth = () => {
   const navigate = useNavigate();
+  const { isLoggedIn, userInfo, logout } = useAuthStore();
+
+  const handleLogout = async () => {
+    if (!window.confirm('로그아웃 하시겠습니까?')) return;
+
+    try {
+      await logoutApi();
+
+      logout();
+
+      alert('로그아웃 되었습니다.');
+
+      navigate(PATH.POSTING);
+    } catch (error) {
+      console.error('로그아웃 실패:', error);
+      alert('로그아웃 처리 중 오류가 발생했습니다.');
+    }
+  };
 
   return (
     <div className="p-4 border-t border-[#e8eaf0]">
@@ -20,18 +36,30 @@ const SidebarAuth = ({ isLoggedIn = false }: SidebarAuthProps) => {
       ) : (
         <div className="flex items-center gap-2.5">
           <div className="flex items-center justify-center w-8.5 h-8.5 rounded-full bg-[#6366f1] text-[13px] font-extrabold text-white shrink-0">
-            김
+            {userInfo?.name ? userInfo.name.charAt(0) : '유'}
           </div>
-          <div>
-            <div className="text-[13px] font-bold text-[#111827]">김개발</div>
-            <div className="text-[11px] text-[#9ca3af]">프론트엔드 지망</div>
+
+          <div className="flex-1 min-w-0">
+            <div className="text-[13px] font-bold text-[#111827] truncate">
+              {userInfo?.name || '유저'}
+            </div>
           </div>
-          <button
-            onClick={() => navigate(PATH.SETTINGS)}
-            className="ml-auto p-1 text-[16px] text-[#9ca3af] hover:text-[#6b7280] transition-colors cursor-pointer"
-          >
-            ⚙
-          </button>
+
+          <div className="flex items-center gap-1 shrink-0">
+            <button
+              onClick={handleLogout}
+              className="px-2 py-1 text-[11px] font-medium text-[#6b7280] hover:text-[#ef4444] hover:bg-[#fee2e2] rounded-md transition-colors cursor-pointer"
+            >
+              로그아웃
+            </button>
+            <button
+              onClick={() => navigate(PATH.SETTINGS)}
+              className="p-1 text-[16px] text-[#9ca3af] hover:text-[#6b7280] transition-colors cursor-pointer"
+              title="설정"
+            >
+              ⚙
+            </button>
+          </div>
         </div>
       )}
     </div>
