@@ -1,5 +1,5 @@
 import { PATH } from '@/router/Path';
-import type { ResumeFormInputs } from '@/type/ResumeFormType';
+import type { ResumeFormInputs } from '@/types/ResumeFormType';
 import { useFormContext, type SubmitHandler } from 'react-hook-form';
 import { useNavigate } from 'react-router-dom';
 import { ChevronLeft } from 'lucide-react';
