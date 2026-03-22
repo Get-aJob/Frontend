@@ -20,14 +20,13 @@ const Login: React.FC<LoginProps> = ({ onSwitchRegister }) => {
       const response = await loginApi(data);
 
       if (response && response.user) {
-        loginAction('', {
+        loginAction(response.token || '', {
           name: response.user.name,
           email: response.user.email,
         });
+        alert('로그인 성공!');
+        navigate(PATH.CALENDAR);
       }
-      alert('로그인 성공!');
-
-      navigate(PATH.CALENDAR);
     } catch (error: unknown) {
       let errorMessage = '로그인 중 오류가 발생했습니다.';
 
