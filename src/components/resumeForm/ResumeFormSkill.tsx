@@ -1,6 +1,6 @@
 import TextAreaAutosize from 'react-textarea-autosize';
 import { useFormContext } from 'react-hook-form';
-import type { ResumeFormInputs } from '@/type/ResumeFormType';
+import type { ResumeFormInputs } from '@/types/ResumeFormType';
 import CharacterCounter from './CharacterCounter';
 
 const ResumeFormSkill = () => {

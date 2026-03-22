@@ -5,6 +5,7 @@ import { PATH } from '@/router/Path';
 import LoginForm from './LoginForm';
 import { loginApi } from '@/api/Auth';
 import type { LoginField } from '@/types/Auth';
+import { useAuthStore } from '@/store/useAuthStore';
 
 interface LoginProps {
   onSwitchRegister: () => void;
@@ -12,14 +13,20 @@ interface LoginProps {
 
 const Login: React.FC<LoginProps> = ({ onSwitchRegister }) => {
   const navigate = useNavigate();
+  const loginAction = useAuthStore((state) => state.login);
 
   const handleLogin = async (data: LoginField) => {
     try {
-      await loginApi(data);
+      const response = await loginApi(data);
 
-      alert('로그인 성공!');
-
-      navigate(PATH.CALENDAR);
+      if (response && response.user) {
+        loginAction(response.token || '', {
+          name: response.user.name,
+          email: response.user.email,
+        });
+        alert('로그인 성공!');
+        navigate(PATH.CALENDAR);
+      }
     } catch (error: unknown) {
       let errorMessage = '로그인 중 오류가 발생했습니다.';
 

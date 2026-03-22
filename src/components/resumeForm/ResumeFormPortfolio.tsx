@@ -1,4 +1,4 @@
-import type { ResumeFormInputs } from '@/type/ResumeFormType';
+import type { ResumeFormInputs } from '@/types/ResumeFormType';
 import { Trash2 } from 'lucide-react';
 import { useFieldArray, useFormContext } from 'react-hook-form';
 

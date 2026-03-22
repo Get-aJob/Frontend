@@ -10,3 +10,13 @@ export const joinApi = async (data: JoinField) => {
   const response = await api.post('/auth/join', data);
   return response.data;
 };
+
+export const logoutApi = async () => {
+  const response = await api.post('/auth/logout');
+  return response.data;
+};
+
+export const deleteAccountApi = async () => {
+  const response = await api.delete('/users/me');
+  return response.data;
+};
