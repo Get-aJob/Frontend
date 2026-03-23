@@ -5,7 +5,7 @@ import Layout from '@/components/common/Layout';
 
 import Calendar from '@/view/Calendar';
 import Status from '@/view/Status';
-import JobPostForm from '@/view/JobPostForm';
+import Posting from '@/view/Posting';
 import Dashboard from '@/view/Dashboard';
 import Resume from '@/view/Resume';
 import Scrap from '@/view/Scrap';
@@ -34,7 +34,7 @@ const router = createBrowserRouter([
       },
       {
         path: PATH.POSTING,
-        element: <JobPostForm />,
+        element: <Posting />,
       },
       {
         path: PATH.DASHBOARD,
