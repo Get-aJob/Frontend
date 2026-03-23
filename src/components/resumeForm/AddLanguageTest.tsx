@@ -1,6 +1,7 @@
 import type { ResumeFormInputs } from '@/type/ResumeFormType';
 import { Trash2 } from 'lucide-react';
 import { useFieldArray, useFormContext } from 'react-hook-form';
+import ResumeFormDatePicker from './ResumeFormDatePicker';
 
 const AddLanguageTest = ({ fieldIndex }: { fieldIndex: number }) => {
   const { register, control } = useFormContext<ResumeFormInputs>();
@@ -16,12 +17,12 @@ const AddLanguageTest = ({ fieldIndex }: { fieldIndex: number }) => {
         onClick={() => {
           append({ testName: '', score: '', date: null });
         }}
-        className="p-2 hover:bg-black/5"
+        className="p-2 hover:bg-black/10 rounded-lg"
       >
         +어학시험 추가
       </button>
       {fields.map((field, index) => (
-        <div key={field.id} className="w-full group relative p-2 rounded-xl hover:bg-black/5">
+        <div key={field.id} className="w-full group relative p-2 rounded-xl hover:bg-black/10">
           <div className="flex gap-1">
             <input
               {...register(`language.${fieldIndex}.test.${index}.testName`)}
@@ -34,9 +35,10 @@ const AddLanguageTest = ({ fieldIndex }: { fieldIndex: number }) => {
               placeholder="점수/등급"
             />
           </div>
-          <input
-            {...register(`language.${fieldIndex}.test.${index}.date`, { valueAsDate: true })}
-            type="date"
+          <ResumeFormDatePicker
+            name={`language.${fieldIndex}.test.${index}.date`}
+            control={control}
+            disabled={false}
           />
           <button
             type="button"

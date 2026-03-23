@@ -1,4 +1,5 @@
 export type AdditionalInfoType = '수상' | '자격증' | '활동' | undefined;
+export type uploadType = 'file' | 'url';
 export type LanguageLevelType =
   | '유창함'
   | '고급 비즈니스 레벨'
@@ -11,11 +12,12 @@ export interface Period {
   endDate: Date | null;
 }
 
-export interface WorkHistory {
-  companyName: string;
+export interface Experience {
+  name: string;
   position: string;
   period: Period;
   description: string;
+  isCurrent: boolean; // ui를 위한 임시 속성
 }
 
 export interface Education {
@@ -45,13 +47,15 @@ export interface Language {
 
 export interface Portfolio {
   name: string;
-  url: string;
+  url?: string;
+  file: File | null;
+  type: uploadType; // ui를 위한 임시 속성
 }
 
 export interface ResumeFormInputs {
   title: string;
   profile: string;
-  workHistory: WorkHistory[];
+  experience: Experience[];
   education: Education[];
   skill: string;
   additionalInfo: AdditionalInfo[];

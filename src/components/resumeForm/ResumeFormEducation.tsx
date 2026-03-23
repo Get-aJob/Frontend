@@ -3,13 +3,25 @@ import { Trash2 } from 'lucide-react';
 import { useFieldArray, useFormContext } from 'react-hook-form';
 import CharacterCounter from './CharacterCounter';
 import TextAreaAutosize from 'react-textarea-autosize';
+import { useState } from 'react';
+import ResumeFormDatePicker from './ResumeFormDatePicker';
+import clsx from 'clsx';
 
 const ResumeFormEducation = () => {
-  const { register, control } = useFormContext<ResumeFormInputs>();
+  const { register, control, setValue } = useFormContext<ResumeFormInputs>();
+  const [currentItems, setCurrentItems] = useState<Record<number, boolean>>({});
   const { fields, append, remove } = useFieldArray({
     control: control,
     name: 'education',
   });
+
+  const handleToggleCurrent = (index: number, checked: boolean) => {
+    setCurrentItems((prev) => ({ ...prev, [index]: checked }));
+
+    if (checked) {
+      setValue(`education.${index}.period.endDate`, null);
+    }
+  };
 
   return (
     <div className="w-full mt-20">
@@ -26,16 +38,30 @@ const ResumeFormEducation = () => {
               placeholder="학교 및 기관 명"
               className="w-full outline-none resize-none"
             />
-            <div className="w-full flex">
-              <input
-                {...register(`education.${index}.period.startDate`, { valueAsDate: true })}
-                type="date"
+            <div className="w-full flex gap-3">
+              <ResumeFormDatePicker
+                name={`education.${index}.period.startDate`}
+                control={control}
+                disabled={false}
               />
               <p>-</p>{' '}
-              <input
-                {...register(`education.${index}.period.endDate`, { valueAsDate: true })}
-                type="date"
+              <ResumeFormDatePicker
+                name={`education.${index}.period.endDate`}
+                control={control}
+                disabled={!!currentItems[index]}
               />
+              <label className="flex items-center justify-center gap-1">
+                <span className={clsx(!currentItems[index] ? 'text-black/40' : 'text-black')}>
+                  현재 진행 중
+                </span>
+                <input
+                  type="checkbox"
+                  onChange={(e) => {
+                    e.stopPropagation();
+                    handleToggleCurrent(index, e.target.checked);
+                  }}
+                />
+              </label>
             </div>
             <TextAreaAutosize
               {...register(`education.${index}.description`)}

@@ -3,6 +3,7 @@ import { Trash2 } from 'lucide-react';
 import { useFieldArray, useFormContext } from 'react-hook-form';
 import TextAreaAutosize from 'react-textarea-autosize';
 import CharacterCounter from './CharacterCounter';
+import ResumeFormDatePicker from './ResumeFormDatePicker';
 
 const ResumeFormAdditionalInfo = () => {
   const { register, control } = useFormContext<ResumeFormInputs>();
@@ -33,12 +34,16 @@ const ResumeFormAdditionalInfo = () => {
               placeholder="활동명"
               className="w-full outline-none resize-none"
             />
-            <div className="w-full flex gap-3">
-              <input {...register(`additionalInfo.${index}.date`)} type="date" />
+            <div className="w-full flex gap-3 items-center">
+              <ResumeFormDatePicker
+                name={`additionalInfo.${index}.date`}
+                control={control}
+                disabled={false}
+              />
               <select
                 {...register(`additionalInfo.${index}.type`)}
                 defaultValue=""
-                className="py-2 px-1 rounded-md bg-white hover:bg-black/10 appearance-none [text-align-last:center]"
+                className="py-2 px-1 rounded-md bg-white hover:bg-black/10 appearance-none focus:outline-none [text-align-last:center]"
               >
                 <option value="" disabled hidden>
                   타입
