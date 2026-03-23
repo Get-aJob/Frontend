@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import AddJobModal from './AddJobModal';
+import JobModal from '@/components/jobPostForm/JobModal';
 
 export interface TopbarProps {
   title?: string;
@@ -54,7 +54,7 @@ const Topbar = ({
         </div>
       </header>
 
-      <AddJobModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} />
+      <JobModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} />
     </>
   );
 };
