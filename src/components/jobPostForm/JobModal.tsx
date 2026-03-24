@@ -85,9 +85,6 @@ const JobModal = ({ isOpen, onClose }: JobModalProps) => {
   };
 
   const onSubmit = (data: JobPostFields) => {
-    // zodResolver가 이미 유효성 검사를 완료했으므로 data는 안전합니다.
-    console.log('제출된 데이터:', data);
-
     // 알림창용 데이터 가공 (로고 데이터 요약)
     const displayData = {
       ...data,
