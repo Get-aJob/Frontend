@@ -6,11 +6,10 @@ import { useResumeItemMenuStore } from '@/store/useResumeItemMenuStore';
 
 interface ResumeItemProps {
   title: string;
-  memo?: string;
   updatedAt: string;
 }
 
-const ResumeItem = ({ title, memo, updatedAt }: ResumeItemProps) => {
+const ResumeItem = ({ title, updatedAt }: ResumeItemProps) => {
   const [isOpen, setIsOpen] = useState(0);
   const menuRef = useRef<HTMLButtonElement | null>(null);
   const navigate = useNavigate();
@@ -48,7 +47,6 @@ const ResumeItem = ({ title, memo, updatedAt }: ResumeItemProps) => {
         }}
       >
         <h1 className="text-2xl">{title}</h1>
-        <p className="text-black/50">{memo || '더보기를 눌러 메모를 입력하세요.'}</p>
         <p>{updatedAt}</p>
       </div>
       <button
@@ -77,7 +75,6 @@ const ResumeItem = ({ title, memo, updatedAt }: ResumeItemProps) => {
         <p className="p-3 hover:bg-black/5">사본 만들기</p>
         <p className="p-3 hover:bg-black/5">다운로드</p>
         <p className="p-3 hover:bg-black/5">미리보기</p>
-        <p className="p-3 hover:bg-black/5">메모 설정</p>
       </div>
     </div>
   );
