@@ -1,4 +1,4 @@
-import type { LanguageLevelType, ResumeFormInputs } from '@/type/ResumeFormType';
+import type { LanguageLevelType, ResumeFormInputs } from '@/types/ResumeFormType';
 import { Trash2 } from 'lucide-react';
 import { useFieldArray, useFormContext } from 'react-hook-form';
 import AddLanguageTest from './AddLanguageTest';

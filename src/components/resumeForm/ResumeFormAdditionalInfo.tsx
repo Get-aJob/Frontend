@@ -1,4 +1,4 @@
-import type { AdditionalInfoType, ResumeFormInputs } from '@/type/ResumeFormType';
+import type { AdditionalInfoType, ResumeFormInputs } from '@/types/ResumeFormType';
 import { Trash2 } from 'lucide-react';
 import { useFieldArray, useFormContext } from 'react-hook-form';
 import TextAreaAutosize from 'react-textarea-autosize';

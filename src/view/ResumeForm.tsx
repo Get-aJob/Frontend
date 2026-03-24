@@ -1,6 +1,6 @@
 import { useForm, FormProvider } from 'react-hook-form';
 import ResumeFormTopbar from '@/components/resumeForm/ResumeFormTopbar';
-import type { ResumeFormInputs } from '@/type/ResumeFormType';
+import type { ResumeFormInputs } from '@/types/ResumeFormType';
 import ResumeFormProfile from '@/components/resumeForm/ResumeFormProfile';
 import ResumeFormEducation from '@/components/resumeForm/ResumeFormEducation';
 import ResumeFormAdditionalInfo from '@/components/resumeForm/ResumeFormAdditionalInfo';
