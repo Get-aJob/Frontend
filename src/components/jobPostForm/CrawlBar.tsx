@@ -9,8 +9,15 @@ const CrawlBar = () => {
       <input
         className="flex-1 bg-transparent border-none outline-none text-[12.5px]"
         placeholder="URL을 붙여넣으면 자동으로 채워드려요!"
+        aria-label="공고 URL 입력"
+        inputMode="url"
       />
-      <button className="px-[13px] py-[6px] text-[12px] bg-[#4f46e5] text-white rounded-[6px] border border-transparent font-medium cursor-pointer hover:bg-[#4338ca] transition-colors">
+
+      <button
+        type="button"
+        onClick={() => alert('아직 제공하지 않는 서비스입니다.')}
+        className="px-[13px] py-[6px] text-[12px] bg-[#4f46e5] text-white rounded-[6px] border border-transparent font-medium cursor-pointer hover:bg-[#4338ca] transition-colors"
+      >
         파싱
       </button>
     </div>

@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useForm, Controller } from 'react-hook-form';
 import { z } from 'zod';
+import { zodResolver } from '@hookform/resolvers/zod';
 import { Plus } from 'lucide-react';
 import CrawlBar from './CrawlBar';
 import LogoUpload from './LogoUpload';
@@ -40,6 +41,7 @@ const JobModal = ({ isOpen, onClose }: JobModalProps) => {
     setValue,
     formState: { errors },
   } = useForm<JobPostFields>({
+    resolver: zodResolver(jobPostSchema),
     defaultValues: {
       title: '',
       company_name: '',
@@ -83,24 +85,16 @@ const JobModal = ({ isOpen, onClose }: JobModalProps) => {
   };
 
   const onSubmit = (data: JobPostFields) => {
-    // Zod를 이용한 최종 유효성 검사
-    const result = jobPostSchema.safeParse(data);
-
-    if (!result.success) {
-      console.error('유효성 검사 실패:', result.error.format());
-      alert('입력값을 확인해 주세요.');
-      return;
-    }
-
-    console.log('제출된 데이터:', result.data);
+    // zodResolver가 이미 유효성 검사를 완료했으므로 data는 안전합니다.
+    console.log('제출된 데이터:', data);
 
     // 알림창용 데이터 가공 (로고 데이터 요약)
     const displayData = {
-      ...result.data,
-      company_logo: result.data.company_logo
-        ? result.data.company_logo.length > 50
-          ? `${result.data.company_logo.substring(0, 50)}... [생략됨]`
-          : result.data.company_logo
+      ...data,
+      company_logo: data.company_logo
+        ? data.company_logo.length > 50
+          ? `${data.company_logo.substring(0, 50)}... [생략됨]`
+          : data.company_logo
         : null,
     };
 
@@ -112,11 +106,11 @@ const JobModal = ({ isOpen, onClose }: JobModalProps) => {
 
   return (
     <div
-      className="fixed inset-0 bg-[#111827]/50 backdrop-blur-[3px] z-[1000] flex items-center justify-center transition-opacity duration-200 opacity-100 pointer-events-auto"
+      className="fixed inset-0 bg-[#111827]/50 backdrop-blur-[3px] z-[1000] flex items-center justify-center transition-opacity duration-200 opacity-100 pointer-events-auto p-4"
       onClick={handleClose}
     >
       <div
-        className="bg-white rounded-[16px] p-[30px] w-[750px] max-w-[calc(100vw-32px)] max-h-[90vh] overflow-y-auto shadow-[0_10px_30px_rgba(0,0,0,0.1)]"
+        className="bg-white rounded-[16px] p-[20px] sm:p-[30px] w-full max-w-[750px] max-h-[90vh] overflow-y-auto shadow-[0_10px_30px_rgba(0,0,0,0.1)]"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex justify-between items-center mb-[22px]">
@@ -133,11 +127,15 @@ const JobModal = ({ isOpen, onClose }: JobModalProps) => {
 
         <CrawlBar />
 
-        <div className="grid grid-cols-[160px_1fr] gap-[24px] mb-[20px]">
+        <div className="flex flex-col sm:grid sm:grid-cols-[160px_1fr] gap-[24px] mb-[20px]">
           <Controller
             name="company_logo"
             control={control}
-            render={({ field }) => <LogoUpload value={field.value} onChange={field.onChange} />}
+            render={({ field }) => (
+              <div className="flex justify-center sm:block">
+                <LogoUpload value={field.value} onChange={field.onChange} />
+              </div>
+            )}
           />
           <div className="flex flex-col gap-[13px]">
             <TextInput
@@ -147,7 +145,7 @@ const JobModal = ({ isOpen, onClose }: JobModalProps) => {
               {...register('title')}
               error={errors.title?.message}
             />
-            <div className="grid grid-cols-2 gap-[12px]">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-[12px]">
               <TextInput
                 label="회사명"
                 placeholder="예: 네이버"
@@ -166,7 +164,7 @@ const JobModal = ({ isOpen, onClose }: JobModalProps) => {
           </div>
         </div>
 
-        <div className="grid grid-cols-2 gap-[12px]">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-[12px]">
           <TextInput
             label="신입/경력"
             placeholder="예: 신입 / 경력(2년 이상)"

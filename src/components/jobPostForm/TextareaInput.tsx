@@ -1,4 +1,4 @@
-import { forwardRef } from 'react';
+import { forwardRef, useId } from 'react';
 import TextareaAutosize, { type TextareaAutosizeProps } from 'react-textarea-autosize';
 import { clsx } from 'clsx';
 
@@ -11,10 +11,18 @@ interface TextareaInputProps extends TextareaAutosizeProps {
 
 const TextareaInput = forwardRef<HTMLTextAreaElement, TextareaInputProps>(
   ({ label, className = '', wrapperClassName = 'mb-[13px]', error, ...props }, ref) => {
+    const defaultId = useId();
+    const textareaId = props.id ?? defaultId;
     return (
       <div className={wrapperClassName}>
-        <label className="text-[12px] text-[#6b7280] font-[600] mb-[6px] block">{label}</label>
+        <label
+          htmlFor={textareaId}
+          className="text-[12px] text-[#6b7280] font-[600] mb-[6px] block"
+        >
+          {label}
+        </label>
         <TextareaAutosize
+          id={textareaId}
           ref={ref}
           className={clsx(
             'w-full bg-[#f8f9fc] border-[1.5px] border-[#e8eaf0] rounded-[9px] py-[9px] px-[13px] text-[13.5px] outline-none box-border focus:border-[#4f46e5] transition-colors min-h-[100px] overflow-hidden',

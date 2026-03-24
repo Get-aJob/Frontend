@@ -41,7 +41,7 @@ const Topbar = ({
               <input
                 id="topbar-search"
                 aria-label="공고 검색"
-                className="w-full bg-transparent border-none outline-none text-[13px] focus-visible:ring-2 focus-visible:ring-[`#4f46e5`] rounded-sm"
+                className="w-full bg-transparent border-none outline-none text-[13px] focus-visible:ring-2 focus-visible:ring-[#4f46e5] rounded-sm"
                 placeholder="검색어를 입력하세요..."
               />
             </div>

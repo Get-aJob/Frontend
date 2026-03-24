@@ -31,7 +31,7 @@ const AddJobModal = ({ isOpen, onClose }: AddJobModalProps) => {
             +{' '}
             <label
               htmlFor="company-name"
-              className="block text-[12px] text-[`#6b7280`] font-semibold mb-1.5"
+              className="block text-[12px] text-[#6b7280] font-semibold mb-1.5"
             >
               회사명 *
             </label>
@@ -45,7 +45,7 @@ const AddJobModal = ({ isOpen, onClose }: AddJobModalProps) => {
             +{' '}
             <label
               htmlFor="job-category"
-              className="block text-[12px] text-[`#6b7280`] font-semibold mb-1.5"
+              className="block text-[12px] text-[#6b7280] font-semibold mb-1.5"
             >
               직군 *
             </label>

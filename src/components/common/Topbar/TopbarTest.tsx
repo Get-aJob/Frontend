@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import JobModal from '@/components/jobPostForm/JobModal';
 import { useAuthStore } from '@/store/useAuthStore';
 import LoginToast from './LoginToast';
@@ -20,10 +20,20 @@ const Topbar = ({
   const [showLoginToast, setShowLoginToast] = useState(false);
   const isLoggedIn = useAuthStore((state) => state.isLoggedIn);
 
+  const toastTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  useEffect(() => {
+    return () => {
+      if (toastTimeoutRef.current) {
+        clearTimeout(toastTimeoutRef.current);
+      }
+    };
+  }, []);
+
   const handleAddButtonClick = () => {
     if (!isLoggedIn) {
       setShowLoginToast(true);
-      setTimeout(() => setShowLoginToast(false), 3000);
+      toastTimeoutRef.current = setTimeout(() => setShowLoginToast(false), 3000);
+
       return;
     }
     setIsModalOpen(true);
@@ -50,7 +60,7 @@ const Topbar = ({
               <input
                 id="topbar-search"
                 aria-label="공고 검색"
-                className="w-full bg-transparent border-none outline-none text-[13px] focus-visible:ring-2 focus-visible:ring-[`#4f46e5`] rounded-sm"
+                className="w-full bg-transparent border-none outline-none text-[13px] focus-visible:ring-2 focus-visible:ring-[#4f46e5] rounded-sm"
                 placeholder="검색어를 입력하세요..."
               />
             </div>
