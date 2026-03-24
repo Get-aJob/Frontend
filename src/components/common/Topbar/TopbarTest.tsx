@@ -1,5 +1,7 @@
 import { useState } from 'react';
 import JobModal from '@/components/jobPostForm/JobModal';
+import { useAuthStore } from '@/store/useAuthStore';
+import LoginToast from './LoginToast';
 
 export interface TopbarProps {
   title?: string;
@@ -15,8 +17,15 @@ const Topbar = ({
   showAddButton = false,
 }: TopbarProps) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [showLoginToast, setShowLoginToast] = useState(false);
+  const isLoggedIn = useAuthStore((state) => state.isLoggedIn);
 
   const handleAddButtonClick = () => {
+    if (!isLoggedIn) {
+      setShowLoginToast(true);
+      setTimeout(() => setShowLoginToast(false), 3000);
+      return;
+    }
     setIsModalOpen(true);
   };
 
@@ -57,6 +66,9 @@ const Topbar = ({
           )}
         </div>
       </header>
+
+      {/* 로그인 안내 토스트 */}
+      <LoginToast visible={showLoginToast} />
 
       <JobModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} />
     </>
