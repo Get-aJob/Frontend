@@ -3,6 +3,7 @@ import type { LoginField, JoinField } from '@/types/Auth';
 
 export const loginApi = async (data: LoginField) => {
   const response = await api.post('/auth/login', data);
+  console.log(response.data);
   return response.data;
 };
 

@@ -1,23 +1,23 @@
 import type { ResumeFormInputs } from '@/types/ResumeFormType';
 import { Trash2 } from 'lucide-react';
 import { useFieldArray, useFormContext } from 'react-hook-form';
-import CharacterCounter from './CharacterCounter';
 import TextAreaAutosize from 'react-textarea-autosize';
+import CharacterCounter from './CharacterCounter';
 import ResumeFormDatePicker from './ResumeFormDatePicker';
 import clsx from 'clsx';
 
-const ResumeFormEducation = () => {
+const ResumeFormExperience = () => {
   const { register, control, setValue, watch } = useFormContext<ResumeFormInputs>();
   const { fields, append, remove } = useFieldArray({
     control: control,
-    name: 'education',
+    name: 'experience',
   });
 
   return (
-    <div className="w-full mt-20">
-      <label className="text-xl ml-2">학력</label>
+    <div className="w-full mt-20 z-0">
+      <label className="text-xl ml-2">경험 / 경력</label>
       {fields.map((field, index) => {
-        const inCurrent = watch(`education.${index}.isCurrent`);
+        const isCurrent = watch(`experience.${index}.isCurrent`);
         return (
           <div
             key={field.id}
@@ -25,58 +25,66 @@ const ResumeFormEducation = () => {
           >
             <div className="flex-1">
               <input
-                {...register(`education.${index}.name`)}
+                {...register(`experience.${index}.name`)}
                 type="text"
-                placeholder="학교 및 기관 명"
+                placeholder="경험 / 회사 명"
                 className="w-full outline-none resize-none"
               />
               <div className="w-full flex gap-3">
                 <ResumeFormDatePicker
-                  name={`education.${index}.period.startDate`}
+                  name={`experience.${index}.period.startDate`}
                   control={control}
                   disabled={false}
                 />
-                <p>-</p>{' '}
+                <p>-</p>
                 <ResumeFormDatePicker
-                  name={`education.${index}.period.endDate`}
+                  name={`experience.${index}.period.endDate`}
                   control={control}
-                  disabled={inCurrent}
+                  disabled={isCurrent}
                 />
                 <label className="flex items-center justify-center gap-1">
-                  <span className={clsx(!inCurrent ? 'text-black/40' : 'text-black')}>
+                  <span className={clsx(!isCurrent ? 'text-black/40' : 'text-black')}>
                     현재 진행 중
                   </span>
                   <input
+                    {...register(`experience.${index}.isCurrent`)}
                     type="checkbox"
                     onChange={(e) => {
                       e.stopPropagation();
                       const checked = e.target.checked;
-                      setValue(`education.${index}.isCurrent`, checked);
+                      setValue(`experience.${index}.isCurrent`, checked);
                       if (checked) {
-                        setValue(`education.${index}.period.endDate`, null);
+                        setValue(`experience.${index}.period.endDate`, null);
                       }
                     }}
                   />
                 </label>
+                <p>|</p>
+                <input
+                  {...register(`experience.${index}.position`)}
+                  type="text"
+                  placeholder="포지션"
+                />
               </div>
               <TextAreaAutosize
-                {...register(`education.${index}.description`)}
-                maxLength={1000}
-                placeholder="이수 과목 또는 연구 내용을 작성해보세요."
+                {...register(`experience.${index}.description`)}
+                maxLength={5000}
+                placeholder="description"
                 className="w-full outline-none mt-5 resize-none"
               />
               <CharacterCounter
                 control={control}
-                name={`education.${index}.description`}
-                limit={1000}
+                name={`experience.${index}.description`}
+                limit={5000}
               />
             </div>
-            <div className="absolute -bottom-14 left-[48%] w-14 h-14 p-2">
+            <div className="absolute -bottom-14 left-[48%] w-14 h-14 p-2 z-20">
               <button
                 type="button"
                 onClick={() => {
                   append({
                     name: '',
+                    position: '',
                     period: { startDate: null, endDate: null },
                     description: '',
                     isCurrent: false,
@@ -94,6 +102,7 @@ const ResumeFormEducation = () => {
                 if (fields.length === 1) {
                   append({
                     name: '',
+                    position: '',
                     period: { startDate: null, endDate: null },
                     description: '',
                     isCurrent: false,
@@ -111,4 +120,4 @@ const ResumeFormEducation = () => {
   );
 };
 
-export default ResumeFormEducation;
+export default ResumeFormExperience;

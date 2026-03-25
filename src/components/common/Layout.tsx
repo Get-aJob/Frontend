@@ -36,7 +36,6 @@ const Layout = () => {
 
   const publicPaths: string[] = [PATH.CALENDAR, PATH.POSTING];
   const isPublicPath = publicPaths.includes(location.pathname);
-
   return (
     <div className="flex h-screen bg-[#f8f9fc] overflow-hidden">
       <Sidebar />
