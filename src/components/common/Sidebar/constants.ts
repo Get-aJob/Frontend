@@ -18,13 +18,12 @@ export const NAV_SECTIONS: NavSectionType[] = [
   {
     title: '메인',
     items: [
-      { id: 'nav-calendar', label: '캘린더', icon: '📅', path: PATH.CALENDAR },
+      { id: 'nav-calendar', label: '캘린더', icon: '📅', path: PATH.ROOT },
       {
         id: 'nav-kanban',
         label: '지원 현황',
         icon: '📋',
         path: PATH.STATUS,
-        badge: 12,
         badgeColor: 'bg-[#4f46e5]',
       },
       { id: 'nav-jobboard', label: '전체 공고', icon: '🔍', path: PATH.POSTING },
@@ -40,7 +39,6 @@ export const NAV_SECTIONS: NavSectionType[] = [
         label: '공고 스크랩',
         icon: '🔖',
         path: PATH.SCRAP,
-        badge: 5,
         badgeColor: 'bg-[#f59e0b]',
       },
     ],
@@ -53,7 +51,6 @@ export const NAV_SECTIONS: NavSectionType[] = [
         label: '알림',
         icon: '🔔',
         path: PATH.NOTIFICATION,
-        badge: 3,
         badgeColor: 'bg-[#f43f5e]',
       },
       { id: 'nav-settings', label: '계정 설정', icon: '⚙️', path: PATH.SETTINGS },
