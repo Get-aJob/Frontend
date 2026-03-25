@@ -1,19 +1,19 @@
 import type { ResumeFormInputs } from '@/types/ResumeFormType';
 import { Trash2 } from 'lucide-react';
 import { useFieldArray, useFormContext } from 'react-hook-form';
-import CharacterCounter from './CharacterCounter';
 import TextAreaAutosize from 'react-textarea-autosize';
+import CharacterCounter from './CharacterCounter';
 
-const ResumeFormEducation = () => {
+const ResumeFormWorkHistory = () => {
   const { register, control } = useFormContext<ResumeFormInputs>();
   const { fields, append, remove } = useFieldArray({
     control: control,
-    name: 'education',
+    name: 'workHistory',
   });
 
   return (
     <div className="w-full mt-20">
-      <label className="text-xl ml-2">학력</label>
+      <label className="text-xl ml-2">경력</label>
       {fields.map((field, index) => (
         <div
           key={field.id}
@@ -21,32 +21,37 @@ const ResumeFormEducation = () => {
         >
           <div className="flex-1">
             <input
-              {...register(`education.${index}.name`)}
+              {...register(`workHistory.${index}.companyName`)}
               type="text"
-              placeholder="학교 및 기관 명"
+              placeholder="회사명"
               className="w-full outline-none resize-none"
             />
-            <div className="w-full flex">
+            <div className="w-full flex gap-3">
               <input
-                {...register(`education.${index}.period.startDate`, { valueAsDate: true })}
+                {...register(`workHistory.${index}.period.startDate`, { valueAsDate: true })}
                 type="date"
               />
               <p>-</p>{' '}
               <input
-                {...register(`education.${index}.period.endDate`, { valueAsDate: true })}
+                {...register(`workHistory.${index}.period.endDate`, { valueAsDate: true })}
                 type="date"
+              />
+              <input
+                {...register(`workHistory.${index}.position`)}
+                type="text"
+                placeholder="직무"
               />
             </div>
             <TextAreaAutosize
-              {...register(`education.${index}.description`)}
-              maxLength={1000}
-              placeholder="이수 과목 또는 연구 내용을 작성해보세요."
+              {...register(`workHistory.${index}.description`)}
+              maxLength={5000}
+              placeholder="description"
               className="w-full outline-none mt-5 resize-none"
             />
             <CharacterCounter
               control={control}
-              name={`education.${index}.description`}
-              limit={1000}
+              name={`workHistory.${index}.description`}
+              limit={5000}
             />
           </div>
           <div className="absolute -bottom-14 left-[48%] w-14 h-14 p-2">
@@ -54,7 +59,8 @@ const ResumeFormEducation = () => {
               type="button"
               onClick={() => {
                 append({
-                  name: '',
+                  companyName: '',
+                  position: '',
                   period: { startDate: null, endDate: null },
                   description: '',
                 });
@@ -70,7 +76,8 @@ const ResumeFormEducation = () => {
               remove(index);
               if (fields.length === 1) {
                 append({
-                  name: '',
+                  companyName: '',
+                  position: '',
                   period: { startDate: null, endDate: null },
                   description: '',
                 });
@@ -86,4 +93,4 @@ const ResumeFormEducation = () => {
   );
 };
 
-export default ResumeFormEducation;
+export default ResumeFormWorkHistory;
