@@ -8,26 +8,29 @@ interface TextInputProps extends InputHTMLAttributes<HTMLInputElement> {
   error?: string;
 }
 
+const STYLES = {
+  label: 'text-[12px] text-[#6b7280] font-[600] mb-[6px] block',
+  input:
+    'w-full bg-[#f8f9fc] border-[1.5px] border-[#e8eaf0] rounded-[9px] py-[9px] px-[13px] text-[13.5px] outline-none box-border focus:border-[#4f46e5] transition-colors',
+  errorText: 'text-red-500 text-[11px] mt-1',
+};
+
 const TextInput = forwardRef<HTMLInputElement, TextInputProps>(
   ({ label, className = '', wrapperClassName = 'mb-[13px]', error, ...props }, ref) => {
     const defaultId = useId();
     const inputId = props.id ?? defaultId;
     return (
       <div className={wrapperClassName}>
-        <label htmlFor={inputId} className="text-[12px] text-[#6b7280] font-[600] mb-[6px] block">
+        <label htmlFor={inputId} className={STYLES.label}>
           {label}
         </label>
         <input
           id={inputId}
           ref={ref}
-          className={clsx(
-            'w-full bg-[#f8f9fc] border-[1.5px] border-[#e8eaf0] rounded-[9px] py-[9px] px-[13px] text-[13.5px] outline-none box-border focus:border-[#4f46e5] transition-colors',
-            error ? 'border-red-500' : '',
-            className,
-          )}
+          className={clsx(STYLES.input, error && 'border-red-500', className)}
           {...props}
         />
-        {error && <p className="text-red-500 text-[11px] mt-1">{error}</p>}
+        {error && <p className={STYLES.errorText}>{error}</p>}
       </div>
     );
   },

@@ -9,6 +9,26 @@ import TextInput from './TextInput';
 import TextareaInput from './TextareaInput';
 import DeadlineInput from './DeadlineInput';
 
+const STYLES = {
+  overlay:
+    'fixed inset-0 bg-[#111827]/50 backdrop-blur-[3px] z-[1000] flex items-center justify-center transition-opacity duration-200 opacity-100 pointer-events-auto p-4',
+  modalContent:
+    'bg-white rounded-[16px] p-[20px] sm:p-[30px] w-full max-w-[750px] max-h-[90vh] overflow-y-auto shadow-[0_10px_30px_rgba(0,0,0,0.1)]',
+  header: 'flex justify-between items-center mb-[22px]',
+  title: 'text-[18px] font-[800] !m-0 flex items-center gap-1.5',
+  resetBtn:
+    'text-[11.5px] px-[11px] py-[5px] text-[#9ca3af] border border-[#e8eaf0] rounded hover:bg-gray-50 transition-colors',
+  topSection: 'flex flex-col sm:grid sm:grid-cols-[160px_1fr] gap-[24px] mb-[20px]',
+  logoWrapper: 'flex justify-center sm:block',
+  formGroup: 'flex flex-col gap-[13px]',
+  gridRow: 'grid grid-cols-1 sm:grid-cols-2 gap-[12px]',
+  footer: 'flex justify-end gap-[10px] mt-[20px] pt-[18px] border-t-[1.5px] border-[#e8eaf0]',
+  cancelBtn:
+    'px-[13px] py-[6px] text-[12px] bg-white text-[#111827] border border-[#e8eaf0] rounded hover:bg-gray-50 transition-colors',
+  submitBtn:
+    'px-[13px] py-[6px] text-[12px] bg-[#4f46e5] text-white rounded hover:bg-[#4338ca] transition-colors',
+};
+
 // Zod Schema 정의
 const jobPostSchema = z.object({
   title: z.string().min(1, '공고 제목을 입력해 주세요.'),
@@ -85,7 +105,6 @@ const JobModal = ({ isOpen, onClose }: JobModalProps) => {
   };
 
   const onSubmit = (data: JobPostFields) => {
-    // 알림창용 데이터 가공 (로고 데이터 요약)
     const displayData = {
       ...data,
       company_logo: data.company_logo
@@ -102,39 +121,30 @@ const JobModal = ({ isOpen, onClose }: JobModalProps) => {
   if (!isOpen) return null;
 
   return (
-    <div
-      className="fixed inset-0 bg-[#111827]/50 backdrop-blur-[3px] z-[1000] flex items-center justify-center transition-opacity duration-200 opacity-100 pointer-events-auto p-4"
-      onClick={handleClose}
-    >
-      <div
-        className="bg-white rounded-[16px] p-[20px] sm:p-[30px] w-full max-w-[750px] max-h-[90vh] overflow-y-auto shadow-[0_10px_30px_rgba(0,0,0,0.1)]"
-        onClick={(e) => e.stopPropagation()}
-      >
-        <div className="flex justify-between items-center mb-[22px]">
-          <div className="text-[18px] font-[800] !m-0 flex items-center gap-1.5">
+    <div className={STYLES.overlay} onClick={handleClose}>
+      <div className={STYLES.modalContent} onClick={(e) => e.stopPropagation()}>
+        <div className={STYLES.header}>
+          <div className={STYLES.title}>
             <Plus size={18} strokeWidth={3} /> 새 공고 등록
           </div>
-          <button
-            onClick={handleReset}
-            className="text-[11.5px] px-[11px] py-[5px] text-[#9ca3af] border border-[#e8eaf0] rounded hover:bg-gray-50 transition-colors"
-          >
+          <button onClick={handleReset} className={STYLES.resetBtn}>
             초기화
           </button>
         </div>
 
         <CrawlBar />
 
-        <div className="flex flex-col sm:grid sm:grid-cols-[160px_1fr] gap-[24px] mb-[20px]">
+        <div className={STYLES.topSection}>
           <Controller
             name="company_logo"
             control={control}
             render={({ field }) => (
-              <div className="flex justify-center sm:block">
+              <div className={STYLES.logoWrapper}>
                 <LogoUpload value={field.value} onChange={field.onChange} />
               </div>
             )}
           />
-          <div className="flex flex-col gap-[13px]">
+          <div className={STYLES.formGroup}>
             <TextInput
               label="공고 제목"
               placeholder="예: 프론트엔드 개발자"
@@ -142,7 +152,7 @@ const JobModal = ({ isOpen, onClose }: JobModalProps) => {
               {...register('title')}
               error={errors.title?.message}
             />
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-[12px]">
+            <div className={STYLES.gridRow}>
               <TextInput
                 label="회사명"
                 placeholder="예: 네이버"
@@ -161,7 +171,7 @@ const JobModal = ({ isOpen, onClose }: JobModalProps) => {
           </div>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-[12px]">
+        <div className={STYLES.gridRow}>
           <TextInput
             label="신입/경력"
             placeholder="예: 신입 / 경력(2년 이상)"
@@ -198,17 +208,11 @@ const JobModal = ({ isOpen, onClose }: JobModalProps) => {
           error={errors.content?.message}
         />
 
-        <div className="flex justify-end gap-[10px] mt-[20px] pt-[18px] border-t-[1.5px] border-[#e8eaf0]">
-          <button
-            className="px-[13px] py-[6px] text-[12px] bg-white text-[#111827] border border-[#e8eaf0] rounded hover:bg-gray-50 transition-colors"
-            onClick={handleClose}
-          >
+        <div className={STYLES.footer}>
+          <button className={STYLES.cancelBtn} onClick={handleClose}>
             취소
           </button>
-          <button
-            className="px-[13px] py-[6px] text-[12px] bg-[#4f46e5] text-white rounded hover:bg-[#4338ca] transition-colors"
-            onClick={handleSubmit(onSubmit)}
-          >
+          <button className={STYLES.submitBtn} onClick={handleSubmit(onSubmit)}>
             등록하기
           </button>
         </div>

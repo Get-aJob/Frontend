@@ -1,10 +1,24 @@
 import React, { useRef, useState } from 'react';
 import { Camera, X } from 'lucide-react';
+import { clsx } from 'clsx';
 
 interface LogoUploadProps {
   value: string | null;
   onChange: (value: string | null) => void;
 }
+
+const STYLES = {
+  container:
+    'w-[160px] h-[160px] border-[2px] border-solid rounded-[12px] flex flex-col items-center justify-center cursor-pointer transition-all duration-200 relative overflow-hidden group',
+  containerDragging: 'border-[#4f46e5] bg-[#f5f3ff]',
+  containerDefault: 'bg-[#f8f9fc] border-[#e8eaf0] hover:border-[#4f46e5] hover:bg-[#f5f3ff]',
+  iconWrapper: 'mb-[8px] transition-colors duration-200',
+  textWrapper: 'text-[11px] text-[#6b7280] text-center px-[10px] leading-[1.4]',
+  subText: 'text-[10px] transition-colors duration-200',
+  previewImg: 'absolute inset-0 w-full h-full object-contain bg-white block',
+  removeBtn:
+    'absolute top-[6px] right-[6px] w-[20px] h-[20px] bg-black/50 text-white rounded-full hidden items-center justify-center cursor-pointer z-10 group-hover:flex hover:bg-black/70',
+};
 
 const LogoUpload: React.FC<LogoUploadProps> = ({ value, onChange }) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -76,41 +90,36 @@ const LogoUpload: React.FC<LogoUploadProps> = ({ value, onChange }) => {
       role="button"
       tabIndex={0}
       title="회사 로고 업로드 (이미지 파일만 가능)"
-      className={`w-[160px] h-[160px] border-[2px] border-solid rounded-[12px] flex flex-col items-center justify-center cursor-pointer transition-all duration-200 relative overflow-hidden group
-        ${
-          isDragging
-            ? 'border-[#4f46e5] bg-[#f5f3ff]'
-            : 'bg-[#f8f9fc] border-[#e8eaf0] hover:border-[#4f46e5] hover:bg-[#f5f3ff]'
-        }`}
+      className={clsx(
+        STYLES.container,
+        isDragging ? STYLES.containerDragging : STYLES.containerDefault,
+      )}
     >
       <input type="file" ref={fileInputRef} onChange={handleFileChange} hidden accept="image/*" />
-      <div
-        className={`mb-[8px] transition-colors duration-200 ${isDragging ? 'text-[#4f46e5]' : 'text-[#9ca3af]'}`}
-      >
+      <div className={clsx(STYLES.iconWrapper, isDragging ? 'text-[#4f46e5]' : 'text-[#9ca3af]')}>
         <Camera size={24} />
       </div>
-      <div className="text-[11px] text-[#6b7280] text-center px-[10px] leading-[1.4]">
+      <div className={STYLES.textWrapper}>
         회사 로고 업로드
         <br />
         <span
-          className={`text-[10px] transition-colors duration-200 ${isDragging ? 'text-[#4f46e5] font-medium' : 'text-[#9ca3af]'}`}
+          className={clsx(
+            STYLES.subText,
+            isDragging ? 'text-[#4f46e5] font-medium' : 'text-[#9ca3af]',
+          )}
         >
           드래그 앤 드롭 또는 클릭
         </span>
       </div>
       {value && (
         <>
-          <img
-            src={value}
-            className="absolute inset-0 w-full h-full object-contain bg-white block"
-            alt="로고 미리보기"
-          />
+          <img src={value} className={STYLES.previewImg} alt="로고 미리보기" />
           <button
             type="button"
             aria-label="로고 삭제"
             onClick={handleRemove}
             title="삭제"
-            className="absolute top-[6px] right-[6px] w-[20px] h-[20px] bg-black/50 text-white rounded-full hidden items-center justify-center cursor-pointer z-10 group-hover:flex hover:bg-black/70"
+            className={STYLES.removeBtn}
           >
             <X size={12} />
           </button>
