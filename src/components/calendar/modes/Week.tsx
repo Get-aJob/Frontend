@@ -7,7 +7,13 @@ interface Props {
 }
 
 const Week = ({ currentDate, events, onEventClick }: Props) => {
-  const todayStr = new Date().toISOString().split('T')[0];
+  const toLocalDateStr = (d: Date) => {
+    const y = d.getFullYear();
+    const m = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    return `${y}-${m}-${day}`;
+  };
+  const todayStr = toLocalDateStr(new Date());
   const startOfWeek = new Date(currentDate);
   startOfWeek.setDate(currentDate.getDate() - currentDate.getDay());
 
@@ -16,7 +22,7 @@ const Week = ({ currentDate, events, onEventClick }: Props) => {
       {Array.from({ length: 7 }).map((_, i) => {
         const day = new Date(startOfWeek);
         day.setDate(startOfWeek.getDate() + i);
-        const dateStr = day.toISOString().split('T')[0];
+        const dateStr = toLocalDateStr(day);
         const isToday = dateStr === todayStr;
 
         return (
@@ -49,10 +55,11 @@ const Week = ({ currentDate, events, onEventClick }: Props) => {
                         : 'bg-rose-50 text-rose-700 border-rose-100';
 
                   return (
-                    <div
+                    <button
+                      type="button"
                       key={idx}
                       onClick={() => onEventClick(e)}
-                      className={`${colorClasses} p-4 rounded-2xl shadow-sm border cursor-pointer hover:scale-105 transition-all`}
+                      className={`${colorClasses} w-full text-left p-4 rounded-2xl shadow-sm border cursor-pointer hover:scale-105 transition-all`}
                     >
                       <p className="text-xs font-black truncate">
                         {isPastDeadline && <span className="mr-1">[종료]</span>}
@@ -63,7 +70,7 @@ const Week = ({ currentDate, events, onEventClick }: Props) => {
                       >
                         {e.title}
                       </p>
-                    </div>
+                    </button>
                   );
                 })}
             </div>

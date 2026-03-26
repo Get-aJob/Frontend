@@ -127,7 +127,10 @@ const CalendarDetailSlide = ({ isOpen, event, onClose }: Props) => {
           </div>
 
           <div className="p-6 mt-auto">
-            <button className="w-full bg-gray-900 text-white py-4 rounded-xl font-bold text-md hover:bg-indigo-600 transition-all shadow-lg active:scale-[0.97]">
+            <button
+              className="w-full bg-gray-900 text-white py-4 rounded-xl font-bold text-md hover:bg-indigo-600 transition-all shadow-lg active:scale-[0.97]"
+              onClick={() => {}}
+            >
               공고 보기
             </button>
           </div>

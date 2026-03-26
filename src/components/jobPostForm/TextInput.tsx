@@ -27,10 +27,16 @@ const TextInput = forwardRef<HTMLInputElement, TextInputProps>(
         <input
           id={inputId}
           ref={ref}
+          aria-invalid={Boolean(error)}
+          aria-describedby={error ? `${inputId}-error` : undefined}
           className={clsx(STYLES.input, error && 'border-red-500', className)}
           {...props}
         />
-        {error && <p className={STYLES.errorText}>{error}</p>}
+        {error && (
+          <p id={`${inputId}-error`} className={STYLES.errorText}>
+            {error}
+          </p>
+        )}
       </div>
     );
   },
