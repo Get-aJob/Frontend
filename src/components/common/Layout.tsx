@@ -2,13 +2,17 @@ import { Outlet, useLocation } from 'react-router-dom';
 import Sidebar from './Sidebar/Sidebar';
 import Topbar from './Topbar/Topbar';
 import { PATH } from '@/router/Path';
+import { useAuthStore } from '@/store/useAuthStore';
 
 const Layout = () => {
   const location = useLocation();
+
+  const isLoggedIn = useAuthStore((state) => state.isLoggedIn);
+
   const getTopbarConfig = () => {
     switch (location.pathname) {
-      case PATH.CALENDAR:
-        return { title: '캘린더', badge: 'CALENDAR', showSearch: false, showAddButton: true };
+      case PATH.ROOT:
+        return { title: '캘린더', badge: 'CALENDAR', showSearch: true, showAddButton: true };
       case PATH.STATUS:
         return { title: '지원 현황', badge: 'STATUS', showSearch: true, showAddButton: true };
       case PATH.POSTING:
@@ -30,9 +34,12 @@ const Layout = () => {
 
   const config = getTopbarConfig();
 
+  const publicPaths: string[] = [PATH.ROOT, PATH.POSTING];
+  const isPublicPath = publicPaths.includes(location.pathname);
+
   return (
     <div className="flex h-screen bg-[#f8f9fc] overflow-hidden">
-      <Sidebar isLoggedIn />
+      <Sidebar />
       <div className="flex flex-col flex-1 overflow-hidden">
         <Topbar
           title={config.title}
@@ -41,7 +48,13 @@ const Layout = () => {
           showAddButton={config.showAddButton}
         />
         <main className="flex-1 overflow-y-auto">
-          <Outlet />
+          {!isLoggedIn && !isPublicPath ? (
+            <div className="flex items-center justify-center h-full w-full">
+              <p className="text-[#6b7280] text-[16px] font-medium">로그인 후 이용가능합니다.</p>
+            </div>
+          ) : (
+            <Outlet />
+          )}
         </main>
       </div>
     </div>

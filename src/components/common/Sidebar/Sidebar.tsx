@@ -3,11 +3,7 @@ import SidebarNavItem from './SidebarNavItem';
 import SidebarAuth from './SidebarAuth';
 import { NAV_SECTIONS } from './constants';
 
-interface SidebarProps {
-  isLoggedIn: boolean;
-}
-
-const Sidebar = ({ isLoggedIn }: SidebarProps) => {
+const Sidebar = () => {
   return (
     <aside className="flex flex-col shrink-0 w-57.5 h-screen bg-white border-r border-[#e8eaf0] shadow-[2px_0_8px_rgba(0,0,0,0.03)] z-20">
       <SidebarLogo />
@@ -26,7 +22,7 @@ const Sidebar = ({ isLoggedIn }: SidebarProps) => {
         ))}
       </nav>
 
-      <SidebarAuth isLoggedIn={isLoggedIn} />
+      <SidebarAuth />
     </aside>
   );
 };

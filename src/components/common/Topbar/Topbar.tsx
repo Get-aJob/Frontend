@@ -1,5 +1,7 @@
-import { useState } from 'react';
-import AddJobModal from './AddJobModal';
+import { useState, useRef, useEffect } from 'react';
+import JobModal from '@/components/jobPostForm/JobModal';
+import { useAuthStore } from '@/store/useAuthStore';
+import LoginToast from './LoginToast'; // 💡 올바른 상대 경로로 수정됨
 
 export interface TopbarProps {
   title?: string;
@@ -15,6 +17,27 @@ const Topbar = ({
   showAddButton = false,
 }: TopbarProps) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [showLoginToast, setShowLoginToast] = useState(false);
+  const isLoggedIn = useAuthStore((state) => state.isLoggedIn);
+
+  const toastTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    return () => {
+      if (toastTimeoutRef.current) {
+        clearTimeout(toastTimeoutRef.current);
+      }
+    };
+  }, []);
+
+  const handleAddButtonClick = () => {
+    if (!isLoggedIn) {
+      setShowLoginToast(true);
+      toastTimeoutRef.current = setTimeout(() => setShowLoginToast(false), 3000);
+      return;
+    }
+    setIsModalOpen(true);
+  };
 
   return (
     <>
@@ -37,7 +60,7 @@ const Topbar = ({
               <input
                 id="topbar-search"
                 aria-label="공고 검색"
-                className="w-full bg-transparent border-none outline-none text-[13px] focus-visible:ring-2 focus-visible:ring-[`#4f46e5`] rounded-sm"
+                className="w-full bg-transparent border-none outline-none text-[13px] focus-visible:ring-2 focus-visible:ring-[#4f46e5] rounded-sm"
                 placeholder="검색어를 입력하세요..."
               />
             </div>
@@ -45,7 +68,7 @@ const Topbar = ({
 
           {showAddButton && (
             <button
-              onClick={() => setIsModalOpen(true)}
+              onClick={handleAddButtonClick}
               className="px-4 py-2 text-[13px] font-bold text-white bg-[#4f46e5] rounded-[10px] hover:bg-[#4338ca] transition-colors"
             >
               ＋ 공고 등록
@@ -54,7 +77,9 @@ const Topbar = ({
         </div>
       </header>
 
-      <AddJobModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} />
+      <LoginToast visible={showLoginToast} />
+
+      <JobModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} />
     </>
   );
 };
