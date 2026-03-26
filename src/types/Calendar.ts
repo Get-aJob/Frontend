@@ -6,6 +6,8 @@ export interface ScheduleEvent {
   eventType: 'deadline' | 'applied';
   title: string;
   companyName: string;
+  sourceType?: string;
+  companyLogo?: string;
   date: string;
   isApplied: boolean;
 }

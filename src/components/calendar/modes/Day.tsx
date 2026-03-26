@@ -34,10 +34,36 @@ const Day = ({ currentDate, events, onEventClick }: Props) => {
           >
             <div className="flex items-center gap-6">
               <div
-                className={`w-14 h-14 rounded-2xl flex items-center justify-center text-white text-xl font-black ${e.eventType === 'deadline' ? 'bg-rose-500' : 'bg-emerald-500'}`}
+                className={`w-14 h-14 rounded-2xl flex items-center justify-center text-white text-xl font-black shrink-0 overflow-hidden ${
+                  e.companyLogo
+                    ? 'bg-white border border-gray-100'
+                    : e.eventType === 'deadline'
+                      ? 'bg-rose-500'
+                      : 'bg-emerald-500'
+                }`}
               >
-                {e.companyName[0]}
+                {e.companyLogo ? (
+                  <img
+                    src={e.companyLogo}
+                    alt={`${e.companyName} 로고`}
+                    className="w-full h-full object-contain p-1"
+                    onError={(ev) => {
+                      ev.currentTarget.style.display = 'none';
+                      const parent = ev.currentTarget.parentElement;
+                      if (parent) {
+                        parent.classList.remove('bg-white', 'border', 'border-gray-100');
+                        parent.classList.add(
+                          e.eventType === 'deadline' ? 'bg-rose-500' : 'bg-emerald-500',
+                        );
+                        parent.innerText = e.companyName[0];
+                      }
+                    }}
+                  />
+                ) : (
+                  e.companyName[0]
+                )}
               </div>
+
               <div>
                 <h4 className="text-xl font-black text-gray-900">{e.companyName}</h4>
                 <p className="text-gray-400 font-bold">{e.title}</p>

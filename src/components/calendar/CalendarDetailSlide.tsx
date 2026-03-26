@@ -49,14 +49,39 @@ const CalendarDetailSlide = ({ isOpen, event, onClose }: Props) => {
           <div className="px-8 py-4 flex-1 overflow-y-auto">
             <div className="flex items-center gap-4 mb-8">
               <div
-                className={`w-16 h-16 rounded-2xl flex items-center justify-center text-white text-2xl font-black shadow-md ${
-                  event.eventType === 'deadline'
-                    ? 'bg-linear-to-br from-rose-500 to-rose-600'
-                    : 'bg-linear-to-br from-emerald-500 to-emerald-600'
+                className={`w-16 h-16 rounded-2xl flex items-center justify-center text-white text-2xl font-black shadow-md shrink-0 overflow-hidden ${
+                  event.companyLogo
+                    ? 'bg-white border border-gray-100'
+                    : event.eventType === 'deadline'
+                      ? 'bg-linear-to-br from-rose-500 to-rose-600'
+                      : 'bg-linear-to-br from-emerald-500 to-emerald-600'
                 }`}
               >
-                {event.companyName[0]}
+                {event.companyLogo ? (
+                  <img
+                    src={event.companyLogo}
+                    alt={`${event.companyName} 로고`}
+                    className="w-full h-full object-contain p-1.5"
+                    onError={(ev) => {
+                      ev.currentTarget.style.display = 'none';
+                      const parent = ev.currentTarget.parentElement;
+                      if (parent) {
+                        parent.classList.remove('bg-white', 'border', 'border-gray-100');
+                        parent.classList.add(
+                          'bg-linear-to-br',
+                          event.eventType === 'deadline' ? 'from-rose-500' : 'from-emerald-500',
+                          event.eventType === 'deadline' ? 'to-rose-600' : 'to-emerald-600',
+                        );
+                        parent.innerText = event.companyName[0];
+                      }
+                    }}
+                  />
+                ) : (
+                  event.companyName[0]
+                )}
               </div>
+              {/* 💡 여기까지 */}
+
               <div>
                 <h2 className="text-2xl font-extrabold text-gray-900 leading-tight">
                   {event.companyName}
