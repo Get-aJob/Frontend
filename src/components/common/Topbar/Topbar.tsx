@@ -1,5 +1,7 @@
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import JobModal from '@/components/jobPostForm/JobModal';
+import { useAuthStore } from '@/store/useAuthStore';
+import LoginToast from './LoginToast'; // 💡 올바른 상대 경로로 수정됨
 
 export interface TopbarProps {
   title?: string;
@@ -15,8 +17,25 @@ const Topbar = ({
   showAddButton = false,
 }: TopbarProps) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [showLoginToast, setShowLoginToast] = useState(false);
+  const isLoggedIn = useAuthStore((state) => state.isLoggedIn);
+
+  const toastTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    return () => {
+      if (toastTimeoutRef.current) {
+        clearTimeout(toastTimeoutRef.current);
+      }
+    };
+  }, []);
 
   const handleAddButtonClick = () => {
+    if (!isLoggedIn) {
+      setShowLoginToast(true);
+      toastTimeoutRef.current = setTimeout(() => setShowLoginToast(false), 3000);
+      return;
+    }
     setIsModalOpen(true);
   };
 
@@ -57,6 +76,8 @@ const Topbar = ({
           )}
         </div>
       </header>
+
+      <LoginToast visible={showLoginToast} />
 
       <JobModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} />
     </>

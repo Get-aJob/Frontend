@@ -25,7 +25,7 @@ const Login: React.FC<LoginProps> = ({ onSwitchRegister }) => {
           email: response.user.email,
         });
         alert('로그인 성공!');
-        navigate(PATH.CALENDAR);
+        navigate(PATH.ROOT);
       }
     } catch (error: unknown) {
       let errorMessage = '로그인 중 오류가 발생했습니다.';

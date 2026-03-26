@@ -28,10 +28,16 @@ const TextareaInput = forwardRef<HTMLTextAreaElement, TextareaInputProps>(
         <TextareaAutosize
           id={textareaId}
           ref={ref}
+          aria-invalid={Boolean(error)}
+          aria-describedby={error ? `${textareaId}-error` : undefined}
           className={clsx(STYLES.textarea, error && 'border-red-500', className)}
           {...props}
         />
-        {error && <p className={STYLES.errorText}>{error}</p>}
+        {error && (
+          <p id={`${textareaId}-error`} className={STYLES.errorText}>
+            {error}
+          </p>
+        )}
       </div>
     );
   },

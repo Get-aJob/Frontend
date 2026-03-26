@@ -54,6 +54,7 @@ const SidebarAuth = () => {
             </button>
             <button
               onClick={() => navigate(PATH.SETTINGS)}
+              aria-label="설정 페이지로 이동"
               className="p-1 text-[16px] text-[#9ca3af] hover:text-[#6b7280] transition-colors cursor-pointer"
               title="설정"
             >
