@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useForm, Controller } from 'react-hook-form';
+import { useForm, Controller, useWatch } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Plus } from 'lucide-react';
@@ -29,7 +29,6 @@ const STYLES = {
     'px-[13px] py-[6px] text-[12px] bg-[#4f46e5] text-white rounded hover:bg-[#4338ca] transition-colors',
 };
 
-// Zod Schema 정의
 const jobPostSchema = z.object({
   title: z.string().min(1, '공고 제목을 입력해 주세요.'),
   company_name: z.string().min(1, '회사명을 입력해 주세요.'),
@@ -43,7 +42,7 @@ const jobPostSchema = z.object({
   source_site_name: z.string().nullable(),
 });
 
-type JobPostFields = z.infer<typeof jobPostSchema>;
+export type JobPostFields = z.infer<typeof jobPostSchema>;
 
 interface JobModalProps {
   isOpen: boolean;
@@ -75,6 +74,22 @@ const JobModal = ({ isOpen, onClose }: JobModalProps) => {
       source_site_name: null,
     },
   });
+
+  const sourceUrl = useWatch({
+    control,
+    name: 'source_url',
+  });
+  const handleUrlChange = (newUrl: string) => {
+    setValue('source_url', newUrl, { shouldValidate: true });
+  };
+
+  const handleParse = (parsedData: Partial<JobPostFields>) => {
+    Object.entries(parsedData).forEach(([key, value]) => {
+      if (value) {
+        setValue(key as keyof JobPostFields, value, { shouldValidate: true });
+      }
+    });
+  };
 
   const handleReset = () => {
     reset({
@@ -132,7 +147,7 @@ const JobModal = ({ isOpen, onClose }: JobModalProps) => {
           </button>
         </div>
 
-        <CrawlBar />
+        <CrawlBar url={sourceUrl} onUrlChange={handleUrlChange} onParse={handleParse} />
 
         <div className={STYLES.topSection}>
           <Controller
