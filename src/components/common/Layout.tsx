@@ -11,8 +11,8 @@ const Layout = () => {
 
   const getTopbarConfig = () => {
     switch (location.pathname) {
-      case PATH.CALENDAR:
-        return { title: '캘린더', badge: 'CALENDAR', showSearch: false, showAddButton: true };
+      case PATH.ROOT:
+        return { title: '캘린더', badge: 'CALENDAR', showSearch: true, showAddButton: true };
       case PATH.STATUS:
         return { title: '지원 현황', badge: 'STATUS', showSearch: true, showAddButton: true };
       case PATH.POSTING:
@@ -34,7 +34,7 @@ const Layout = () => {
 
   const config = getTopbarConfig();
 
-  const publicPaths: string[] = [PATH.CALENDAR, PATH.POSTING];
+  const publicPaths: string[] = [PATH.ROOT, PATH.POSTING];
   const isPublicPath = publicPaths.includes(location.pathname);
   return (
     <div className="flex h-screen bg-[#f8f9fc] overflow-hidden">

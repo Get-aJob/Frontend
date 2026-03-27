@@ -1,4 +1,4 @@
-import { createBrowserRouter, Navigate } from 'react-router-dom';
+import { createBrowserRouter } from 'react-router-dom';
 import { PATH } from './Path';
 
 import Layout from '@/components/common/Layout';
@@ -22,10 +22,6 @@ const router = createBrowserRouter([
     children: [
       {
         index: true,
-        element: <Navigate to={PATH.CALENDAR} replace />,
-      },
-      {
-        path: PATH.CALENDAR,
         element: <Calendar />,
       },
       {

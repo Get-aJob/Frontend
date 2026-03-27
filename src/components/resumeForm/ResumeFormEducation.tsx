@@ -48,6 +48,7 @@ const ResumeFormEducation = () => {
                   </span>
                   <input
                     type="checkbox"
+                    {...register(`education.${index}.isCurrent`)}
                     onChange={(e) => {
                       e.stopPropagation();
                       const checked = e.target.checked;

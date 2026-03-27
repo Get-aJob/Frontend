@@ -1,6 +1,6 @@
 export const PATH = {
   ROOT: '/',
-  CALENDAR: '/calendar', // 일정 확인
+  // CALENDAR: '/calendar', // 일정 확인
   STATUS: '/status', // 지원 현황
   POSTING: '/posting', // 전체 공고
   DASHBOARD: '/dashboard', // 통계 분석

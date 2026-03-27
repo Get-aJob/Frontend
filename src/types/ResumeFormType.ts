@@ -1,5 +1,6 @@
 export type AdditionalInfoType = '수상' | '자격증' | '활동' | undefined;
 export type uploadType = 'file' | 'url';
+
 export type LanguageLevelType =
   | '유창함'
   | '고급 비즈니스 레벨'
