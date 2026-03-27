@@ -1,36 +1,65 @@
 import { PATH } from '@/router/Path';
-import type { ResumeFormInputs } from '@/types/ResumeFormType';
+import type { ResumeFormData, ResumeFormInputs, ResumeInfo } from '@/types/ResumeFormType';
 import { useFormContext, type SubmitHandler } from 'react-hook-form';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { ChevronLeft, LoaderCircle } from 'lucide-react';
 import ResumeDownloadButton from './ResumeDownloadButton';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { submitApi } from '@/api/ResumeForm';
+import { useGetResume, useSaveResume } from '@/hooks/resume';
+import { useEffect, useState } from 'react';
 
 const ResumeFormTopbar = () => {
-  const { register, handleSubmit, watch } = useFormContext<ResumeFormInputs>();
+  const { resumeId } = useParams<{ resumeId: string }>();
+  const { register, handleSubmit, watch, reset } = useFormContext<ResumeFormInputs>();
   const navigate = useNavigate();
   const formData = watch();
+  const [formId, setFormId] = useState(() => resumeId);
 
-  const queryClient = useQueryClient();
-  const { mutate, isPending } = useMutation({
-    mutationFn: async (formData: ResumeFormInputs) => {
-      const response = submitApi(formData);
-      return response;
-    },
-    onSuccess: (data) => {
-      alert(JSON.stringify(data));
-      queryClient.invalidateQueries({ queryKey: ['resumes'] });
-    },
-    onError: (error) => {
-      console.error('저장 실패:', error);
-      alert('저장 중 오류가 발생했습니다.');
-    },
-  });
+  const saveResume = useSaveResume(formId);
+  const { data } = useGetResume(resumeId);
 
-  const onSubmit: SubmitHandler<ResumeFormInputs> = (data) => {
-    //alert(JSON.stringify(data, null, 2));
-    mutate(data);
+  useEffect(() => {
+    if (formId && data) {
+      const resume: ResumeFormInputs = {
+        title: data.title,
+        profile: data.content.profile,
+        experience: data.content.experience.map((e) => ({ ...e, isCurrent: !e.period.endDate })),
+        education: data.content.education.map((e) => ({ ...e, isCurrent: !e.period.endDate })),
+        skill: data.content.skill,
+        additionalInfo: data.content.additionalInfo,
+        language: data.content.language,
+        portfolio: data.content.portfolio.map((p) => ({ ...p, type: 'url' })),
+      };
+      reset(resume);
+    }
+  }, [data, formId, reset]);
+
+  const onSubmit: SubmitHandler<ResumeFormInputs> = async (data) => {
+    const submitData: ResumeFormData = {
+      title: data.title,
+      resume: {
+        profile: data.profile,
+        experience: data.experience.map((e) => ({
+          name: e.name,
+          position: e.position,
+          period: e.period,
+          description: e.description,
+        })),
+        education: data.education.map((e) => ({
+          name: e.name,
+          description: e.description,
+          period: e.period,
+        })),
+        skill: data.skill,
+        additionalInfo: data.additionalInfo,
+        language: data.language,
+        portfolio: data.portfolio.map((p) => ({ name: p.name, url: p.url, file: p.file })),
+      },
+    };
+    const response: ResumeInfo = await saveResume.mutateAsync(submitData);
+
+    if (response.id) {
+      setFormId(response.id);
+    }
   };
   return (
     <aside className="bg-white">
@@ -61,7 +90,7 @@ const ResumeFormTopbar = () => {
             onClick={handleSubmit(onSubmit)}
             className="py-2 px-3 border mx-5 rounded-xl text-white bg-blue-400 hover:bg-blue-600"
           >
-            {isPending ? <LoaderCircle className="animate-spin" /> : '작성 완료'}
+            {saveResume.isPending ? <LoaderCircle className="animate-spin" /> : '작성 완료'}
           </button>
         </div>
       </div>

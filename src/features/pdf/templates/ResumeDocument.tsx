@@ -58,7 +58,14 @@ const ResumeDocument = ({ data }: { data: ResumeFormInputs }) => (
         }}
       >
         <View style={styles.sectionItem}>
-          <Text style={{ ...styles.sectionTitle, borderBottomWidth: 1, borderBottomColor: '#000' }}>
+          <Text
+            style={{
+              ...styles.sectionTitle,
+              borderBottomWidth: 1,
+              borderBottomColor: '#000',
+              width: '100%',
+            }}
+          >
             수상/자격증/기타
           </Text>
           {data.additionalInfo
@@ -66,7 +73,7 @@ const ResumeDocument = ({ data }: { data: ResumeFormInputs }) => (
             .map((a) => (
               <View key={a.name} style={{ marginBottom: '2px' }}>
                 <Text>{a.name}</Text>
-                <View>
+                <View style={styles.dateRange}>
                   <Text>{String(a.date)}</Text>
                   <Text>{a.type}</Text>
                 </View>
@@ -86,15 +93,17 @@ const ResumeDocument = ({ data }: { data: ResumeFormInputs }) => (
                   <Text>{l.name}</Text>
                   <Text>{l.level}</Text>
                 </View>
-                {l.test.map((t) => (
-                  <View key={t.testName} style={{ marginBottom: '2px' }}>
-                    <View>
-                      <Text>{t.testName}</Text>
-                      <Text>{t.score}</Text>
+                {l.test
+                  .filter((t) => t.testName)
+                  .map((t) => (
+                    <View key={t.testName} style={{ marginBottom: '2px' }}>
+                      <View style={styles.dateRange}>
+                        <Text>{t.testName}</Text>
+                        <Text>{t.score}</Text>
+                      </View>
+                      <Text>{String(t.date)}</Text>
                     </View>
-                    <Text>{String(t.date)}</Text>
-                  </View>
-                ))}
+                  ))}
               </View>
             ))}
         </View>

@@ -63,3 +63,31 @@ export interface ResumeFormInputs {
   language: Language[];
   portfolio: Portfolio[];
 }
+
+interface ResumeFormPayload {
+  profile: string;
+  experience: Omit<Experience, 'isCurrent'>[];
+  education: Omit<Education, 'isCurrent'>[];
+  skill: string;
+  additionalInfo: AdditionalInfo[];
+  language: Language[];
+  portfolio: Omit<Portfolio, 'type'>[];
+}
+
+export interface ResumeFormData {
+  title: string;
+  resume: ResumeFormPayload;
+}
+
+export interface ResumeInfo {
+  id: string;
+  title: string;
+  createdAt: string;
+}
+
+export interface GetResumeById {
+  id: string;
+  title: string;
+  content: ResumeFormPayload;
+  createdAt: string;
+}
