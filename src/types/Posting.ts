@@ -11,6 +11,8 @@ export interface BackendJob {
   deadline_text?: string;
   external_id?: string;
   content?: string;
+  source_site_name?: string;
+  created_at?: string;
 }
 
 export interface JobPosting {
@@ -27,4 +29,5 @@ export interface JobPosting {
 
 export interface PostingResponse {
   jobs: BackendJob[];
+  totalCount: number;
 }

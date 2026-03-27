@@ -35,7 +35,7 @@ const styles = {
 const PostingList: React.FC = () => {
   const [postings, setPostings] = useState<JobPosting[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
-  const [totalPages] = useState(10); // 백엔드 API에서 전체 개수를 제공하지 않아 임시 표기용으로 10페이지 설정
+  const [totalPages, setTotalPages] = useState(1);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -50,7 +50,13 @@ const PostingList: React.FC = () => {
         if (isMounted) {
           const rawJobs = data.jobs || (Array.isArray(data) ? data : []);
 
-          const mappedJobs: JobPosting[] = rawJobs.map((j: BackendJob) => {
+          const sortedJobs = [...rawJobs].sort((a, b) => {
+            const dateA = a.created_at ? new Date(a.created_at).getTime() : 0;
+            const dateB = b.created_at ? new Date(b.created_at).getTime() : 0;
+            return dateB - dateA;
+          });
+
+          const mappedJobs: JobPosting[] = sortedJobs.map((j: BackendJob) => {
             let finalDeadline = '상시모집';
 
             if (j.deadline) {
@@ -76,7 +82,7 @@ const PostingList: React.FC = () => {
               companyLogo: j.company_logo,
               title: j.title || 'Untitled',
               url: j.source_url,
-              site: j.source_type === 'auto' ? '자동크롤링' : '수동등록',
+              site: j.source_type === 'auto' ? j.source_site_name || '자동크롤링' : '수동등록',
               location: j.location || '전국',
               experienceLevel: j.experience || '경력무관',
               deadline: finalDeadline,
@@ -84,6 +90,7 @@ const PostingList: React.FC = () => {
           });
 
           setPostings(mappedJobs);
+          setTotalPages(Math.ceil((data.totalCount || 0) / 30));
         }
       } catch (err: unknown) {
         if (isMounted) {
