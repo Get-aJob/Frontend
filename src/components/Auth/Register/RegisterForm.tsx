@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import type { JoinField } from '@/types/Auth';
 
@@ -28,6 +28,9 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ onSwitchLogin, onSubmit }) 
     const file = e.target.files?.[0];
     if (file) {
       setValue('profileImage', file);
+      if (previewImage) {
+        URL.revokeObjectURL(previewImage);
+      }
       setPreviewImage(URL.createObjectURL(file));
     }
   };
@@ -35,6 +38,14 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ onSwitchLogin, onSubmit }) 
   const handleFormSubmit = ({ name, email, password, profileImage }: RegisterFormData) => {
     onSubmit({ name, email, password, profileImage });
   };
+
+  useEffect(() => {
+    return () => {
+      if (previewImage) {
+        URL.revokeObjectURL(previewImage);
+      }
+    };
+  }, [previewImage]);
 
   return (
     <form onSubmit={handleSubmit(handleFormSubmit)} className="flex flex-col gap-4">

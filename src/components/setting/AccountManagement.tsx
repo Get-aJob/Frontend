@@ -67,9 +67,14 @@ const AccountManagement = () => {
       });
 
       alert('비밀번호가 성공적으로 변경되었습니다. 다시 로그인해주세요.');
-      await logoutApi();
-      logout();
-      navigate(PATH.AUTH);
+      try {
+        await logoutApi();
+      } catch (logoutError) {
+        console.warn('서버 로그아웃 실패:', logoutError);
+      } finally {
+        logout();
+        navigate(PATH.AUTH);
+      }
     } catch (error) {
       console.error('비밀번호 재설정 실패:', error);
       alert('비밀번호 재설정 중 오류가 발생했습니다. 현재 비밀번호 등을 다시 확인해주세요.');
