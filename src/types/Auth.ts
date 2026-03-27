@@ -4,4 +4,5 @@ export interface LoginField {
 }
 export interface JoinField extends LoginField {
   name: string;
+  profileImage?: File | null;
 }

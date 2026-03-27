@@ -12,11 +12,8 @@ const SidebarAuth = () => {
 
     try {
       await logoutApi();
-
       logout();
-
       alert('로그아웃 되었습니다.');
-
       navigate(PATH.POSTING);
     } catch (error) {
       console.error('로그아웃 실패:', error);
@@ -35,8 +32,18 @@ const SidebarAuth = () => {
         </Link>
       ) : (
         <div className="flex items-center gap-2.5">
-          <div className="flex items-center justify-center w-8.5 h-8.5 rounded-full bg-[#6366f1] text-[13px] font-extrabold text-white shrink-0">
-            {userInfo?.name ? userInfo.name.charAt(0) : '유'}
+          <div className="flex items-center justify-center w-8.5 h-8.5 rounded-full bg-[#6366f1] text-[13px] font-extrabold text-white shrink-0 overflow-hidden">
+            {userInfo?.profile_image_url ? (
+              <img
+                src={userInfo.profile_image_url}
+                alt="Profile"
+                className="w-full h-full object-cover"
+              />
+            ) : userInfo?.name ? (
+              userInfo.name.charAt(0)
+            ) : (
+              '유'
+            )}
           </div>
 
           <div className="flex-1 min-w-0">
