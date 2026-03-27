@@ -124,17 +124,16 @@ const styles = {
 
 const PostingCard: React.FC<PostingCardProps> = ({ job }) => {
   const getDdayColor = (dday: string) => {
-    if (
-      dday.includes('마감') ||
-      dday.includes('D-1') ||
-      dday.includes('D-2') ||
-      dday.includes('D-3') ||
-      dday.includes('D-Day')
-    )
-      return '#f43f5e'; // 로즈 (위험)
-    if (dday.includes('D-') && parseInt(dday.split('-')[1].replace(/[^0-9]/g, '')) <= 7)
-      return '#f59e0b'; // 앰버 (주의)
-    return '#10b981'; // 에메랄드 (안전)
+    if (dday === 'D-Day' || dday.includes('마감')) return '#f43f5e'; // 긴급 또는 마감된 공고
+
+    const match = dday.match(/^D-(\d+)$/);
+    if (match) {
+      const days = parseInt(match[1], 10);
+      if (days <= 3) return '#f43f5e'; // 1-3일: 빨간색
+      if (days <= 7) return '#f59e0b'; // 4-7일: 주황색
+      return '#10b981'; // 7일 초과: 초록색
+    }
+    return '#6b7280'; // 기본 회색
   };
 
   const handleClick = () => {
@@ -143,8 +142,21 @@ const PostingCard: React.FC<PostingCardProps> = ({ job }) => {
     }
   };
 
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      if (e.key === ' ') e.preventDefault();
+      handleClick();
+    }
+  };
+
   return (
-    <div style={styles.card} onClick={handleClick}>
+    <div
+      style={styles.card}
+      onClick={handleClick}
+      onKeyDown={handleKeyDown}
+      role="button"
+      tabIndex={0}
+    >
       <div style={styles.topSection}>
         {/* 맨 왼쪽: company_logo */}
         {job.companyLogo ? (
@@ -183,7 +195,7 @@ const PostingCard: React.FC<PostingCardProps> = ({ job }) => {
       </div>
 
       <div style={styles.bottomSection}>
-        {/* 왼쪽 하단: experience, location, source_type */}
+        {/* 왼쪽 하단: 경력, 위치, 출처 서비스 */}
         <div style={styles.tagsLeft}>
           <div style={styles.tagRow}>
             {job.experienceLevel && <span style={styles.expTag}>{job.experienceLevel}</span>}

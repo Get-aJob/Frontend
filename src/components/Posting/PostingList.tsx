@@ -41,17 +41,19 @@ const PostingList: React.FC = () => {
   const { postings, currentPage, totalPages, isLoading, error, fetchPostings } = usePostingStore();
 
   useEffect(() => {
+    // 스토어의 현재 상태를 기준으로 초기 로드
     fetchPostings(currentPage);
-  }, [currentPage, fetchPostings]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [fetchPostings]); // 마운트 시 또는 fetchPostings가 변경될 때만 실행 (페이지 변경은 handlePageChange가 처리)
 
   const handlePageChange = (page: number) => {
-    const mainElement = document.querySelector('main');
-    if (mainElement) {
-      mainElement.scrollTo({
-        top: 0,
-        behavior: 'auto',
-      });
-    }
+    if (page === currentPage) return;
+
+    window.scrollTo({
+      top: 0,
+      behavior: 'auto',
+    });
+
     fetchPostings(page);
   };
 

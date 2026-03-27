@@ -14,14 +14,18 @@ interface PostingState {
 export const usePostingStore = create<PostingState>((set) => ({
   postings: [],
   currentPage: 1,
-  totalPages: 10,
+  totalPages: 1,
   isLoading: false,
   error: null,
+
   fetchPostings: async (page: number) => {
     set({ isLoading: true, error: null });
     try {
-      const data = await getPostings(page, 30, 'auto');
+      const PAGE_SIZE = 30;
+      const data = await getPostings(page, PAGE_SIZE, 'auto');
+
       const rawJobs = data.jobs || (Array.isArray(data) ? data : []);
+      const totalCount = data.totalCount || rawJobs.length;
 
       const sortedJobs = [...rawJobs].sort((a, b) => {
         const dateA = a.created_at ? new Date(a.created_at).getTime() : 0;
@@ -30,7 +34,7 @@ export const usePostingStore = create<PostingState>((set) => ({
       });
 
       const mappedJobs: JobPosting[] = sortedJobs.map((j: BackendJob) => {
-        let finalDeadline = '상시모집';
+        let finalDeadline = '상시채용';
 
         if (j.deadline) {
           const today = new Date();
@@ -45,7 +49,7 @@ export const usePostingStore = create<PostingState>((set) => ({
           else if (diffDays > 0) finalDeadline = `D-${diffDays}`;
           else finalDeadline = `마감 (D+${Math.abs(diffDays)})`;
         } else if (j.deadline_text) {
-          if (j.deadline_text.includes('상시')) finalDeadline = '상시모집';
+          if (j.deadline_text.includes('상시')) finalDeadline = '상시채용';
           else finalDeadline = j.deadline_text;
         }
 
@@ -65,12 +69,15 @@ export const usePostingStore = create<PostingState>((set) => ({
       set({
         postings: mappedJobs,
         currentPage: page,
-        totalPages: Math.ceil((data.totalCount || 0) / 30),
+        totalPages: Math.ceil(totalCount / PAGE_SIZE),
         isLoading: false,
       });
     } catch (error: unknown) {
       const err = error as Error;
-      set({ isLoading: false, error: err.message || '공고 데이터를 불러오는데 실패했습니다' });
+      set({
+        isLoading: false,
+        error: err.message || '공고 데이터를 불러오는데 실패했습니다',
+      });
     }
   },
 }));

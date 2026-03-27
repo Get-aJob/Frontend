@@ -9,7 +9,7 @@ const styles = {
     flexDirection: 'column' as const,
     flex: 1,
     background: '#f4f5f8',
-    minHeight: '100vh',
+    minHeight: '100%',
   },
   apiBar: {
     background: 'linear-gradient(135deg, #eef2ff, #f5f3ff)',

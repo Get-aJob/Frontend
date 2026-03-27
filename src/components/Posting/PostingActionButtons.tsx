@@ -40,15 +40,30 @@ const PostingActionButtons: React.FC<PostingActionButtonsProps> = ({ url }) => {
 
   const handleApplyClick = (e: React.MouseEvent) => {
     e.stopPropagation();
-    if (url) window.open(url, '_blank', 'noopener,noreferrer');
+    if (!url) {
+      alert('이동할 수 있는 지원 공고 주소가 없습니다.');
+      return;
+    }
+    window.open(url, '_blank', 'noopener,noreferrer');
   };
+
+  const applyBtnStyle = url
+    ? { ...styles.btn, ...styles.applyBtn }
+    : {
+        ...styles.btn,
+        ...styles.applyBtn,
+        background: '#e5e7eb',
+        borderColor: '#d1d5db',
+        color: '#9ca3af',
+        cursor: 'not-allowed',
+      };
 
   return (
     <div style={styles.buttonGroup}>
       <button style={{ ...styles.btn, ...styles.scrapBtn }} onClick={handleScrapClick}>
         ★ 스크랩
       </button>
-      <button style={{ ...styles.btn, ...styles.applyBtn }} onClick={handleApplyClick}>
+      <button style={applyBtnStyle} onClick={handleApplyClick}>
         지원하기
       </button>
     </div>
