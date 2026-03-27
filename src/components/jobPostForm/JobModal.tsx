@@ -53,6 +53,9 @@ interface JobModalProps {
 const JobModal = ({ isOpen, onClose }: JobModalProps) => {
   const [isAlwaysRecruit, setIsAlwaysRecruit] = useState(false);
 
+  const [crawlUrl, setCrawlUrl] = useState('');
+  const [isParsing, setIsParsing] = useState(false);
+
   const {
     register,
     handleSubmit,
@@ -90,6 +93,7 @@ const JobModal = ({ isOpen, onClose }: JobModalProps) => {
       source_site_name: null,
     });
     setIsAlwaysRecruit(false);
+    setCrawlUrl('');
   };
 
   const handleAlwaysRecruitChange = (checked: boolean) => {
@@ -102,6 +106,19 @@ const JobModal = ({ isOpen, onClose }: JobModalProps) => {
   const handleClose = () => {
     onClose();
     handleReset();
+  };
+
+  const handleParse = () => {
+    if (!crawlUrl.trim()) return;
+    setIsParsing(true);
+    // 파싱 기능 api 연동 전
+    setTimeout(() => {
+      setIsParsing(false);
+      alert(
+        'URL 파싱 기능은 아직 준비 중입니다. 입력하신 URL을 공고 URL 필드에 자동으로 채워드렸습니다.',
+      );
+      setValue('source_url', crawlUrl);
+    }, 1000);
   };
 
   const onSubmit = (data: JobPostFields) => {
@@ -132,7 +149,12 @@ const JobModal = ({ isOpen, onClose }: JobModalProps) => {
           </button>
         </div>
 
-        <CrawlBar />
+        <CrawlBar
+          url={crawlUrl}
+          onUrlChange={setCrawlUrl}
+          onParse={handleParse}
+          isParsing={isParsing}
+        />
 
         <div className={STYLES.topSection}>
           <Controller

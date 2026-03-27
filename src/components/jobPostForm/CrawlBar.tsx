@@ -16,7 +16,12 @@ const STYLES = {
     'px-[13px] py-[6px] text-[12px] bg-[#4f46e5] text-white rounded-[6px] border border-transparent font-medium cursor-pointer hover:bg-[#4338ca] transition-colors',
 };
 
-const CrawlBar = ({ url, onUrlChange, onParse, isParsing = false }: CrawlBarProps) => {
+const CrawlBar = ({
+  url = '',
+  onUrlChange = () => {},
+  onParse = () => {},
+  isParsing = false,
+}: CrawlBarProps) => {
   return (
     <div className={STYLES.container}>
       <span className={STYLES.iconWrapper}>
