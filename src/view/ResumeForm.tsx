@@ -2,24 +2,25 @@ import { useForm, FormProvider } from 'react-hook-form';
 import ResumeFormTopbar from '@/components/resumeForm/ResumeFormTopbar';
 import type { ResumeFormInputs } from '@/types/ResumeFormType';
 import ResumeFormProfile from '@/components/resumeForm/ResumeFormProfile';
-import ResumeFormWorkHistory from '@/components/resumeForm/ResumeFormWorkHistory';
 import ResumeFormEducation from '@/components/resumeForm/ResumeFormEducation';
 import ResumeFormAdditionalInfo from '@/components/resumeForm/ResumeFormAdditionalInfo';
 import ResumeFormSkill from '@/components/resumeForm/ResumeFormSkill';
 import ResumeFormLanguage from '@/components/resumeForm/ResumeFormLanguage';
 import ResumeFormWorkPortfolio from '@/components/resumeForm/ResumeFormPortfolio';
+import ResumeFormExperience from '@/components/resumeForm/ResumeFormExperience';
 
 const ResumeForm = () => {
   const resume = useForm<ResumeFormInputs>({
     defaultValues: {
       title: '',
       profile: '',
-      workHistory: [
+      experience: [
         {
-          companyName: '',
+          name: '',
           position: '',
           period: { startDate: null, endDate: null },
           description: '',
+          isCurrent: false,
         },
       ],
       education: [
@@ -27,6 +28,7 @@ const ResumeForm = () => {
           name: '',
           period: { startDate: null, endDate: null },
           description: '',
+          isCurrent: false,
         },
       ],
       additionalInfo: [
@@ -50,7 +52,7 @@ const ResumeForm = () => {
           ],
         },
       ],
-      portfolio: [{ name: '', url: '' }],
+      portfolio: [{ name: '', url: '', file: null, type: 'file' }],
     },
   });
   return (
@@ -60,7 +62,7 @@ const ResumeForm = () => {
         <div className="w-full h-full bg-black/5 overflow-y-scroll">
           <form className="mx-50 mt-15 mb-45 p-15 bg-white">
             <ResumeFormProfile />
-            <ResumeFormWorkHistory />
+            <ResumeFormExperience />
             <ResumeFormSkill />
             <ResumeFormEducation />
             <div className="flex gap-6">
