@@ -30,6 +30,12 @@ const styles = {
     gridColumn: '1 / -1',
     padding: '40px',
   },
+  animations: `
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+  `,
 };
 
 const PostingList: React.FC = () => {
@@ -113,8 +119,15 @@ const PostingList: React.FC = () => {
   }, [currentPage]);
 
   const handlePageChange = (page: number) => {
+    // 브라우저 내장 scrollTo API를 이용하여 상단으로 이동
+    const mainElement = document.querySelector('main');
+    if (mainElement) {
+      mainElement.scrollTo({
+        top: 0,
+        behavior: 'auto',
+      });
+    }
     setCurrentPage(page);
-    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   if (error) {
@@ -123,7 +136,13 @@ const PostingList: React.FC = () => {
 
   return (
     <>
-      <div style={styles.grid}>
+      <style>{styles.animations}</style>
+      <div
+        style={{
+          ...styles.grid,
+          animation: !isLoading ? 'fadeIn 0.4s ease-out' : 'none',
+        }}
+      >
         {isLoading ? (
           <div style={styles.loadingContainer}>공고를 불러오는 중입니다...</div>
         ) : postings?.length > 0 ? (

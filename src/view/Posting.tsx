@@ -8,7 +8,6 @@ const styles = {
     display: 'flex',
     flexDirection: 'column' as const,
     flex: 1,
-    overflowY: 'auto' as const,
     background: '#f4f5f8',
     minHeight: '100vh',
   },
