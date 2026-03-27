@@ -63,6 +63,10 @@ const router = createBrowserRouter([
     element: <ResumeForm />,
   },
   {
+    path: PATH.RESUME_VIEW,
+    element: <ResumeForm />,
+  },
+  {
     path: '*',
     element: <div>404 Not Found - 존재하지 않는 페이지입니다.</div>,
   },

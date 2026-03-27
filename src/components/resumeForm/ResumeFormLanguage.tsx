@@ -37,7 +37,7 @@ const ResumeFormLanguage = () => {
               <select
                 {...register(`language.${index}.level`)}
                 defaultValue=""
-                className="py-2 px-1 rounded-md bg-white hover:bg-black/10 appearance-none [text-align-last:center]"
+                className="py-2 px-1 rounded-md bg-white hover:bg-black/10 appearance-none focus:outline-none [text-align-last:center]"
               >
                 <option value="" disabled hidden>
                   수준
