@@ -7,7 +7,20 @@ export const loginApi = async (data: LoginField) => {
 };
 
 export const joinApi = async (data: JoinField) => {
-  const response = await api.post('/auth/join', data);
+  const formData = new FormData();
+  formData.append('email', data.email);
+  formData.append('password', data.password);
+  formData.append('name', data.name);
+
+  if (data.profileImage) {
+    formData.append('file', data.profileImage);
+  }
+
+  const response = await api.post('/auth/join', formData, {
+    headers: {
+      'Content-Type': 'multipart/form-data',
+    },
+  });
   return response.data;
 };
 
@@ -18,5 +31,28 @@ export const logoutApi = async () => {
 
 export const deleteAccountApi = async () => {
   const response = await api.delete('/users/me');
+  return response.data;
+};
+
+export const uploadProfileImageApi = async (file: File) => {
+  const formData = new FormData();
+  formData.append('file', file);
+
+  const response = await api.post('/auth/join', formData);
+  return response.data;
+};
+
+export const deleteProfileImageApi = async () => {
+  const response = await api.delete('/users/me/image');
+  return response.data;
+};
+
+export const requestPasswordResetApi = async (data: { email: string; name: string }) => {
+  const response = await api.post('/auth/password/reset', data);
+  return response.data;
+};
+
+export const confirmPasswordResetApi = async (data: { reset_token: string; password: string }) => {
+  const response = await api.put('/auth/password/reset', data);
   return response.data;
 };

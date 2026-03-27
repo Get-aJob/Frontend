@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import type { JoinField } from '@/types/Auth';
 
@@ -12,21 +12,61 @@ interface RegisterFormData extends JoinField {
 }
 
 const RegisterForm: React.FC<RegisterFormProps> = ({ onSwitchLogin, onSubmit }) => {
+  const [previewImage, setPreviewImage] = useState<string | null>(null);
+
   const {
     register,
     handleSubmit,
     getValues,
+    setValue,
     formState: { errors },
   } = useForm<RegisterFormData>({
     mode: 'onChange',
   });
 
-  const handleFormSubmit = ({ name, email, password }: RegisterFormData) => {
-    onSubmit({ name, email, password });
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setValue('profileImage', file);
+      if (previewImage) {
+        URL.revokeObjectURL(previewImage);
+      }
+      setPreviewImage(URL.createObjectURL(file));
+    }
   };
+
+  const handleFormSubmit = ({ name, email, password, profileImage }: RegisterFormData) => {
+    onSubmit({ name, email, password, profileImage });
+  };
+
+  useEffect(() => {
+    return () => {
+      if (previewImage) {
+        URL.revokeObjectURL(previewImage);
+      }
+    };
+  }, [previewImage]);
 
   return (
     <form onSubmit={handleSubmit(handleFormSubmit)} className="flex flex-col gap-4">
+      {/* 프로필 이미지 업로드 영역 */}
+      <div className="flex flex-col items-center gap-2 mb-2">
+        <label className="cursor-pointer relative group">
+          <div className="w-20 h-20 rounded-full bg-[#f9fafb] border border-[#e8eaf0] flex items-center justify-center overflow-hidden transition-all group-hover:border-[#4f46e5]">
+            {previewImage ? (
+              <img
+                src={previewImage}
+                alt="Profile preview"
+                className="w-full h-full object-cover"
+              />
+            ) : (
+              <span className="text-[12px] text-[#9ca3af]">사진 추가</span>
+            )}
+          </div>
+          <input type="file" accept="image/*" className="hidden" onChange={handleImageChange} />
+        </label>
+      </div>
+
       <div className="flex flex-col gap-1.5">
         <label className="text-[13px] font-medium text-[#4b5563] ml-1">이름</label>
         <input
