@@ -6,6 +6,16 @@ export const loginApi = async (data: LoginField) => {
   return response.data;
 };
 
+export const meApi = async () => {
+  const response = await api.get('/auth/me');
+  return response.data;
+};
+
+export const googleCredentialLoginApi = async (credential: string) => {
+  const response = await api.post('/auth/google/credential', { credential });
+  return response.data;
+};
+
 export const joinApi = async (data: JoinField) => {
   const formData = new FormData();
   formData.append('email', data.email);
