@@ -11,6 +11,9 @@ importers:
       '@hookform/resolvers':
         specifier: ^5.2.2
         version: 5.2.2(react-hook-form@7.71.2(react@19.2.4))
+      '@react-oauth/google':
+        specifier: ^0.13.4
+        version: 0.13.4(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
       '@react-pdf/renderer':
         specifier: ^4.3.2
         version: 4.3.2(react@19.2.4)
@@ -530,6 +533,12 @@ packages:
 
   '@jridgewell/trace-mapping@0.3.31':
     resolution: {integrity: sha512-zzNR+SdQSDJzc8joaeP8QQoCQr8NuYx2dIIytl1QeBEZHJ9uW6hebsrYgbz8hJwUQao3TWCMtmfV8Nu1twOLAw==}
+
+  '@react-oauth/google@0.13.4':
+    resolution: {integrity: sha512-hGKyNEH+/PK8M0sFEuo3MAEk0txtHpgs94tDQit+s2LXg7b6z53NtzHfqDvoB2X8O6lGB+FRg80hY//X6hfD+w==}
+    peerDependencies:
+      react: '>=16.8.0'
+      react-dom: '>=16.8.0'
 
   '@react-pdf/fns@3.1.2':
     resolution: {integrity: sha512-qTKGUf0iAMGg2+OsUcp9ffKnKi41RukM/zYIWMDJ4hRVYSr89Q7e3wSDW/Koqx3ea3Uy/z3h2y3wPX6Bdfxk6g==}
@@ -2643,6 +2652,11 @@ snapshots:
     dependencies:
       '@jridgewell/resolve-uri': 3.1.2
       '@jridgewell/sourcemap-codec': 1.5.5
+
+  '@react-oauth/google@0.13.4(react-dom@19.2.4(react@19.2.4))(react@19.2.4)':
+    dependencies:
+      react: 19.2.4
+      react-dom: 19.2.4(react@19.2.4)
 
   '@react-pdf/fns@3.1.2': {}
 
