@@ -32,17 +32,19 @@ const LoginForm: React.FC<LoginFormProps> = ({ onSubmit, onSwitchRegister, onFor
         return;
       }
       const response = await googleCredentialLoginApi(credentialResponse.credential);
-      if (response?.user) {
-        loginAction({
-          id: response.user.id,
-          name: response.user.name,
-          email: response.user.email,
-          profile_image_url: response.user.profile_image_url,
-        });
-        navigate(PATH.ROOT);
+      if (!response?.user?.name || !response?.user?.email) {
+        alert('Google 로그인 응답이 올바르지 않습니다. 다시 시도해주세요.');
+        return;
       }
-    } catch (error) {
-      console.error('Google 로그인 실패:', error);
+      loginAction({
+        id: response.user.id,
+        name: response.user.name,
+        email: response.user.email,
+        profile_image_url: response.user.profile_image_url,
+      });
+      navigate(PATH.ROOT);
+    } catch {
+      console.error('Google 로그인 실패');
       alert('Google 로그인에 실패했습니다. 다시 시도해주세요.');
     }
   };
