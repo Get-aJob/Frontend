@@ -206,8 +206,8 @@ const PostingCard: React.FC<PostingCardProps> = ({ job }) => {
           </div>
         </div>
 
-        {/* 오른쪽 하단 버튼들 컴포넌트로 분리 */}
-        <PostingActionButtons url={job.url} />
+        {/* 💡 핵심 수정 부분: url 뿐만 아니라 jobId도 함께 넘겨줍니다! */}
+        <PostingActionButtons url={job.url} jobId={job.id} />
       </div>
     </div>
   );

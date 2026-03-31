@@ -1,17 +1,19 @@
-import React from 'react';
+import React, { useState } from 'react';
+import { toggleScrap } from '@/api/Scrap'; // 💡 API 불러오기
 
 interface PostingActionButtonsProps {
   url?: string;
+  jobId: string | number; // 💡 jobId 추가
 }
 
 const styles = {
   buttonGroup: {
     display: 'flex',
     gap: '8px',
-    minWidth: '170px', // 두 버튼의 넓이를 고정하기 위해 부모 너비 설정
+    minWidth: '170px',
   },
   btn: {
-    flex: 1, // 컨테이너 공간을 똑같이 절반씩 나눠 가짐
+    flex: 1,
     padding: '8px 0',
     borderRadius: '8px',
     fontSize: '13px',
@@ -25,6 +27,12 @@ const styles = {
     background: '#fffaf0',
     color: '#d97706',
   },
+  // 💡 스크랩 활성화 시 스타일 추가
+  scrapBtnActive: {
+    border: '1.5px solid #d97706',
+    background: '#d97706',
+    color: '#ffffff',
+  },
   applyBtn: {
     border: '1.5px solid #4f46e5',
     background: '#4f46e5',
@@ -32,10 +40,33 @@ const styles = {
   },
 };
 
-const PostingActionButtons: React.FC<PostingActionButtonsProps> = ({ url }) => {
-  const handleScrapClick = (e: React.MouseEvent) => {
+const PostingActionButtons: React.FC<PostingActionButtonsProps> = ({ url, jobId }) => {
+  // 💡 스크랩 상태 관리
+  const [isScrapActive, setIsScrapActive] = useState(false);
+
+  const handleScrapClick = async (e: React.MouseEvent) => {
     e.stopPropagation();
-    alert('스크랩 기능이 개발 중입니다!');
+
+    try {
+      const result = await toggleScrap(String(jobId));
+      setIsScrapActive(result.added);
+
+      if (result.added) {
+        alert('공고가 스크랩되었습니다. 스크랩 페이지에서 확인하세요!');
+      } else {
+        alert('스크랩이 해제되었습니다.');
+      }
+    } catch (error: unknown) {
+      console.error('스크랩 처리 중 오류 발생:', error);
+
+      const err = error as { response?: { status?: number } };
+
+      if (err.response?.status === 401) {
+        alert('로그인이 필요한 기능입니다. 로그인 후 이용해주세요.');
+      } else {
+        alert('스크랩 처리에 실패했습니다. 잠시 후 다시 시도해주세요.');
+      }
+    }
   };
 
   const handleApplyClick = (e: React.MouseEvent) => {
@@ -58,10 +89,15 @@ const PostingActionButtons: React.FC<PostingActionButtonsProps> = ({ url }) => {
         cursor: 'not-allowed',
       };
 
+  // 💡 상태에 따라 스크랩 버튼 스타일 동적 적용
+  const currentScrapStyle = isScrapActive
+    ? { ...styles.btn, ...styles.scrapBtnActive }
+    : { ...styles.btn, ...styles.scrapBtn };
+
   return (
     <div style={styles.buttonGroup}>
-      <button style={{ ...styles.btn, ...styles.scrapBtn }} onClick={handleScrapClick}>
-        ★ 스크랩
+      <button style={currentScrapStyle} onClick={handleScrapClick}>
+        {isScrapActive ? '★ 저장됨' : '☆ 스크랩'}
       </button>
       <button style={applyBtnStyle} onClick={handleApplyClick}>
         지원하기
