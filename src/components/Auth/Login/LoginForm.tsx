@@ -1,6 +1,11 @@
 import React from 'react';
 import { useForm } from 'react-hook-form';
+import { useNavigate } from 'react-router-dom';
+import { GoogleLogin } from '@react-oauth/google';
 import type { LoginField } from '@/types/Auth';
+import { googleCredentialLoginApi } from '@/api/Auth';
+import { useAuthStore } from '@/store/useAuthStore';
+import { PATH } from '@/router/Path';
 
 interface LoginFormProps {
   onSubmit: (data: LoginField) => void;
@@ -9,6 +14,9 @@ interface LoginFormProps {
 }
 
 const LoginForm: React.FC<LoginFormProps> = ({ onSubmit, onSwitchRegister, onForgotPassword }) => {
+  const navigate = useNavigate();
+  const loginAction = useAuthStore((state) => state.login);
+
   const {
     register,
     handleSubmit,
@@ -17,23 +25,46 @@ const LoginForm: React.FC<LoginFormProps> = ({ onSubmit, onSwitchRegister, onFor
     mode: 'onChange',
   });
 
+  const handleGoogleSuccess = async (credentialResponse: { credential?: string }) => {
+    try {
+      if (!credentialResponse.credential) {
+        alert('Google 로그인에 실패했습니다.');
+        return;
+      }
+      const response = await googleCredentialLoginApi(credentialResponse.credential);
+      if (response?.user) {
+        loginAction({
+          id: response.user.id,
+          name: response.user.name,
+          email: response.user.email,
+          profile_image_url: response.user.profile_image_url,
+        });
+        navigate(PATH.ROOT);
+      }
+    } catch (error) {
+      console.error('Google 로그인 실패:', error);
+      alert('Google 로그인에 실패했습니다. 다시 시도해주세요.');
+    }
+  };
+
+  const handleGoogleError = () => {
+    alert('Google 로그인에 실패했습니다. 다시 시도해주세요.');
+  };
+
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-5">
-      {/* 이메일 입력 섹션 */}
+    <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4 w-85 mx-auto">
       <div className="flex flex-col gap-1.5">
         <label className="text-[13px] font-semibold text-[#374151] ml-1">이메일</label>
         <input
           type="email"
           placeholder="example@email.com"
-          className={`w-full p-3.5 rounded-xl border ${errors.email ? 'border-red-500' : 'border-[#e8eaf0]'} bg-[#f9fafb] text-[14px] focus:outline-none focus:ring-2 focus:ring-[#4f46e5]/10 focus:border-[#4f46e5] transition-all`}
+          className={`w-full p-3 rounded-md border ${errors.email ? 'border-red-500' : 'border-[#e8eaf0]'} bg-[#f9fafb] text-[14px] focus:outline-none focus:ring-2 focus:ring-[#4f46e5]/10 focus:border-[#4f46e5] transition-all`}
           {...register('email', { required: '이메일을 입력해주세요.' })}
         />
         {errors.email && (
           <span className="text-red-500 text-[11px] ml-1">{errors.email.message}</span>
         )}
       </div>
-
-      {/* 비밀번호 입력 섹션: 라벨과 재설정 링크를 한 줄에 배치 */}
       <div className="flex flex-col gap-1.5">
         <div className="flex justify-between items-center px-1">
           <label className="text-[13px] font-semibold text-[#374151]">비밀번호</label>
@@ -48,23 +79,33 @@ const LoginForm: React.FC<LoginFormProps> = ({ onSubmit, onSwitchRegister, onFor
         <input
           type="password"
           placeholder="비밀번호를 입력해주세요"
-          className={`w-full p-3.5 rounded-xl border ${errors.password ? 'border-red-500' : 'border-[#e8eaf0]'} bg-[#f9fafb] text-[14px] focus:outline-none focus:ring-2 focus:ring-[#4f46e5]/10 focus:border-[#4f46e5] transition-all`}
+          className={`w-full p-3 rounded-md border ${errors.password ? 'border-red-500' : 'border-[#e8eaf0]'} bg-[#f9fafb] text-[14px] focus:outline-none focus:ring-2 focus:ring-[#4f46e5]/10 focus:border-[#4f46e5] transition-all`}
           {...register('password', { required: '비밀번호를 입력해주세요.' })}
         />
         {errors.password && (
           <span className="text-red-500 text-[11px] ml-1">{errors.password.message}</span>
         )}
       </div>
+      <div className="flex flex-col gap-3 mt-2">
+        <button
+          type="submit"
+          className="w-full h-10 flex justify-center items-center rounded-sm bg-[#4f46e5] hover:bg-[#4338ca] active:bg-[#3730a3] text-white text-[14px] font-medium shadow-sm transition-colors cursor-pointer"
+        >
+          로그인
+        </button>
 
-      {/* 로그인 버튼 */}
-      <button
-        type="submit"
-        className="mt-2 w-full p-4 rounded-xl bg-linear-to-br from-[#4f46e5] to-[#8b5cf6] text-white text-[15px] font-bold shadow-[0_4px_15px_rgba(79,70,229,0.25)] hover:opacity-95 transition-all active:scale-[0.98] cursor-pointer"
-      >
-        로그인
-      </button>
+        <div className="flex justify-center w-full">
+          <GoogleLogin
+            onSuccess={handleGoogleSuccess}
+            onError={handleGoogleError}
+            text="continue_with"
+            shape="rectangular"
+            logo_alignment="center"
+            width="340"
+          />
+        </div>
+      </div>
 
-      {/* 하단 구분선 및 회원가입 안내 */}
       <div className="relative my-2">
         <div className="absolute inset-0 flex items-center">
           <div className="w-full border-t border-[#f3f4f6]"></div>
