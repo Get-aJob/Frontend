@@ -8,6 +8,8 @@ import ResumeFormSkill from '@/components/resumeForm/ResumeFormSkill';
 import ResumeFormLanguage from '@/components/resumeForm/ResumeFormLanguage';
 import ResumeFormWorkPortfolio from '@/components/resumeForm/ResumeFormPortfolio';
 import ResumeFormExperience from '@/components/resumeForm/ResumeFormExperience';
+import { usePreviewStore } from '@/store/usePdfPreviewStore';
+import PortFolioPreview from '@/components/resumeForm/PortFolioPreview';
 
 const ResumeForm = () => {
   const resume = useForm<ResumeFormInputs>({
@@ -55,8 +57,11 @@ const ResumeForm = () => {
       portfolio: [{ name: '', url: '', file: null, type: 'file' }],
     },
   });
+
+  const { isOpen } = usePreviewStore();
   return (
     <div className="w-full h-dvh overflow-hidden">
+      {isOpen && <PortFolioPreview />}
       <FormProvider {...resume}>
         <ResumeFormTopbar />
         <div className="w-full h-full bg-black/5 overflow-y-scroll">
