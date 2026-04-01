@@ -27,7 +27,6 @@ const PostingFeed = () => {
   };
 
   const handleCardClick = (jobId: string | number) => {
-    console.log(PATH.POSTING_FEED_DETAIL.replace(':jobId', String(jobId)))
     navigate(PATH.POSTING_FEED_DETAIL.replace(':jobId', String(jobId)));
   };
 
