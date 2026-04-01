@@ -3,6 +3,8 @@ export const PATH = {
   // CALENDAR: '/calendar', // 일정 확인
   STATUS: '/status', // 지원 현황
   POSTING: '/posting', // 전체 공고
+  POSTING_FEED: '/posting-feed', // 전체 공고 댓글
+  POSTING_FEED_DETAIL: '/posting-feed/:jobId', // 공고 댓글 상세
   DASHBOARD: '/dashboard', // 통계 분석
   RESUME: '/resume', // 이력서 관리
   RESUME_CREATE_FORM: '/resume/write', // 공통 이력서 양식으로 작성
