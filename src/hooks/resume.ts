@@ -4,7 +4,9 @@ import {
   getAllResume,
   getResumeById,
   updateResume,
+  uploadPortfolio,
 } from '@/api/ResumeForm';
+import { supabase } from '@/api/Supabase';
 import type { GetResumeById, ResumeFormData, ResumeInfo } from '@/types/ResumeFormType';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
@@ -68,4 +70,38 @@ export const useDeleteResume = () => {
   });
 
   return { mutate };
+};
+
+export const useUploadPortfolio = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (file: File) => {
+      const response = await uploadPortfolio(file);
+      return response;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['portfolio', 'upload'] });
+    },
+    onError: (error) => {
+      console.error('업로드 실패:', error);
+      alert('업로드 중 오류가 발생했습니다.');
+    },
+  });
+};
+
+export const useDownloadPortfolio = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (path: string) => {
+      const { data } = await supabase.storage.from('portfolios').download(path);
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['portfolio', 'download'] });
+    },
+    onError: (error) => {
+      console.error('다운로드 실패:', error);
+      alert('다운로드 중 오류가 발생했습니다.');
+    },
+  });
 };

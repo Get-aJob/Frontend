@@ -1,47 +1,81 @@
-import { Controller, type Control, type FieldPath, type FieldValues } from 'react-hook-form';
+import {
+  Controller,
+  useFormContext,
+  type Control,
+  type FieldPath,
+  type FieldValues,
+} from 'react-hook-form';
 import { useDropzone } from 'react-dropzone';
-import { Trash2, Upload } from 'lucide-react';
+import { Download, Eye, Trash2, Upload } from 'lucide-react';
+import type { pdfType, ResumeFormInputs } from '@/types/ResumeFormType';
+import ResumeFormPortfolioItem from './ResumeFormPortfolioItem';
+import { usePreviewStore } from '@/store/usePdfPreviewStore';
 
 interface ResumeFormDropzoneProps<T extends FieldValues> {
   name: FieldPath<T>;
   control: Control<T>;
+  index: number;
 }
 
 interface DropzoneBoxProps {
-  value: File | null | undefined;
+  value: pdfType;
   onChange: (file: File | null) => void;
+  index: number;
 }
 
 const ResumeFormDropzone = <T extends FieldValues>({
   name,
   control,
+  index,
 }: ResumeFormDropzoneProps<T>) => {
   return (
     <Controller
       control={control}
       name={name}
-      render={({ field: { onChange, value } }) => <DropzoneBox value={value} onChange={onChange} />}
+      render={({ field: { onChange, value } }) => (
+        <DropzoneBox index={index} value={value} onChange={onChange} />
+      )}
     />
   );
 };
 
-const DropzoneBox = ({ value, onChange }: DropzoneBoxProps) => {
+const DropzoneBox = ({ value, onChange, index }: DropzoneBoxProps) => {
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop: (files) => onChange(files[0]),
     accept: { 'application/pdf': ['.pdf'] },
     multiple: false,
   });
-  return value ? (
-    <div className="relative p-10 w-fit my-5 text-center justify-center border rounded-2xl hover:bg-black/10 border-black/20">
-      <embed
-        src={`${URL.createObjectURL(value)}#toolbar=0&navpanes=0&scrollbar=0`}
-        type="application/pdf"
-        className="border h-85"
-      />
+
+  const { watch, setValue } = useFormContext<ResumeFormInputs>();
+  const { openPreview } = usePreviewStore();
+
+  const portfolio = watch(`portfolio.${index}`);
+
+  return portfolio.file || portfolio.fileUrl ? (
+    <div className="relative p-10 w-full my-3 text-center justify-center border rounded-2xl hover:bg-black/10 border-black/20">
+      <ResumeFormPortfolioItem name={portfolio.name} file={portfolio.file} />
+      <button
+        type="button"
+        onClick={() => {}}
+        className="absolute top-4 right-28 w-8 h-8 p-1.5 hidden group-hover:flex items-center shadow-sm justify-center bg-white rounded-sm hover:bg-gray-200"
+      >
+        <Download />
+      </button>
+      <button
+        type="button"
+        onClick={(e) => {
+          e.stopPropagation();
+          openPreview(value, portfolio.fileUrl);
+        }}
+        className="absolute top-4 right-16 w-8 h-8 p-1.5 hidden group-hover:flex items-center shadow-sm justify-center bg-white rounded-sm hover:bg-gray-200"
+      >
+        <Eye />
+      </button>
       <button
         type="button"
         onClick={() => {
           onChange(null);
+          setValue(`portfolio.${index}.fileUrl`, undefined);
         }}
         className="absolute top-4 right-4 w-8 h-8 p-1.5 hidden group-hover:flex items-center shadow-sm justify-center bg-white rounded-sm hover:bg-gray-200"
       >
