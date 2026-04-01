@@ -27,6 +27,7 @@ export const NAV_SECTIONS: NavSectionType[] = [
         badgeColor: 'bg-[#4f46e5]',
       },
       { id: 'nav-jobboard', label: '전체 공고', icon: '🔍', path: PATH.POSTING },
+      { id: 'nav-jobboardfeed', label: '공고 댓글', icon: '🔍', path: PATH.POSTING_FEED },
       { id: 'nav-stats', label: '통계 분석', icon: '📊', path: PATH.DASHBOARD },
     ],
   },
