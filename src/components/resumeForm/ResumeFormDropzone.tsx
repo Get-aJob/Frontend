@@ -65,7 +65,7 @@ const DropzoneBox = ({ value, onChange, index }: DropzoneBoxProps) => {
         type="button"
         onClick={(e) => {
           e.stopPropagation();
-          openPreview(value, portfolio.fileUrl);
+          openPreview(value || portfolio.fileUrl);
         }}
         className="absolute top-4 right-16 w-8 h-8 p-1.5 hidden group-hover:flex items-center shadow-sm justify-center bg-white rounded-sm hover:bg-gray-200"
       >

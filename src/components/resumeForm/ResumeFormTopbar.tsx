@@ -2,7 +2,7 @@ import { PATH } from '@/router/Path';
 import type { ResumeFormData, ResumeFormInputs, ResumeInfo } from '@/types/ResumeFormType';
 import { useFormContext, type SubmitHandler } from 'react-hook-form';
 import { useNavigate, useParams } from 'react-router-dom';
-import { ChevronLeft, LoaderCircle } from 'lucide-react';
+import { ChevronLeft, Download, LoaderCircle } from 'lucide-react';
 import ResumeDownloadButton from './ResumeDownloadButton';
 import { useGetResume, useSaveResume, useUploadPortfolio } from '@/hooks/resume';
 import { useEffect, useState } from 'react';
@@ -41,6 +41,10 @@ const ResumeFormTopbar = () => {
   }, [data, reset, resumeId]);
 
   const onSubmit: SubmitHandler<ResumeFormInputs> = async (data) => {
+    if (!data.title) {
+      alert('제목을 입력하세요.');
+      return;
+    }
     try {
       const uploadPortfolioResult = await Promise.all(
         data.portfolio.map(async (p) => {
@@ -108,8 +112,10 @@ const ResumeFormTopbar = () => {
         <div className="h-full flex w-fit">
           <ResumeDownloadButton
             data={formData}
-            className="py-2 px-3 rounded-xl hover:bg-black/10"
-          />
+            className="block py-2 px-3 rounded-xl hover:bg-black/10"
+          >
+            <Download />
+          </ResumeDownloadButton>
           <button
             type="button"
             onClick={handleSubmit(onSubmit)}

@@ -81,7 +81,7 @@ interface ResumeFormPayload {
 
 export interface ResumeFormData {
   title: string;
-  resume: ResumeFormPayload;
+  resume?: ResumeFormPayload;
 }
 
 export interface ResumeInfo {

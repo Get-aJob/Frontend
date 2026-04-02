@@ -26,11 +26,10 @@ export const deleteResume = async (resumeId: string) => {
   return response.data;
 };
 
-/*
 export const duplicateResume = async (resumeId: string) => {
-  const response = await api.post(`/`);
+  const response = await api.post(`/resumes/${resumeId}/duplicate`);
+  return response.data;
 };
-*/
 
 export const uploadPortfolio = async (file: File) => {
   const formData = new FormData();
@@ -40,5 +39,10 @@ export const uploadPortfolio = async (file: File) => {
       'Content-Type': 'multipart/form-data',
     },
   });
+  return response.data;
+};
+
+export const getPortfolioPdf = async (path: string) => {
+  const response = await api.get(path, { responseType: 'blob', withCredentials: true });
   return response.data;
 };

@@ -1,12 +1,12 @@
 import {
   createResume,
   deleteResume,
+  duplicateResume,
   getAllResume,
   getResumeById,
   updateResume,
   uploadPortfolio,
 } from '@/api/ResumeForm';
-import { supabase } from '@/api/Supabase';
 import type { GetResumeById, ResumeFormData, ResumeInfo } from '@/types/ResumeFormType';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
@@ -29,6 +29,29 @@ export const useSaveResume = (resumeId: string | undefined) => {
     onError: (error) => {
       console.error('저장 실패:', error);
       alert('저장 중 오류가 발생했습니다.');
+    },
+  });
+};
+
+export const useUpdateResumeTitle = (resumeId: string) => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (title: string) => {
+      const formData: ResumeFormData = {
+        title: title,
+        resume: undefined,
+      };
+
+      const response = await updateResume(resumeId, formData);
+      return response;
+    },
+    onSuccess: () => {
+      alert('제목 변경 성공!');
+      queryClient.invalidateQueries({ queryKey: ['resumes', 'list'] });
+    },
+    onError: (error) => {
+      console.error('제목 변경 실패: ', error);
+      alert('변경 중 오류가 발생했습니다.');
     },
   });
 };
@@ -89,19 +112,20 @@ export const useUploadPortfolio = () => {
   });
 };
 
-export const useDownloadPortfolio = () => {
+export const useDuplicateResume = () => {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: async (path: string) => {
-      const { data } = await supabase.storage.from('portfolios').download(path);
-      return data;
+    mutationFn: async (resumeId: string) => {
+      const response = await duplicateResume(resumeId);
+      return response;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['portfolio', 'download'] });
+      alert('이력서 복사 성공');
+      queryClient.invalidateQueries({ queryKey: ['resumes', 'list'] });
     },
     onError: (error) => {
-      console.error('다운로드 실패:', error);
-      alert('다운로드 중 오류가 발생했습니다.');
+      console.error('이력서 복사 실패:', error);
+      alert('이력서 복사 중 오류가 발생했습니다.');
     },
   });
 };
