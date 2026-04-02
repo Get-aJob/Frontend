@@ -1,14 +1,20 @@
 import { create } from 'zustand';
 import { getPostings } from '@/api/Posting';
+import { getMyScraps } from '@/api/Scrap';
 import type { JobPosting, BackendJob } from '@/types/Posting';
 
+interface ExtendedJobPosting extends JobPosting {
+  isScrapped?: boolean;
+}
+
 interface PostingState {
-  postings: JobPosting[];
+  postings: ExtendedJobPosting[];
   currentPage: number;
   totalPages: number;
   isLoading: boolean;
   error: string | null;
   fetchPostings: (page: number) => Promise<void>;
+  toggleScrapStatus: (jobId: string | number) => void;
 }
 
 export const usePostingStore = create<PostingState>((set) => ({
@@ -22,7 +28,14 @@ export const usePostingStore = create<PostingState>((set) => ({
     set({ isLoading: true, error: null });
     try {
       const PAGE_SIZE = 30;
-      const data = await getPostings(page, PAGE_SIZE, 'auto');
+
+      // 공고 목록과 내 스크랩 목록을 동시에 가져옴
+      const [data, scrapData] = await Promise.all([
+        getPostings(page, PAGE_SIZE, 'auto'),
+        getMyScraps().catch(() => []),
+      ]);
+
+      const scrappedIds = new Set(scrapData.map((s) => String(s.jobPostingId)));
 
       const rawJobs = data.jobs || (Array.isArray(data) ? data : []);
       const totalCount = data.totalCount || rawJobs.length;
@@ -33,7 +46,7 @@ export const usePostingStore = create<PostingState>((set) => ({
         return dateB - dateA;
       });
 
-      const mappedJobs: JobPosting[] = sortedJobs.map((j: BackendJob) => {
+      const mappedJobs: ExtendedJobPosting[] = sortedJobs.map((j: BackendJob) => {
         let finalDeadline = '상시채용';
 
         if (j.deadline) {
@@ -63,6 +76,7 @@ export const usePostingStore = create<PostingState>((set) => ({
           location: j.location || '전국',
           experienceLevel: j.experience || '경력무관',
           deadline: finalDeadline,
+          isScrapped: scrappedIds.has(String(j.id)),
         };
       });
 
@@ -79,5 +93,13 @@ export const usePostingStore = create<PostingState>((set) => ({
         error: err.message || '공고 데이터를 불러오는데 실패했습니다',
       });
     }
+  },
+
+  toggleScrapStatus: (jobId: string | number) => {
+    set((state) => ({
+      postings: state.postings.map((job) =>
+        String(job.id) === String(jobId) ? { ...job, isScrapped: !job.isScrapped } : job,
+      ),
+    }));
   },
 }));

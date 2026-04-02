@@ -72,7 +72,7 @@ const ResumeFormEducation = () => {
                 limit={1000}
               />
             </div>
-            <div className="absolute -bottom-14 left-[48%] w-14 h-14 p-2">
+            <div className="absolute -bottom-14 left-[48%] w-14 h-14 p-2 z-20">
               <button
                 type="button"
                 onClick={() => {

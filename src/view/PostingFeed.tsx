@@ -35,9 +35,9 @@ const PostingFeed = () => {
   }
 
   return (
-    <div className='flex min-h-full flex-1 flex-col bg-[#f4f5f8] p-6'>
-      <div className='mb-[18px] flex items-center gap-[14px] rounded-xl border-[1.5px] border-[#c7d2fe] bg-gradient-to-br from-[#eef2ff] to-[#f5f3ff] px-[18px] py-[14px]'>
-        <div className='flex items-center gap-2 text-[13px] font-bold text-[#111827]'>
+    <div className="flex min-h-full flex-1 flex-col bg-[#f4f5f8] p-6">
+      <div className="mb-[18px] flex items-center gap-[14px] rounded-xl border-[1.5px] border-[#c7d2fe] bg-gradient-to-br from-[#eef2ff] to-[#f5f3ff] px-[18px] py-[14px]">
+        <div className="flex items-center gap-2 text-[13px] font-bold text-[#111827]">
           <RefreshCw size={14} color="#4f46e5" />
           <span>6시간 마다 채용 공고 크롤링</span>
         </div>
@@ -69,7 +69,9 @@ const PostingFeed = () => {
                 </div>
               )}
 
-              <div className="min-w-0 text-base font-semibold text-[#111827] truncate">{job.companyName}</div>
+              <div className="min-w-0 text-base font-semibold text-[#111827] truncate">
+                {job.companyName}
+              </div>
             </div>
           ))}
         </div>
@@ -77,17 +79,15 @@ const PostingFeed = () => {
         <div>등록된 공고가 없습니다.</div>
       )}
 
-      {
-        !isLoading && postings?.length > 0 && (
-          <Pagination
-            currentPage={currentPage}
-            totalPages={totalPages}
-            onPageChange={handlePageChange}
-          />
-        )
-      }
+      {!isLoading && postings?.length > 0 && (
+        <Pagination
+          currentPage={currentPage}
+          totalPages={totalPages}
+          onPageChange={handlePageChange}
+        />
+      )}
     </div>
-  )
-}
+  );
+};
 
-export default PostingFeed
+export default PostingFeed;

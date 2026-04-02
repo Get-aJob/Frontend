@@ -25,3 +25,24 @@ export const deleteResume = async (resumeId: string) => {
   const response = await api.delete(`/resumes/${resumeId}`);
   return response.data;
 };
+
+export const duplicateResume = async (resumeId: string) => {
+  const response = await api.post(`/resumes/${resumeId}/duplicate`);
+  return response.data;
+};
+
+export const uploadPortfolio = async (file: File): Promise<string> => {
+  const formData = new FormData();
+  formData.append('file', file);
+  const response = await api.post('/portfolios/upload', formData, {
+    headers: {
+      'Content-Type': 'multipart/form-data',
+    },
+  });
+  return response.data;
+};
+
+export const getPortfolioPdf = async (path: string) => {
+  const response = await api.get(path, { responseType: 'blob', withCredentials: true });
+  return response.data;
+};
