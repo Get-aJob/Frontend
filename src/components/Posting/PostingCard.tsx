@@ -3,7 +3,7 @@ import type { JobPosting } from '@/types/Posting';
 import PostingActionButtons from './PostingActionButtons';
 
 interface PostingCardProps {
-  job: JobPosting;
+  job: JobPosting & { isScrapped?: boolean };
 }
 
 const styles = {
@@ -37,7 +37,7 @@ const styles = {
     fontSize: '22px',
     fontWeight: 800,
     color: '#fff',
-    backgroundColor: '#4ade80', // 네이버 등 기본 그린 색상
+    backgroundColor: '#4ade80',
     flexShrink: 0,
   },
   logoImg: {
@@ -53,7 +53,7 @@ const styles = {
     display: 'flex',
     flexDirection: 'column' as const,
     flex: 1,
-    paddingRight: '60px', // 우측 상단 텍스트(deadline)와 겹치지 않게 여유 공간
+    paddingRight: '60px',
   },
   title: {
     fontSize: '18px',
@@ -124,16 +124,16 @@ const styles = {
 
 const PostingCard: React.FC<PostingCardProps> = ({ job }) => {
   const getDdayColor = (dday: string) => {
-    if (dday === 'D-Day' || dday.includes('마감')) return '#f43f5e'; // 긴급 또는 마감된 공고
+    if (dday === 'D-Day' || dday.includes('마감')) return '#f43f5e';
 
     const match = dday.match(/^D-(\d+)$/);
     if (match) {
       const days = parseInt(match[1], 10);
-      if (days <= 3) return '#f43f5e'; // 1-3일: 빨간색
-      if (days <= 7) return '#f59e0b'; // 4-7일: 주황색
-      return '#10b981'; // 7일 초과: 초록색
+      if (days <= 3) return '#f43f5e';
+      if (days <= 7) return '#f59e0b';
+      return '#10b981';
     }
-    return '#6b7280'; // 기본 회색
+    return '#6b7280';
   };
 
   const handleClick = () => {
@@ -158,7 +158,6 @@ const PostingCard: React.FC<PostingCardProps> = ({ job }) => {
       tabIndex={0}
     >
       <div style={styles.topSection}>
-        {/* 맨 왼쪽: company_logo */}
         {job.companyLogo ? (
           <img src={job.companyLogo} alt={job.companyName} style={styles.logoImg} />
         ) : (
@@ -167,13 +166,11 @@ const PostingCard: React.FC<PostingCardProps> = ({ job }) => {
           </div>
         )}
 
-        {/* 로고 우측: title 그 아래 company_name */}
         <div style={styles.textContainer}>
           <div style={styles.title}>{job.title}</div>
           <div style={styles.company}>{job.companyName}</div>
         </div>
 
-        {/* 맨 오른쪽 상단: deadline / deadline_text */}
         <div
           style={{
             ...styles.deadline,
@@ -195,7 +192,6 @@ const PostingCard: React.FC<PostingCardProps> = ({ job }) => {
       </div>
 
       <div style={styles.bottomSection}>
-        {/* 왼쪽 하단: 경력, 위치, 출처 서비스 */}
         <div style={styles.tagsLeft}>
           <div style={styles.tagRow}>
             {job.experienceLevel && <span style={styles.expTag}>{job.experienceLevel}</span>}
@@ -206,8 +202,7 @@ const PostingCard: React.FC<PostingCardProps> = ({ job }) => {
           </div>
         </div>
 
-        {/* 💡 핵심 수정 부분: url 뿐만 아니라 jobId도 함께 넘겨줍니다! */}
-        <PostingActionButtons url={job.url} jobId={job.id} />
+        <PostingActionButtons url={job.url} jobId={job.id} isScrapped={job.isScrapped} />
       </div>
     </div>
   );

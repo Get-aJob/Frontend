@@ -1,9 +1,12 @@
-import React, { useState } from 'react';
-import { toggleScrap } from '@/api/Scrap'; // 💡 API 불러오기
+// src/components/Posting/PostingActionButtons.tsx
+import React from 'react';
+import { toggleScrap } from '@/api/Scrap';
+import { usePostingStore } from '@/store/usePostingStore';
 
 interface PostingActionButtonsProps {
   url?: string;
-  jobId: string | number; // 💡 jobId 추가
+  jobId: string | number;
+  isScrapped?: boolean;
 }
 
 const styles = {
@@ -27,7 +30,6 @@ const styles = {
     background: '#fffaf0',
     color: '#d97706',
   },
-  // 💡 스크랩 활성화 시 스타일 추가
   scrapBtnActive: {
     border: '1.5px solid #d97706',
     background: '#d97706',
@@ -40,16 +42,18 @@ const styles = {
   },
 };
 
-const PostingActionButtons: React.FC<PostingActionButtonsProps> = ({ url, jobId }) => {
-  // 💡 스크랩 상태 관리
-  const [isScrapActive, setIsScrapActive] = useState(false);
+const PostingActionButtons: React.FC<PostingActionButtonsProps> = ({ url, jobId, isScrapped }) => {
+  // 💡 전역 스토어의 토글 함수 가져오기
+  const toggleScrapStatus = usePostingStore((state) => state.toggleScrapStatus);
 
   const handleScrapClick = async (e: React.MouseEvent) => {
     e.stopPropagation();
 
     try {
       const result = await toggleScrap(String(jobId));
-      setIsScrapActive(result.added);
+
+      // 💡 API 통신 성공 시 스토어의 상태를 즉시 업데이트
+      toggleScrapStatus(jobId);
 
       if (result.added) {
         alert('공고가 스크랩되었습니다. 스크랩 페이지에서 확인하세요!');
@@ -89,15 +93,14 @@ const PostingActionButtons: React.FC<PostingActionButtonsProps> = ({ url, jobId 
         cursor: 'not-allowed',
       };
 
-  // 💡 상태에 따라 스크랩 버튼 스타일 동적 적용
-  const currentScrapStyle = isScrapActive
+  const currentScrapStyle = isScrapped
     ? { ...styles.btn, ...styles.scrapBtnActive }
     : { ...styles.btn, ...styles.scrapBtn };
 
   return (
     <div style={styles.buttonGroup}>
       <button style={currentScrapStyle} onClick={handleScrapClick}>
-        {isScrapActive ? '★ 저장됨' : '☆ 스크랩'}
+        {isScrapped ? '★ 저장됨' : '☆ 스크랩'}
       </button>
       <button style={applyBtnStyle} onClick={handleApplyClick}>
         지원하기
