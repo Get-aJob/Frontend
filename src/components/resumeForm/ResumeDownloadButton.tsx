@@ -39,6 +39,8 @@ const ResumeDownloadButton = ({ data, id, className, children }: ResumeDownloadB
           })),
         };
         await downloadResumePdf(resume);
+      } else {
+        alert('데이터를 불러오는 중입니다. 잠시 후 다시 시도해주세요.');
       }
     } catch (error) {
       console.error('PDF 생성 에러:', error);
@@ -48,7 +50,7 @@ const ResumeDownloadButton = ({ data, id, className, children }: ResumeDownloadB
     }
   };
   return (
-    <button onClick={handleDownload} disabled={isGenerating} className={`flex ${className}`}>
+    <button onClick={handleDownload} disabled={isGenerating} className={`flex ${className || ''}`}>
       {isGenerating ? <LoaderCircle className="animate-spin" /> : children}
     </button>
   );

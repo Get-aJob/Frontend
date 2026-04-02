@@ -96,14 +96,10 @@ export const useDeleteResume = () => {
 };
 
 export const useUploadPortfolio = () => {
-  const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async (file: File) => {
       const response = await uploadPortfolio(file);
       return response;
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['portfolio', 'upload'] });
     },
     onError: (error) => {
       console.error('업로드 실패:', error);

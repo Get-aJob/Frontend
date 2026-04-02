@@ -9,12 +9,20 @@ interface PreviewStore {
   closePreview: () => void;
 }
 
-export const usePreviewStore = create<PreviewStore>((set) => ({
+export const usePreviewStore = create<PreviewStore>((set, get) => ({
   previewUrl: null,
   isOpen: false,
 
   // 비동기 액션으로 만들기
   openPreview: async (value: pdfType) => {
+    if (!value) {
+      return;
+    }
+
+    const currentUrl = get().previewUrl;
+    if (currentUrl) {
+      URL.revokeObjectURL(currentUrl);
+    }
     let url = '';
 
     if (value instanceof File) {
@@ -27,5 +35,11 @@ export const usePreviewStore = create<PreviewStore>((set) => ({
     set({ previewUrl: url, isOpen: true });
   },
 
-  closePreview: () => set({ previewUrl: null, isOpen: false }),
+  closePreview: () => {
+    const currentUrl = get().previewUrl;
+    if (currentUrl) {
+      URL.revokeObjectURL(currentUrl);
+    }
+    set({ previewUrl: null, isOpen: false });
+  },
 }));

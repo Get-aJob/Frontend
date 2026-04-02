@@ -50,7 +50,7 @@ const ResumeFormTopbar = () => {
         data.portfolio.map(async (p) => {
           if (p.file instanceof File) {
             const response = await uploadPortfolio.mutateAsync(p.file);
-            return { ...p, fileUrl: response.fileUrl };
+            return { ...p, fileUrl: response };
           } else {
             return p;
           }

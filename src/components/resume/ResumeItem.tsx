@@ -107,7 +107,7 @@ const ResumeItem = ({ title, id, updatedAt }: ResumeItemProps) => {
           <button onClick={() => duplicateMutate(id)} className="p-3 hover:bg-black/5 text-start">
             사본 만들기
           </button>
-          <ResumeDownloadButton id={id} className='"w-full p-3 hover:bg-black/5 text-start"'>
+          <ResumeDownloadButton id={id} className="w-full p-3 hover:bg-black/5 text-start">
             다운로드
           </ResumeDownloadButton>
           <p className="p-3 hover:bg-black/5">미리보기</p>

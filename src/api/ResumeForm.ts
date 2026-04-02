@@ -31,7 +31,7 @@ export const duplicateResume = async (resumeId: string) => {
   return response.data;
 };
 
-export const uploadPortfolio = async (file: File) => {
+export const uploadPortfolio = async (file: File): Promise<string> => {
   const formData = new FormData();
   formData.append('file', file);
   const response = await api.post('/portfolios/upload', formData, {
