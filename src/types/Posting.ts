@@ -25,6 +25,7 @@ export interface JobPosting {
   location: string;
   experienceLevel?: string;
   deadline: string;
+  isScrapped?: boolean;
 }
 
 export interface PostingResponse {
