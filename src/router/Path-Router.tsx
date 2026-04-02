@@ -36,7 +36,7 @@ const router = createBrowserRouter([
       },
       {
         path: PATH.POSTING_FEED,
-        element: <PostingFeed />
+        element: <PostingFeed />,
       },
       {
         path: PATH.POSTING_FEED_DETAIL,

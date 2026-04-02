@@ -45,7 +45,10 @@ const PostingFeedDetail = () => {
         setComments(list.map(mapApiToFeed));
       } catch (e: unknown) {
         if (cancelled) return;
-        const err = e as { response?: { data?: { error?: string; message?: string } }; message?: string };
+        const err = e as {
+          response?: { data?: { error?: string; message?: string } };
+          message?: string;
+        };
         setLoadError(
           err.response?.data?.error ??
             err.response?.data?.message ??
@@ -87,7 +90,12 @@ const PostingFeedDetail = () => {
           content?: string;
           createdAt?: string;
           created_at?: string;
-          author?: { id?: string; email?: string; name?: string; profile_image_url?: string | null };
+          author?: {
+            id?: string;
+            email?: string;
+            name?: string;
+            profile_image_url?: string | null;
+          };
         };
         const createdAt =
           flat.createdAt ??
@@ -116,7 +124,10 @@ const PostingFeedDetail = () => {
       }
       setComment('');
     } catch (e: unknown) {
-      const err = e as { response?: { data?: { error?: string; message?: string } }; message?: string };
+      const err = e as {
+        response?: { data?: { error?: string; message?: string } };
+        message?: string;
+      };
       setSubmitError(
         err.response?.data?.error ??
           err.response?.data?.message ??

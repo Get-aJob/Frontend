@@ -63,7 +63,11 @@ const ResumeFormWorkPortfolio = () => {
                   className="w-full outline-none resize-none"
                 />
               ) : (
-                <ResumeFormDropzone name={`portfolio.${index}.file`} control={control} />
+                <ResumeFormDropzone
+                  index={index}
+                  name={`portfolio.${index}.file`}
+                  control={control}
+                />
               )}
             </div>
             <div className="absolute -bottom-14 left-[48%] w-14 h-14 p-2 z-20">

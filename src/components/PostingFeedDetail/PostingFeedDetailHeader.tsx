@@ -21,7 +21,9 @@ const PostingFeedDetailHeader = ({ job }: Props) => {
         )}
 
         <div className="min-w-0">
-          <p className="truncate text-lg font-bold text-[#111827]">{job?.companyName ?? '회사 정보'}</p>
+          <p className="truncate text-lg font-bold text-[#111827]">
+            {job?.companyName ?? '회사 정보'}
+          </p>
           <p className="mt-1 text-sm text-[#6b7280]">
             {job?.title ?? '채용 공고 제목'} · {job?.location ?? '근무지 정보 없음'}
           </p>
