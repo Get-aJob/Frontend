@@ -56,10 +56,10 @@ const ResumeItem = ({ title, id, updatedAt }: ResumeItemProps) => {
   const date = new Date(updatedAt);
 
   return (
-    <div className="w-full h-64 xl:h-75 relative ">
+    <div className="w-full h-64 xl:h-75 relative group hover:scale-[101%]">
       <div
         ref={itemRef}
-        className="w-full h-full rounded-2xl p-7 bg-blue-50 border-2 border-blue-100 hover:border-blue-200 z-0"
+        className="w-full h-full rounded-2xl p-7 bg-white border-2 border-black/10 z-0"
         onClick={() => {
           if (!isAnyMenuOpen && !isOpen && !isFormOpen) {
             navigate(`/resume/${id}`);
