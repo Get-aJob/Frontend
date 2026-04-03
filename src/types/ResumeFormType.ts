@@ -97,4 +97,9 @@ export interface GetResumeById {
   createdAt: string;
 }
 
+export interface UploadResult {
+  message: string;
+  fileUrl: string;
+}
+
 export type pdfType = File | string | null | undefined;

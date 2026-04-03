@@ -53,7 +53,10 @@ const DropzoneBox = ({ value, onChange, index }: DropzoneBoxProps) => {
 
   return portfolio.file || portfolio.fileUrl ? (
     <div className="group relative p-10 w-full my-3 text-center justify-center border rounded-2xl hover:bg-black/10 border-black/20">
-      <ResumeFormPortfolioItem name={portfolio.name} file={portfolio.file} />
+      <ResumeFormPortfolioItem
+        name={portfolio.file ? portfolio.file.name : portfolio.name}
+        file={portfolio.file}
+      />
       <button
         type="button"
         onClick={() => {}}
