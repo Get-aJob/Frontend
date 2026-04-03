@@ -12,6 +12,8 @@ type Props = {
   isSubmitting: boolean;
   onSubmitComment: () => void;
   isMine: (item: FeedComment) => boolean;
+  onEditComment: (item: FeedComment) => void;
+  editingCommentId: string | null;
 };
 
 const PostingFeedDetailCommentPanel = ({
@@ -24,6 +26,8 @@ const PostingFeedDetailCommentPanel = ({
   isSubmitting,
   onSubmitComment,
   isMine,
+  onEditComment,
+  editingCommentId,
 }: Props) => {
   return (
     <section className="rounded-2xl border border-[#e8eaf0] bg-white p-5 shadow-sm">
@@ -66,7 +70,13 @@ const PostingFeedDetailCommentPanel = ({
           <p className="text-sm text-[#6b7280]">댓글을 불러오는 중입니다…</p>
         ) : comments.length > 0 ? (
           comments.map((item) => (
-            <PostingFeedDetailCommentItem key={item.id} item={item} isMine={isMine(item)} />
+            <PostingFeedDetailCommentItem
+              key={item.id}
+              item={item}
+              isMine={isMine(item)}
+              onEdit={onEditComment}
+              isEditing={editingCommentId === item.id}
+            />
           ))
         ) : (
           <p className="text-sm text-[#6b7280]">첫 댓글을 남겨보세요.</p>
