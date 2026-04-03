@@ -1,6 +1,6 @@
 import React from 'react';
 import type { JobPosting } from '@/types/Posting';
-import PostingActionButtons from './PostingActionButton';
+import PostingActionButton from './PostingActionButton';
 
 interface PostingCardProps {
   job: JobPosting & { isScrapped?: boolean };
@@ -216,7 +216,7 @@ const PostingCard: React.FC<PostingCardProps> = ({ job }) => {
           </div>
         </div>
 
-        <PostingActionButtons job={job} />
+        <PostingActionButton job={job} />
       </div>
     </div>
   );

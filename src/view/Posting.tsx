@@ -1,9 +1,7 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { RefreshCw } from 'lucide-react';
 import PostingList from '@/components/Posting/PostingList';
 import { usePostingStore } from '@/store/usePostingStore';
-import { useAuthStore } from '@/store/useAuthStore';
 import JobModal from '@/components/jobPostForm/JobModal';
 
 const styles = {
@@ -95,9 +93,7 @@ const styles = {
 
 const PostingView: React.FC = () => {
   const { sourceType, setSourceType } = usePostingStore();
-  const { isLoggedIn } = useAuthStore();
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const navigate = useNavigate();
 
   return (
     <div style={styles.container}>
@@ -123,15 +119,8 @@ const PostingView: React.FC = () => {
             전체 공고
           </button>
           <button
-            style={styles.tab(sourceType !== 'auto')}
-            onClick={() => {
-              if (!isLoggedIn) {
-                alert('로그인 후 이용하세요.');
-                navigate('/auth');
-                return;
-              }
-              setSourceType('manual');
-            }}
+            style={styles.tab(sourceType === 'manual')}
+            onClick={() => setSourceType('manual')}
           >
             내가 등록한 공고
           </button>
@@ -139,7 +128,6 @@ const PostingView: React.FC = () => {
       </div>
 
       <PostingList />
-
       {isModalOpen && <JobModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} />}
     </div>
   );

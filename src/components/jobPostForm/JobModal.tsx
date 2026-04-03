@@ -1,4 +1,5 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
+import axios from 'axios';
 import { useForm, Controller } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -100,6 +101,36 @@ const JobModal = ({ isOpen, onClose, mode = 'create', initialData }: JobModalPro
     },
   });
 
+  const handleReset = useCallback(() => {
+    reset({
+      title: '',
+      company_name: '',
+      company_logo: null,
+      location: '',
+      experience: '',
+      deadline: null,
+      source_url: '',
+      content: '',
+      source_type: 'direct',
+      source_site_name: null,
+    });
+    setIsAlwaysRecruit(false);
+    setCrawlUrl('');
+    setParsedData(null);
+  }, [reset]);
+
+  const handleClose = () => {
+    onClose();
+    handleReset();
+  };
+
+  const handleOverlayClick = (e: React.MouseEvent) => {
+    if (e.target === e.currentTarget) {
+      e.stopPropagation();
+      handleClose();
+    }
+  };
+
   useEffect(() => {
     if (isOpen) {
       if (mode === 'edit' && initialData) {
@@ -120,37 +151,13 @@ const JobModal = ({ isOpen, onClose, mode = 'create', initialData }: JobModalPro
         handleReset();
       }
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isOpen, mode, initialData]);
-
-  const handleReset = () => {
-    reset({
-      title: '',
-      company_name: '',
-      company_logo: null,
-      location: '',
-      experience: '',
-      deadline: null,
-      source_url: '',
-      content: '',
-      source_type: 'direct',
-      source_site_name: null,
-    });
-    setIsAlwaysRecruit(false);
-    setCrawlUrl('');
-    setParsedData(null);
-  };
+  }, [isOpen, mode, initialData, reset, handleReset]);
 
   const handleAlwaysRecruitChange = (checked: boolean) => {
     setIsAlwaysRecruit(checked);
     if (checked) {
       setValue('deadline', null);
     }
-  };
-
-  const handleClose = () => {
-    onClose();
-    handleReset();
   };
 
   const handleParse = async () => {
@@ -184,9 +191,23 @@ const JobModal = ({ isOpen, onClose, mode = 'create', initialData }: JobModalPro
         );
         setIsAlwaysRecruit(false);
       }
-    } catch (error) {
+    } catch (error: unknown) {
       console.error(error);
-      alert('URL 분석 중 오류가 발생했습니다.');
+      let errorMessage = 'URL 분석 중 오류가 발생했습니다.';
+
+      if (axios.isAxiosError(error)) {
+        const err = error;
+        if (err.code === 'ECONNABORTED' || err.message?.includes('timeout')) {
+          errorMessage = '타임아웃: 서버 응답이 지연되고 있습니다.';
+        } else if (!err.response) {
+          errorMessage = '네트워크 오류: 인터넷 연결을 확인해주세요.';
+        } else if (err.response?.status === 400) {
+          errorMessage = '지원하지 않는 사이트이거나 잘못된 URL입니다.';
+        } else if (err.response?.status) {
+          errorMessage = `서버 오류 (${err.response.status}): 잠시 후 다시 시도해주세요.`;
+        }
+      }
+      alert(errorMessage);
     } finally {
       setIsParsing(false);
     }
@@ -229,7 +250,7 @@ const JobModal = ({ isOpen, onClose, mode = 'create', initialData }: JobModalPro
         };
 
         if (mode === 'edit' && initialData?.externalId) {
-          await updateJob(initialData.externalId, requestData);
+          await updateJob(initialData.externalId, requestData, initialData.sourceType);
           alert('성공적으로 수정되었습니다.');
         } else {
           await createJob(requestData);
@@ -246,7 +267,7 @@ const JobModal = ({ isOpen, onClose, mode = 'create', initialData }: JobModalPro
   if (!isOpen) return null;
 
   return (
-    <div className={STYLES.overlay} onClick={handleClose}>
+    <div className={STYLES.overlay} onClick={handleOverlayClick}>
       <div className={STYLES.modalContent} onClick={(e) => e.stopPropagation()}>
         <div className={STYLES.header}>
           <div className={STYLES.title}>

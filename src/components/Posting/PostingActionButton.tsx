@@ -54,7 +54,7 @@ const styles = {
   },
 };
 
-const PostingActionButtons: React.FC<PostingActionButtonsProps> = ({ job }) => {
+const PostingActionButton: React.FC<PostingActionButtonsProps> = ({ job }) => {
   const { toggleScrapStatus, deleteJob } = usePostingStore();
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
 
@@ -102,14 +102,21 @@ const PostingActionButtons: React.FC<PostingActionButtonsProps> = ({ job }) => {
       try {
         await deleteJob(job.externalId, job.sourceType);
         alert('공고가 삭제되었습니다.');
-      } catch (error) {
+      } catch (error: unknown) {
         console.error(error);
-        alert('삭제 중 오류가 발생했습니다.');
+        const err = error as { response?: { status?: number } };
+        if (err.response?.status === 401) {
+          alert('로그인이 필요한 기능입니다. 로그인 후 이용해주세요.');
+        } else if (err.response?.status === 0 || err.response?.status === undefined) {
+          alert('네트워크 오류가 발생했습니다. 연결을 확인해주세요.');
+        } else {
+          alert('삭제 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요.');
+        }
       }
     }
   };
 
-  const isManual = job.sourceType !== 'auto';
+  const isManual = job.sourceType === 'manual' || job.sourceType === 'direct';
 
   const applyBtnStyle = job.url
     ? { ...styles.btn, ...styles.applyBtn }
@@ -159,4 +166,4 @@ const PostingActionButtons: React.FC<PostingActionButtonsProps> = ({ job }) => {
   );
 };
 
-export default PostingActionButtons;
+export default PostingActionButton;
