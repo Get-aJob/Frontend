@@ -31,7 +31,6 @@ const STYLES = {
     'px-[13px] py-[6px] text-[12px] bg-[#4f46e5] text-white rounded hover:bg-[#4338ca] transition-colors',
 };
 
-// Zod Schema 정의
 const jobPostSchema = z.object({
   title: z.string().min(1, '공고 제목을 입력해 주세요.'),
   company_name: z.string().min(1, '회사명을 입력해 주세요.'),
@@ -41,7 +40,7 @@ const jobPostSchema = z.object({
   deadline: z.string().nullish(),
   source_url: z.string().url('올바른 URL 형식이 아닙니다.').or(z.literal('')),
   content: z.string().optional(),
-  source_type: z.string().optional().default('direct'),
+  source_type: z.string().default('direct'),
   source_site_name: z.string().nullish(),
 });
 
@@ -54,13 +53,29 @@ interface JobModalProps {
   initialData?: JobPosting;
 }
 
+interface ParsedJobData {
+  title?: string;
+  companyName?: string;
+  companyLogo?: string;
+  location?: string;
+  experience?: string;
+  sourceUrl?: string;
+  content?: {
+    requirements?: string;
+    preferred?: string;
+    description?: string;
+    [key: string]: unknown;
+  };
+  deadlineText?: string;
+  deadline?: string;
+}
+
 const JobModal = ({ isOpen, onClose, mode = 'create', initialData }: JobModalProps) => {
   const { createJob, updateJob, parseJobUrl, saveParsedJob } = usePostingStore();
   const [isAlwaysRecruit, setIsAlwaysRecruit] = useState(false);
   const [crawlUrl, setCrawlUrl] = useState('');
   const [isParsing, setIsParsing] = useState(false);
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const [parsedData, setParsedData] = useState<any>(null);
+  const [parsedData, setParsedData] = useState<ParsedJobData | null>(null);
 
   const {
     register,
@@ -142,7 +157,7 @@ const JobModal = ({ isOpen, onClose, mode = 'create', initialData }: JobModalPro
     if (!crawlUrl.trim()) return;
     setIsParsing(true);
     try {
-      const data = await parseJobUrl(crawlUrl);
+      const data = (await parseJobUrl(crawlUrl)) as ParsedJobData;
       setParsedData(data);
       setValue('title', data.title || '');
       setValue('company_name', data.companyName || '');
@@ -152,7 +167,6 @@ const JobModal = ({ isOpen, onClose, mode = 'create', initialData }: JobModalPro
       setValue('source_url', data.sourceUrl || crawlUrl);
       setValue('source_type', 'manual');
 
-      // 상세 내용 구성
       const descriptionParts = [];
       if (data.content?.requirements)
         descriptionParts.push(`[지원자격]\n${data.content.requirements}`);
@@ -171,7 +185,7 @@ const JobModal = ({ isOpen, onClose, mode = 'create', initialData }: JobModalPro
         setIsAlwaysRecruit(false);
       }
     } catch (error) {
-      console.error('분석 에러:', error);
+      console.error(error);
       alert('URL 분석 중 오류가 발생했습니다.');
     } finally {
       setIsParsing(false);
@@ -181,13 +195,13 @@ const JobModal = ({ isOpen, onClose, mode = 'create', initialData }: JobModalPro
   const onSubmit = async (data: JobPostFields) => {
     try {
       if (data.source_type === 'manual') {
-        // 크롤링된 데이터
         const requestData = {
           title: data.title,
           companyName: data.company_name,
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           externalId:
-            mode === 'edit' ? ((initialData as any)?.externalId as string) : crypto.randomUUID(),
+            mode === 'edit' && initialData?.externalId
+              ? initialData.externalId
+              : crypto.randomUUID(),
           sourceUrl: data.source_url || '',
           companyLogo: data.company_logo || '',
           location: data.location || undefined,
@@ -202,7 +216,6 @@ const JobModal = ({ isOpen, onClose, mode = 'create', initialData }: JobModalPro
         await saveParsedJob(requestData);
         alert(mode === 'edit' ? '성공적으로 수정되었습니다.' : '성공적으로 등록되었습니다.');
       } else {
-        // 직접 입력한 데이터
         const requestData = {
           title: data.title,
           companyName: data.company_name,
@@ -225,7 +238,7 @@ const JobModal = ({ isOpen, onClose, mode = 'create', initialData }: JobModalPro
       }
       handleClose();
     } catch (error) {
-      console.error('제출 에러:', error);
+      console.error(error);
       alert('저장 중 오류가 발생했습니다.');
     }
   };

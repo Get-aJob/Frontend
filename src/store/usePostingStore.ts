@@ -57,12 +57,10 @@ export const usePostingStore = create<PostingState>((set, get) => ({
       const PAGE_SIZE = 30;
       const currentSourceType = get().sourceType;
 
-      // 공고 목록과 내 스크랩 목록을 동시에 가져옴
       let data: PostingResponse;
       if (currentSourceType === 'auto') {
         data = await getPostings(page, PAGE_SIZE, 'auto');
       } else {
-        // manual과 direct 공고를 모두 가져와서 합침 (사용자 입장에서는 모두 내가 등록한 공고에서 확인 가능)
         const [manualData, directData] = await Promise.all([
           getPostings(1, 100, 'manual'),
           getPostings(1, 100, 'direct'),
@@ -85,10 +83,8 @@ export const usePostingStore = create<PostingState>((set, get) => ({
       const totalCount = data.totalCount || rawJobs.length;
 
       const sortedJobs = [...rawJobs].sort((a: BackendJob, b: BackendJob) => {
-        const dateA =
-          a.created_at || a.createdAt ? new Date(a.created_at || a.createdAt).getTime() : 0;
-        const dateB =
-          b.created_at || b.createdAt ? new Date(b.created_at || b.createdAt).getTime() : 0;
+        const dateA = a.created_at ? new Date(a.created_at).getTime() : 0;
+        const dateB = b.created_at ? new Date(b.created_at).getTime() : 0;
         return dateB - dateA;
       });
 
@@ -96,7 +92,7 @@ export const usePostingStore = create<PostingState>((set, get) => ({
         const j = jObj;
         let finalDeadline = '상시채용';
         const deadline = j.deadline;
-        const deadlineText = j.deadline_text || j.deadlineText;
+        const deadlineText = j.deadline_text;
 
         if (deadline) {
           const today = new Date();
@@ -115,24 +111,21 @@ export const usePostingStore = create<PostingState>((set, get) => ({
           else finalDeadline = deadlineText;
         }
 
-        const sourceType = j.source_type || j.sourceType;
+        const sourceType = j.source_type;
 
         return {
           id: j.id,
-          companyName: j.company_name || j.companyName || '회사명 미상',
-          companyLogo: j.company_logo || j.companyLogo,
+          companyName: j.company_name || '회사명 미상',
+          companyLogo: j.company_logo,
           title: j.title || '제목 없음',
-          url: j.source_url || j.sourceUrl,
-          site:
-            sourceType === 'auto'
-              ? j.source_site_name || j.sourceSiteName || '자동크롤링'
-              : '수동등록',
+          url: j.source_url,
+          site: sourceType === 'auto' ? j.source_site_name || '자동크롤링' : '수동등록',
           location: j.location || '전국',
           experienceLevel: j.experience || '경력무관',
           deadline: finalDeadline,
           isScrapped: scrappedIds.has(String(j.id)),
           sourceType: sourceType,
-          externalId: j.external_id || j.externalId,
+          externalId: j.external_id,
           description: (() => {
             if (!j.content) return '';
             if (typeof j.content === 'object')
