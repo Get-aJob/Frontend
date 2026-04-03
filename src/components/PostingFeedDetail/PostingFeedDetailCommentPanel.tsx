@@ -11,6 +11,7 @@ export type CommentPanelState = {
   isSubmitting: boolean;
   editingCommentId: string | null;
   savingCommentId: string | null;
+  deletingCommentId: string | null;
   editingContent: string;
 };
 
@@ -20,6 +21,7 @@ export type CommentPanelActions = {
   isMine: (item: FeedComment) => boolean;
   onStartEditComment: (item: FeedComment) => void;
   onSaveEditComment: (item: FeedComment) => void;
+  onDeleteComment: (item: FeedComment) => void;
   onCancelEditComment: () => void;
   onEditingContentChange: (value: string) => void;
 };
@@ -39,6 +41,7 @@ const PostingFeedDetailCommentPanel = ({ state, actions }: Props) => {
     isSubmitting,
     editingCommentId,
     savingCommentId,
+    deletingCommentId,
     editingContent,
   } = state;
   const {
@@ -47,6 +50,7 @@ const PostingFeedDetailCommentPanel = ({ state, actions }: Props) => {
     isMine,
     onStartEditComment,
     onSaveEditComment,
+    onDeleteComment,
     onCancelEditComment,
     onEditingContentChange,
   } = actions;
@@ -98,9 +102,11 @@ const PostingFeedDetailCommentPanel = ({ state, actions }: Props) => {
               isMine={isMine(item)}
               onStartEdit={onStartEditComment}
               onSaveEdit={onSaveEditComment}
+              onDelete={onDeleteComment}
               onCancelEdit={onCancelEditComment}
               isEditing={editingCommentId === item.id}
               isSaving={savingCommentId === item.id}
+              isDeleting={deletingCommentId === item.id}
               editingContent={editingContent}
               onEditingContentChange={onEditingContentChange}
             />

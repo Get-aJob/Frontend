@@ -32,12 +32,14 @@ const PostingFeedDetail = () => {
     submitError,
     editingCommentId,
     savingCommentId,
+    deletingCommentId,
     editingContent,
     setEditingContent,
     handleSubmitComment,
     startEditComment,
     cancelEditComment,
     saveEditComment,
+    deleteCommentItem,
     isMine,
   } = usePostingFeedComments({
     jobId: jobId ? String(jobId) : undefined,
@@ -55,6 +57,7 @@ const PostingFeedDetail = () => {
     isSubmitting,
     editingCommentId,
     savingCommentId,
+    deletingCommentId,
     editingContent,
   };
 
@@ -64,6 +67,7 @@ const PostingFeedDetail = () => {
     isMine,
     onStartEditComment: startEditComment,
     onSaveEditComment: saveEditComment,
+    onDeleteComment: deleteCommentItem,
     onCancelEditComment: cancelEditComment,
     onEditingContentChange: setEditingContent,
   };

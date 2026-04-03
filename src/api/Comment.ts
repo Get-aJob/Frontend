@@ -27,3 +27,7 @@ export const updateComment = async (
   );
   return data.comment;
 };
+
+export const deleteComment = async (jobId: string, commentId: string): Promise<void> => {
+  await api.delete(`/jobs/${jobId}/comments/${commentId}`);
+};

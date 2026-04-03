@@ -6,9 +6,11 @@ type Props = {
   isMine: boolean;
   onStartEdit: (item: FeedComment) => void;
   onSaveEdit: (item: FeedComment) => void;
+  onDelete: (item: FeedComment) => void;
   onCancelEdit: () => void;
   isEditing: boolean;
   isSaving: boolean;
+  isDeleting: boolean;
   editingContent: string;
   onEditingContentChange: (value: string) => void;
 };
@@ -18,9 +20,11 @@ const PostingFeedDetailCommentItem = ({
   isMine,
   onStartEdit,
   onSaveEdit,
+  onDelete,
   onCancelEdit,
   isEditing,
   isSaving,
+  isDeleting,
   editingContent,
   onEditingContentChange,
 }: Props) => {
@@ -76,11 +80,21 @@ const PostingFeedDetailCommentItem = ({
                 isSavingByClickRef.current = true;
               }}
               onClick={() => (isEditing ? onSaveEdit(item) : onStartEdit(item))}
-              disabled={isSaving}
+              disabled={isSaving || isDeleting}
               className="rounded-md border border-[#c7d2fe] bg-white px-2.5 py-1 text-[11px] font-semibold text-[#4f46e5] transition-all hover:-translate-y-[1px] hover:border-[#a5b4fc] hover:bg-[#eef2ff] hover:shadow-sm active:translate-y-0 disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:translate-y-0 disabled:hover:shadow-none"
             >
               {isSaving ? '저장 중…' : isEditing ? '저장' : '수정'}
             </button>
+            {!isEditing && (
+              <button
+                type="button"
+                onClick={() => onDelete(item)}
+                disabled={isDeleting}
+                className="rounded-md border border-[#fecaca] bg-white px-2.5 py-1 text-[11px] font-semibold text-[#dc2626] transition-all hover:-translate-y-[1px] hover:border-[#fca5a5] hover:bg-[#fef2f2] hover:shadow-sm active:translate-y-0 disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:translate-y-0 disabled:hover:shadow-none"
+              >
+                {isDeleting ? '삭제 중…' : '삭제'}
+              </button>
+            )}
           </div>
         )}
       </div>
@@ -91,7 +105,7 @@ const PostingFeedDetailCommentItem = ({
             value={editingContent}
             onChange={(e) => onEditingContentChange(e.target.value)}
             onBlur={handleBlur}
-            disabled={isSaving}
+            disabled={isSaving || isDeleting}
             className="h-[96px] w-full resize-none overflow-y-auto rounded-lg border border-[#d1d5db] bg-white px-3 py-2 text-sm text-[#111827] outline-none ring-[#4f46e5] placeholder:text-[#9ca3af] focus:ring-2"
           />
         </div>

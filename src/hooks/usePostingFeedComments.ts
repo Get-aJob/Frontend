@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
-import { createComment, getJobComments, updateComment } from '@/api/Comment';
+import { createComment, deleteComment, getJobComments, updateComment } from '@/api/Comment';
 import type { JobCommentApiItem } from '@/types/Comment';
 import { mapApiToFeed, type FeedComment } from '@/components/PostingFeedDetail/feedComment';
 
@@ -33,6 +33,7 @@ export const usePostingFeedComments = ({
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [editingCommentId, setEditingCommentId] = useState<string | null>(null);
   const [savingCommentId, setSavingCommentId] = useState<string | null>(null);
+  const [deletingCommentId, setDeletingCommentId] = useState<string | null>(null);
   const [editingContent, setEditingContent] = useState('');
 
   useEffect(() => {
@@ -164,6 +165,28 @@ export const usePostingFeedComments = ({
     [jobId, editingContent, cancelEditComment, savingCommentId],
   );
 
+  const deleteCommentItem = useCallback(
+    async (item: FeedComment) => {
+      if (!jobId) return;
+      if (deletingCommentId === item.id) return;
+
+      const ok = window.confirm('해당 댓글을 삭제하시겠습니까?');
+      if (!ok) return;
+
+      setSubmitError(null);
+      setDeletingCommentId(item.id);
+      try {
+        await deleteComment(jobId, item.id);
+        setComments((prev) => prev.filter((c) => c.id !== item.id));
+      } catch (error: unknown) {
+        setSubmitError(getErrorMessage(error, '댓글 삭제에 실패했습니다.'));
+      } finally {
+        setDeletingCommentId(null);
+      }
+    },
+    [jobId, deletingCommentId],
+  );
+
   const isMine = useCallback(
     (item: FeedComment) => currentUserDbId != null && item.authorUserId === currentUserDbId,
     [currentUserDbId],
@@ -179,12 +202,14 @@ export const usePostingFeedComments = ({
     submitError,
     editingCommentId,
     savingCommentId,
+    deletingCommentId,
     editingContent,
     setEditingContent,
     handleSubmitComment,
     startEditComment,
     cancelEditComment,
     saveEditComment,
+    deleteCommentItem,
     isMine,
   };
 };
