@@ -46,8 +46,3 @@ export const uploadPortfolio = async (file: File): Promise<UploadResult> => {
   });
   return response.data;
 };
-
-export const getPortfolioPdf = async (path: string) => {
-  const response = await api.get(path, { responseType: 'blob', withCredentials: true });
-  return response.data;
-};
