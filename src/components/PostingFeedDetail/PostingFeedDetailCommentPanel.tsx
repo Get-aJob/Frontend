@@ -2,33 +2,55 @@ import { Send } from 'lucide-react';
 import type { FeedComment } from './feedComment';
 import PostingFeedDetailCommentItem from './PostingFeedDetailCommentItem';
 
-type Props = {
+export type CommentPanelState = {
   comments: FeedComment[];
   isLoadingComments: boolean;
   loadError: string | null;
   submitError: string | null;
   comment: string;
-  onCommentChange: (value: string) => void;
   isSubmitting: boolean;
-  onSubmitComment: () => void;
-  isMine: (item: FeedComment) => boolean;
-  onEditComment: (item: FeedComment) => void;
   editingCommentId: string | null;
+  savingCommentId: string | null;
+  editingContent: string;
 };
 
-const PostingFeedDetailCommentPanel = ({
-  comments,
-  isLoadingComments,
-  loadError,
-  submitError,
-  comment,
-  onCommentChange,
-  isSubmitting,
-  onSubmitComment,
-  isMine,
-  onEditComment,
-  editingCommentId,
-}: Props) => {
+export type CommentPanelActions = {
+  onCommentChange: (value: string) => void;
+  onSubmitComment: () => void;
+  isMine: (item: FeedComment) => boolean;
+  onStartEditComment: (item: FeedComment) => void;
+  onSaveEditComment: (item: FeedComment) => void;
+  onCancelEditComment: () => void;
+  onEditingContentChange: (value: string) => void;
+};
+
+type Props = {
+  state: CommentPanelState;
+  actions: CommentPanelActions;
+};
+
+const PostingFeedDetailCommentPanel = ({ state, actions }: Props) => {
+  const {
+    comments,
+    isLoadingComments,
+    loadError,
+    submitError,
+    comment,
+    isSubmitting,
+    editingCommentId,
+    savingCommentId,
+    editingContent,
+  } = state;
+  const {
+    onCommentChange,
+    onSubmitComment,
+    isMine,
+    onStartEditComment,
+    onSaveEditComment,
+    onCancelEditComment,
+    onEditingContentChange,
+  } = actions;
+
   return (
     <section className="rounded-2xl border border-[#e8eaf0] bg-white p-5 shadow-sm">
       <h2 className="mb-4 text-base font-bold text-[#111827]">댓글</h2>
@@ -74,8 +96,13 @@ const PostingFeedDetailCommentPanel = ({
               key={item.id}
               item={item}
               isMine={isMine(item)}
-              onEdit={onEditComment}
+              onStartEdit={onStartEditComment}
+              onSaveEdit={onSaveEditComment}
+              onCancelEdit={onCancelEditComment}
               isEditing={editingCommentId === item.id}
+              isSaving={savingCommentId === item.id}
+              editingContent={editingContent}
+              onEditingContentChange={onEditingContentChange}
             />
           ))
         ) : (

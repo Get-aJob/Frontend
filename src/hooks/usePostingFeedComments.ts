@@ -32,6 +32,8 @@ export const usePostingFeedComments = ({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [editingCommentId, setEditingCommentId] = useState<string | null>(null);
+  const [savingCommentId, setSavingCommentId] = useState<string | null>(null);
+  const [editingContent, setEditingContent] = useState('');
 
   useEffect(() => {
     if (!jobId) {
@@ -124,28 +126,42 @@ export const usePostingFeedComments = ({
     }
   }, [comment, jobId, currentUserName, currentUserImage]);
 
-  const handleEditComment = useCallback(
+  const startEditComment = useCallback((item: FeedComment) => {
+    setSubmitError(null);
+    setEditingCommentId(item.id);
+    setEditingContent(item.content);
+  }, []);
+
+  const cancelEditComment = useCallback(() => {
+    setEditingCommentId(null);
+    setEditingContent('');
+  }, []);
+
+  const saveEditComment = useCallback(
     async (item: FeedComment) => {
       if (!jobId) return;
+      if (savingCommentId === item.id) return;
 
-      const nextContent = window.prompt('수정할 댓글 내용을 입력하세요.', item.content);
-      if (nextContent === null) return;
-
-      const trimmed = nextContent.trim();
-      if (!trimmed || trimmed === item.content) return;
+      const trimmed = editingContent.trim();
+      if (!trimmed || trimmed === item.content) {
+        cancelEditComment();
+        return;
+      }
 
       setSubmitError(null);
       setEditingCommentId(item.id);
+      setSavingCommentId(item.id);
       try {
         const updated = await updateComment(jobId, item.id, { content: trimmed });
         setComments((prev) => prev.map((c) => (c.id === item.id ? mapApiToFeed(updated) : c)));
+        cancelEditComment();
       } catch (error: unknown) {
         setSubmitError(getErrorMessage(error, '댓글 수정에 실패했습니다.'));
       } finally {
-        setEditingCommentId(null);
+        setSavingCommentId(null);
       }
     },
-    [jobId],
+    [jobId, editingContent, cancelEditComment, savingCommentId],
   );
 
   const isMine = useCallback(
@@ -162,8 +178,13 @@ export const usePostingFeedComments = ({
     isSubmitting,
     submitError,
     editingCommentId,
+    savingCommentId,
+    editingContent,
+    setEditingContent,
     handleSubmitComment,
-    handleEditComment,
+    startEditComment,
+    cancelEditComment,
+    saveEditComment,
     isMine,
   };
 };
