@@ -1,4 +1,3 @@
-import { getPortfolioPdf } from '@/api/ResumeForm';
 import type { pdfType } from '@/types/ResumeFormType';
 import { create } from 'zustand';
 
@@ -28,8 +27,8 @@ export const usePreviewStore = create<PreviewStore>((set, get) => ({
     if (value instanceof File) {
       url = URL.createObjectURL(value);
     } else if (typeof value === 'string') {
-      const pdf = await getPortfolioPdf(value);
-      url = URL.createObjectURL(pdf);
+      console.log(value);
+      url = value;
     }
 
     set({ previewUrl: url, isOpen: true });

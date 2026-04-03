@@ -50,7 +50,7 @@ const ResumeFormTopbar = () => {
         data.portfolio.map(async (p) => {
           if (p.file instanceof File) {
             const response = await uploadPortfolio.mutateAsync(p.file);
-            return { ...p, fileUrl: response };
+            return { ...p, fileUrl: response.fileUrl };
           } else {
             return p;
           }
@@ -119,7 +119,7 @@ const ResumeFormTopbar = () => {
           <button
             type="button"
             onClick={handleSubmit(onSubmit)}
-            className="py-2 px-3 border mx-5 rounded-xl text-white bg-blue-400 hover:bg-blue-600"
+            className="py-2 px-3 border mx-5 rounded-xl text-white bg-[#4f46e5] hover:bg-[#4338ca]"
           >
             {saveResume.isPending ? <LoaderCircle className="animate-spin" /> : '작성 완료'}
           </button>

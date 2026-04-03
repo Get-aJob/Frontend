@@ -10,7 +10,6 @@ const Resume = () => {
     <div className="w-full bg-white min-h-dvh">
       {isAnyMenuOpen && <div className="absolute w-full h-full bg-black z-10 opacity-0" />}
       <div className="w-full p-14">
-        <h1 className="text-3xl">이력서 목록</h1>
         {isLoading && <p>로딩중...</p>}
         {!isLoading && (
           <div className="grid grid-cols-3 w-full gap-12 my-14">
