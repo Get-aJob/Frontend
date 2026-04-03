@@ -26,9 +26,37 @@ export interface JobPosting {
   experienceLevel?: string;
   deadline: string;
   isScrapped?: boolean;
+  sourceType?: string;
+  externalId?: string;
+  description?: string;
 }
 
 export interface PostingResponse {
   jobs: BackendJob[];
   totalCount: number;
+}
+
+export interface DirectJobRequest {
+  title: string;
+  companyName: string;
+  location?: string;
+  experience?: string;
+  companyLogo?: string;
+  deadline?: string;
+  deadlineText?: string;
+  description?: string;
+  sourceUrl?: string;
+}
+
+export interface ManualSaveRequest {
+  title: string;
+  companyName: string;
+  externalId: string;
+  sourceUrl: string;
+  companyLogo?: string;
+  location?: string;
+  experience?: string;
+  deadline?: string;
+  deadlineText?: string;
+  content?: Record<string, unknown> | string;
 }

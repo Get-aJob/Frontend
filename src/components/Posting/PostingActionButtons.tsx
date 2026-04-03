@@ -1,12 +1,12 @@
 // src/components/Posting/PostingActionButtons.tsx
-import React from 'react';
+import React, { useState } from 'react';
 import { toggleScrap } from '@/api/Scrap';
 import { usePostingStore } from '@/store/usePostingStore';
+import JobModal from '@/components/jobPostForm/JobModal';
+import type { JobPosting } from '@/types/Posting';
 
 interface PostingActionButtonsProps {
-  url?: string;
-  jobId: string | number;
-  isScrapped?: boolean;
+  job: JobPosting & { isScrapped?: boolean; sourceType?: string; externalId?: string };
 }
 
 const styles = {
@@ -14,6 +14,8 @@ const styles = {
     display: 'flex',
     gap: '8px',
     minWidth: '170px',
+    flexWrap: 'wrap' as const,
+    flex: '1 1 auto',
   },
   btn: {
     flex: 1,
@@ -24,6 +26,7 @@ const styles = {
     cursor: 'pointer',
     transition: 'all 0.15s ease',
     textAlign: 'center' as const,
+    border: '1.5px solid transparent',
   },
   scrapBtn: {
     border: '1.5px solid #fbd38d',
@@ -40,20 +43,28 @@ const styles = {
     background: '#4f46e5',
     color: '#fff',
   },
+  editBtn: {
+    border: '1.5px solid #cbd5e1',
+    background: '#f8fafc',
+    color: '#475569',
+  },
+  deleteBtn: {
+    border: '1.5px solid #fecaca',
+    background: '#fff1f1',
+    color: '#dc2626',
+  },
 };
 
-const PostingActionButtons: React.FC<PostingActionButtonsProps> = ({ url, jobId, isScrapped }) => {
-  // 💡 전역 스토어의 토글 함수 가져오기
-  const toggleScrapStatus = usePostingStore((state) => state.toggleScrapStatus);
+const PostingActionButtons: React.FC<PostingActionButtonsProps> = ({ job }) => {
+  const { toggleScrapStatus, deleteJob } = usePostingStore();
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
 
   const handleScrapClick = async (e: React.MouseEvent) => {
     e.stopPropagation();
 
     try {
-      const result = await toggleScrap(String(jobId));
-
-      // 💡 API 통신 성공 시 스토어의 상태를 즉시 업데이트
-      toggleScrapStatus(jobId);
+      const result = await toggleScrap(String(job.id));
+      toggleScrapStatus(job.id);
 
       if (result.added) {
         alert('공고가 스크랩되었습니다. 스크랩 페이지에서 확인하세요!');
@@ -62,9 +73,7 @@ const PostingActionButtons: React.FC<PostingActionButtonsProps> = ({ url, jobId,
       }
     } catch (error: unknown) {
       console.error('스크랩 처리 중 오류 발생:', error);
-
       const err = error as { response?: { status?: number } };
-
       if (err.response?.status === 401) {
         alert('로그인이 필요한 기능입니다. 로그인 후 이용해주세요.');
       } else {
@@ -75,14 +84,36 @@ const PostingActionButtons: React.FC<PostingActionButtonsProps> = ({ url, jobId,
 
   const handleApplyClick = (e: React.MouseEvent) => {
     e.stopPropagation();
-    if (!url) {
+    if (!job.url) {
       alert('이동할 수 있는 지원 공고 주소가 없습니다.');
       return;
     }
-    window.open(url, '_blank', 'noopener,noreferrer');
+    window.open(job.url, '_blank', 'noopener,noreferrer');
   };
 
-  const applyBtnStyle = url
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const handleEditClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setIsEditModalOpen(true);
+  };
+
+  const handleDeleteClick = async (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (!job.externalId) return;
+    if (window.confirm('정말 이 공고를 삭제하시겠습니까?')) {
+      try {
+        await deleteJob(job.externalId, job.sourceType);
+        alert('공고가 삭제되었습니다.');
+      } catch (error) {
+        console.error('삭제 에러:', error);
+        alert('삭제 중 오류가 발생했습니다.');
+      }
+    }
+  };
+
+  const isManual = job.sourceType !== 'auto';
+
+  const applyBtnStyle = job.url
     ? { ...styles.btn, ...styles.applyBtn }
     : {
         ...styles.btn,
@@ -93,19 +124,35 @@ const PostingActionButtons: React.FC<PostingActionButtonsProps> = ({ url, jobId,
         cursor: 'not-allowed',
       };
 
-  const currentScrapStyle = isScrapped
+  const currentScrapStyle = job.isScrapped
     ? { ...styles.btn, ...styles.scrapBtnActive }
     : { ...styles.btn, ...styles.scrapBtn };
 
   return (
-    <div style={styles.buttonGroup}>
-      <button style={currentScrapStyle} onClick={handleScrapClick}>
-        {isScrapped ? '★ 저장됨' : '☆ 스크랩'}
-      </button>
-      <button style={applyBtnStyle} onClick={handleApplyClick}>
-        지원하기
-      </button>
-    </div>
+    <>
+      <div style={{ ...styles.buttonGroup, minWidth: isManual ? '240px' : '170px' }}>
+        {isManual && (
+          <button style={{ ...styles.btn, ...styles.deleteBtn }} onClick={handleDeleteClick}>
+            삭제
+          </button>
+        )}
+        <button style={currentScrapStyle} onClick={handleScrapClick}>
+          {job.isScrapped ? '★ 저장됨' : '☆ 스크랩'}
+        </button>
+        <button style={applyBtnStyle} onClick={handleApplyClick}>
+          지원하기
+        </button>
+      </div>
+
+      {isEditModalOpen && (
+        <JobModal
+          isOpen={isEditModalOpen}
+          onClose={() => setIsEditModalOpen(false)}
+          mode="edit"
+          initialData={job}
+        />
+      )}
+    </>
   );
 };
 

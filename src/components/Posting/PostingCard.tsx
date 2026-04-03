@@ -85,15 +85,20 @@ const styles = {
     justifyContent: 'space-between',
     alignItems: 'flex-end',
     marginTop: '28px',
+    flexWrap: 'wrap' as const,
+    gap: '12px',
   },
   tagsLeft: {
     display: 'flex',
     flexDirection: 'column' as const,
     gap: '10px',
+    flex: '1 1 auto',
+    overflow: 'hidden',
   },
   tagRow: {
     display: 'flex',
     gap: '8px',
+    flexWrap: 'wrap' as const,
   },
   expTag: {
     background: '#f3f0ff',
@@ -102,6 +107,7 @@ const styles = {
     fontWeight: 700,
     padding: '4px 10px',
     borderRadius: '6px',
+    whiteSpace: 'nowrap' as const,
   },
   locTag: {
     background: '#f3f0ff',
@@ -110,6 +116,10 @@ const styles = {
     fontWeight: 700,
     padding: '4px 10px',
     borderRadius: '6px',
+    whiteSpace: 'nowrap' as const,
+    overflow: 'hidden',
+    textOverflow: 'ellipsis',
+    maxWidth: '180px',
   },
   sourceTag: {
     background: '#f0f9ff',
@@ -119,6 +129,10 @@ const styles = {
     padding: '4px 10px',
     borderRadius: '6px',
     width: 'max-content',
+    maxWidth: '100%',
+    overflow: 'hidden',
+    textOverflow: 'ellipsis',
+    whiteSpace: 'nowrap' as const,
   },
 };
 
@@ -202,7 +216,7 @@ const PostingCard: React.FC<PostingCardProps> = ({ job }) => {
           </div>
         </div>
 
-        <PostingActionButtons url={job.url} jobId={job.id} isScrapped={job.isScrapped} />
+        <PostingActionButtons job={job} />
       </div>
     </div>
   );

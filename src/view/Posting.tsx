@@ -1,6 +1,10 @@
-import React from 'react';
+import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { RefreshCw } from 'lucide-react';
 import PostingList from '@/components/Posting/PostingList';
+import { usePostingStore } from '@/store/usePostingStore';
+import { useAuthStore } from '@/store/useAuthStore';
+import JobModal from '@/components/jobPostForm/JobModal';
 
 const styles = {
   container: {
@@ -19,6 +23,7 @@ const styles = {
     marginBottom: '18px',
     display: 'flex',
     alignItems: 'center',
+    justifyContent: 'space-between',
     gap: '14px',
   },
   apiStatus: {
@@ -53,9 +58,47 @@ const styles = {
     fontWeight: 700,
     color: '#111827',
   },
+  tabContainer: {
+    display: 'flex',
+    background: '#e2e8f0',
+    padding: '4px',
+    borderRadius: '8px',
+    gap: '4px',
+  },
+  tab: (isActive: boolean) => ({
+    padding: '6px 12px',
+    fontSize: '13px',
+    fontWeight: 600,
+    borderRadius: '6px',
+    cursor: 'pointer',
+    background: isActive ? '#fff' : 'transparent',
+    color: isActive ? '#1e293b' : '#64748b',
+    boxShadow: isActive ? '0 1px 3px rgba(0,0,0,0.1)' : 'none',
+    border: 'none',
+    transition: 'all 0.2s',
+  }),
+  addBtn: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '6px',
+    background: '#4f46e5',
+    color: '#fff',
+    border: 'none',
+    padding: '8px 16px',
+    borderRadius: '8px',
+    fontSize: '13px',
+    fontWeight: 600,
+    cursor: 'pointer',
+    transition: 'background 0.2s',
+  },
 };
 
 const PostingView: React.FC = () => {
+  const { sourceType, setSourceType } = usePostingStore();
+  const { isLoggedIn } = useAuthStore();
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const navigate = useNavigate();
+
   return (
     <div style={styles.container}>
       <style>
@@ -74,12 +117,30 @@ const PostingView: React.FC = () => {
         </div>
       </div>
 
-      <div style={styles.flexRow}>
-        <h1 style={styles.title}>전체 공고</h1>
-        {/* Removed job tags, filters, and api sources as requested */}
+      <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '18px' }}>
+        <div style={styles.tabContainer}>
+          <button style={styles.tab(sourceType === 'auto')} onClick={() => setSourceType('auto')}>
+            전체 공고
+          </button>
+          <button
+            style={styles.tab(sourceType !== 'auto')}
+            onClick={() => {
+              if (!isLoggedIn) {
+                alert('로그인 후 이용하세요.');
+                navigate('/auth');
+                return;
+              }
+              setSourceType('manual');
+            }}
+          >
+            내가 등록한 공고
+          </button>
+        </div>
       </div>
 
       <PostingList />
+
+      {isModalOpen && <JobModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} />}
     </div>
   );
 };

@@ -38,13 +38,13 @@ const styles = {
 };
 
 const PostingList: React.FC = () => {
-  const { postings, currentPage, totalPages, isLoading, error, fetchPostings } = usePostingStore();
+  const { postings, currentPage, totalPages, isLoading, error, fetchPostings, sourceType } =
+    usePostingStore();
 
   useEffect(() => {
     // 스토어의 현재 상태를 기준으로 초기 로드
     fetchPostings(currentPage);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [fetchPostings]); // 마운트 시 또는 fetchPostings가 변경될 때만 실행 (페이지 변경은 handlePageChange가 처리)
+  }, [fetchPostings, sourceType]);
 
   const handlePageChange = (page: number) => {
     if (page === currentPage) return;
