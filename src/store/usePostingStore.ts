@@ -19,7 +19,7 @@ import type {
   PostingResponse,
 } from '@/types/Posting';
 
-interface ExtendedJobPosting extends JobPosting {
+export interface ExtendedJobPosting extends JobPosting {
   isScrapped?: boolean;
 }
 

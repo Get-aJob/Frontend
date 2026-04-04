@@ -4,7 +4,6 @@ import {
   Calendar,
   KanbanSquare,
   Briefcase,
-  MessageSquareText,
   BarChart3,
   FileText,
   Bookmark,
@@ -39,12 +38,7 @@ export const NAV_SECTIONS: NavSectionType[] = [
         badgeVariant: 'point',
       },
       { id: 'nav-jobboard', label: '전체 공고', icon: <Briefcase size={18} />, path: PATH.POSTING },
-      {
-        id: 'nav-jobboardfeed',
-        label: '공고 댓글',
-        icon: <MessageSquareText size={18} />,
-        path: PATH.POSTING_FEED,
-      },
+
       { id: 'nav-stats', label: '통계 분석', icon: <BarChart3 size={18} />, path: PATH.DASHBOARD },
     ],
   },

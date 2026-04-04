@@ -13,10 +13,7 @@ import Notification from '@/view/Notification';
 import Settings from '@/view/Settings';
 import Auth from '@/view/Auth';
 import ResumeForm from '@/view/ResumeForm';
-import PostingFeed from '@/view/PostingFeed';
-import PostingFeedDetail from '@/view/PostingFeedDetail';
 
-// 라우터 설정
 const router = createBrowserRouter([
   {
     path: PATH.ROOT,
@@ -33,14 +30,6 @@ const router = createBrowserRouter([
       {
         path: PATH.POSTING,
         element: <Posting />,
-      },
-      {
-        path: PATH.POSTING_FEED,
-        element: <PostingFeed />,
-      },
-      {
-        path: PATH.POSTING_FEED_DETAIL,
-        element: <PostingFeedDetail />,
       },
       {
         path: PATH.DASHBOARD,

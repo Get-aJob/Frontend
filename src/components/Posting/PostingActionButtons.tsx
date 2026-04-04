@@ -2,9 +2,10 @@ import React, { useState } from 'react';
 import { toggleScrap } from '@/api/Scrap';
 import { usePostingStore } from '@/store/usePostingStore';
 import JobModal from '@/components/jobPostForm/JobModal';
+import PostingDetailModal from '@/components/Posting/PostingDetailModal'; // 상세 보기 모달 추가
 import type { JobPosting } from '@/types/Posting';
 import Button from '@/components/common/UI/Button';
-import { Bookmark, ExternalLink, Trash2 } from 'lucide-react';
+import { Bookmark, ExternalLink, Trash2, Search } from 'lucide-react'; // Search 아이콘 추가
 
 interface PostingActionButtonsProps {
   job: JobPosting & { isScrapped?: boolean; sourceType?: string; externalId?: string };
@@ -13,6 +14,7 @@ interface PostingActionButtonsProps {
 const PostingActionButtons: React.FC<PostingActionButtonsProps> = ({ job }) => {
   const { toggleScrapStatus, deleteJob } = usePostingStore();
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [isDetailModalOpen, setIsDetailModalOpen] = useState(false); // 상세 보기 상태 추가
 
   const handleScrapClick = async (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -26,7 +28,6 @@ const PostingActionButtons: React.FC<PostingActionButtonsProps> = ({ job }) => {
         alert('저장이 해제되었습니다.');
       }
     } catch (error: unknown) {
-      // any 대신 unknown 사용
       const err = error as { response?: { status?: number } };
       if (err.response?.status === 401) {
         alert('로그인이 필요한 기능입니다.');
@@ -36,10 +37,11 @@ const PostingActionButtons: React.FC<PostingActionButtonsProps> = ({ job }) => {
     }
   };
 
-  const handleApplyClick = (e: React.MouseEvent) => {
+  // 기존 handleApplyClick을 사이트 가기 로직으로 활용
+  const handleSiteGoClick = (e: React.MouseEvent) => {
     e.stopPropagation();
     if (!job.url) {
-      alert('지원 주소가 없습니다.');
+      alert('연결된 사이트 주소가 없습니다.');
       return;
     }
     window.open(job.url, '_blank', 'noopener,noreferrer');
@@ -53,11 +55,15 @@ const PostingActionButtons: React.FC<PostingActionButtonsProps> = ({ job }) => {
         await deleteJob(job.externalId, job.sourceType);
         alert('삭제되었습니다.');
       } catch (error) {
-        // error 변수를 로그에 활용하여 미사용 경고 해결
         console.error('삭제 중 오류 발생:', error);
         alert('삭제 중 오류가 발생했습니다.');
       }
     }
+  };
+
+  const handleDetailClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setIsDetailModalOpen(true); // 상세 보기 모달 열기
   };
 
   const isManual = job.sourceType !== 'auto';
@@ -65,16 +71,15 @@ const PostingActionButtons: React.FC<PostingActionButtonsProps> = ({ job }) => {
   return (
     <>
       <div className="flex gap-2 w-full mt-4 items-center">
-        {isManual && (
-          <Button
-            variant="outline"
-            size="sm"
-            className="flex-1 border-status-error text-status-error hover:bg-red-50 gap-1.5"
-            onClick={handleDeleteClick}
-          >
-            <Trash2 size={14} /> 삭제
-          </Button>
-        )}
+        {/* 상세보기 버튼 추가 */}
+        <Button
+          variant="outline"
+          size="sm"
+          className="flex-1 gap-1.5 border-gray-200 text-gray-600 hover:border-btn-point hover:text-btn-point"
+          onClick={handleDetailClick}
+        >
+          <Search size={14} /> 상세보기
+        </Button>
 
         <Button
           variant={job.isScrapped ? 'primary' : 'outline'}
@@ -86,16 +91,37 @@ const PostingActionButtons: React.FC<PostingActionButtonsProps> = ({ job }) => {
           {job.isScrapped ? '저장됨' : '스크랩'}
         </Button>
 
+        {/* '지원하기' -> '사이트 가기'로 명칭 및 스타일 변경 */}
         <Button
           variant="primary"
           size="sm"
           className="flex-1 gap-1.5 bg-gray-900 border-gray-900 hover:bg-black disabled:bg-gray-200 disabled:border-gray-200"
-          onClick={handleApplyClick}
+          onClick={handleSiteGoClick}
           disabled={!job.url}
         >
-          <ExternalLink size={14} /> 지원하기
+          <ExternalLink size={14} /> 사이트 가기
         </Button>
+
+        {isManual && (
+          <Button
+            variant="outline"
+            size="sm"
+            className="flex-initial px-3 border-status-error text-status-error hover:bg-red-50"
+            onClick={handleDeleteClick}
+          >
+            <Trash2 size={14} />
+          </Button>
+        )}
       </div>
+
+      {/* 공고 상세 보기 모달 */}
+      {isDetailModalOpen && (
+        <PostingDetailModal
+          isOpen={isDetailModalOpen}
+          onClose={() => setIsDetailModalOpen(false)}
+          job={job}
+        />
+      )}
 
       {isEditModalOpen && (
         <JobModal
