@@ -6,6 +6,7 @@ export interface UserInfo {
   name: string;
   email: string;
   profile_image_url?: string | null;
+  provider?: string; // ✨ 로그인 수단 (예: 'google', 'local' 등) 추가
 }
 
 interface AuthState {
