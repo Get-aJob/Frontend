@@ -1,5 +1,6 @@
 import React, { useEffect } from 'react';
 import { usePostingStore } from '@/store/usePostingStore';
+import { useAuthStore } from '@/store/useAuthStore';
 import PostingCard from './PostingCard';
 import Pagination from './Pagination';
 
@@ -29,6 +30,16 @@ const styles = {
     gridColumn: '1 / -1',
     padding: '40px',
   },
+  loginRequired: {
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center',
+    height: '300px',
+    color: '#6b7280',
+    fontSize: '16px',
+    fontWeight: 500,
+    gridColumn: '1 / -1',
+  },
   animations: `
     @keyframes fadeIn {
       from { opacity: 0; transform: translateY(10px); }
@@ -38,13 +49,14 @@ const styles = {
 };
 
 const PostingList: React.FC = () => {
-  const { postings, currentPage, totalPages, isLoading, error, fetchPostings } = usePostingStore();
+  const { postings, currentPage, totalPages, isLoading, error, fetchPostings, sourceType } =
+    usePostingStore();
+  const { isLoggedIn } = useAuthStore();
 
   useEffect(() => {
     // 스토어의 현재 상태를 기준으로 초기 로드
     fetchPostings(currentPage);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [fetchPostings]); // 마운트 시 또는 fetchPostings가 변경될 때만 실행 (페이지 변경은 handlePageChange가 처리)
+  }, [fetchPostings, currentPage, isLoggedIn]);
 
   const handlePageChange = (page: number) => {
     if (page === currentPage) return;
@@ -72,6 +84,8 @@ const PostingList: React.FC = () => {
       >
         {isLoading ? (
           <div style={styles.loadingContainer}>공고를 불러오는 중입니다...</div>
+        ) : !isLoggedIn && sourceType !== 'auto' ? (
+          <div style={styles.loginRequired}>로그인 후 이용가능합니다.</div>
         ) : postings?.length > 0 ? (
           postings.map((job) => <PostingCard key={job.id} job={job} />)
         ) : (

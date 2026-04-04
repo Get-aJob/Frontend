@@ -1,4 +1,5 @@
-import { useState } from 'react';
+import { useState, useEffect, useCallback } from 'react';
+import axios from 'axios';
 import { useForm, Controller } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -8,6 +9,8 @@ import LogoUpload from './LogoUpload';
 import TextInput from './TextInput';
 import TextareaInput from './TextareaInput';
 import DeadlineInput from './DeadlineInput';
+import { usePostingStore } from '@/store/usePostingStore';
+import type { JobPosting } from '@/types/Posting';
 
 const STYLES = {
   overlay:
@@ -29,18 +32,17 @@ const STYLES = {
     'px-[13px] py-[6px] text-[12px] bg-[#4f46e5] text-white rounded hover:bg-[#4338ca] transition-colors',
 };
 
-// Zod Schema 정의
 const jobPostSchema = z.object({
   title: z.string().min(1, '공고 제목을 입력해 주세요.'),
   company_name: z.string().min(1, '회사명을 입력해 주세요.'),
-  company_logo: z.string().nullable(),
+  company_logo: z.string().nullish(),
   location: z.string().min(1, '회사 위치를 입력해 주세요.'),
   experience: z.string().min(1, '경력 정보를 입력해 주세요.'),
-  deadline: z.string().nullable(),
+  deadline: z.string().nullish(),
   source_url: z.string().url('올바른 URL 형식이 아닙니다.').or(z.literal('')),
   content: z.string().optional(),
-  source_type: z.string(),
-  source_site_name: z.string().nullable(),
+  source_type: z.string().default('direct'),
+  source_site_name: z.string().nullish(),
 });
 
 type JobPostFields = z.infer<typeof jobPostSchema>;
@@ -48,13 +50,33 @@ type JobPostFields = z.infer<typeof jobPostSchema>;
 interface JobModalProps {
   isOpen: boolean;
   onClose: () => void;
+  mode?: 'create' | 'edit';
+  initialData?: JobPosting;
 }
 
-const JobModal = ({ isOpen, onClose }: JobModalProps) => {
-  const [isAlwaysRecruit, setIsAlwaysRecruit] = useState(false);
+interface ParsedJobData {
+  title?: string;
+  companyName?: string;
+  companyLogo?: string;
+  location?: string;
+  experience?: string;
+  sourceUrl?: string;
+  content?: {
+    requirements?: string;
+    preferred?: string;
+    description?: string;
+    [key: string]: unknown;
+  };
+  deadlineText?: string;
+  deadline?: string;
+}
 
+const JobModal = ({ isOpen, onClose, mode = 'create', initialData }: JobModalProps) => {
+  const { createJob, updateJob, parseJobUrl, saveParsedJob } = usePostingStore();
+  const [isAlwaysRecruit, setIsAlwaysRecruit] = useState(false);
   const [crawlUrl, setCrawlUrl] = useState('');
   const [isParsing, setIsParsing] = useState(false);
+  const [parsedData, setParsedData] = useState<ParsedJobData | null>(null);
 
   const {
     register,
@@ -74,12 +96,12 @@ const JobModal = ({ isOpen, onClose }: JobModalProps) => {
       deadline: null,
       source_url: '',
       content: '',
-      source_type: 'manual',
+      source_type: 'direct',
       source_site_name: null,
     },
   });
 
-  const handleReset = () => {
+  const handleReset = useCallback(() => {
     reset({
       title: '',
       company_name: '',
@@ -89,12 +111,47 @@ const JobModal = ({ isOpen, onClose }: JobModalProps) => {
       deadline: null,
       source_url: '',
       content: '',
-      source_type: 'manual',
+      source_type: 'direct',
       source_site_name: null,
     });
     setIsAlwaysRecruit(false);
     setCrawlUrl('');
+    setParsedData(null);
+  }, [reset]);
+
+  const handleClose = () => {
+    onClose();
+    handleReset();
   };
+
+  const handleOverlayClick = (e: React.MouseEvent) => {
+    if (e.target === e.currentTarget) {
+      e.stopPropagation();
+      handleClose();
+    }
+  };
+
+  useEffect(() => {
+    if (isOpen) {
+      if (mode === 'edit' && initialData) {
+        reset({
+          title: initialData.title || '',
+          company_name: initialData.companyName || '',
+          company_logo: initialData.companyLogo || null,
+          location: initialData.location || '',
+          experience: initialData.experienceLevel || '',
+          deadline: null,
+          source_url: initialData.url || '',
+          content: initialData.description || '',
+          source_type: initialData.sourceType || 'direct',
+          source_site_name: null,
+        });
+        setIsAlwaysRecruit(!initialData.deadline || initialData.deadline.includes('상시'));
+      } else {
+        handleReset();
+      }
+    }
+  }, [isOpen, mode, initialData, reset, handleReset]);
 
   const handleAlwaysRecruitChange = (checked: boolean) => {
     setIsAlwaysRecruit(checked);
@@ -103,58 +160,132 @@ const JobModal = ({ isOpen, onClose }: JobModalProps) => {
     }
   };
 
-  const handleClose = () => {
-    onClose();
-    handleReset();
-  };
-
-  const handleParse = () => {
+  const handleParse = async () => {
     if (!crawlUrl.trim()) return;
     setIsParsing(true);
-    // 파싱 기능 api 연동 전
-    setTimeout(() => {
+    try {
+      const data = (await parseJobUrl(crawlUrl)) as ParsedJobData;
+      setParsedData(data);
+      setValue('title', data.title || '');
+      setValue('company_name', data.companyName || '');
+      setValue('company_logo', data.companyLogo || '');
+      setValue('location', data.location || '');
+      setValue('experience', data.experience || '');
+      setValue('source_url', data.sourceUrl || crawlUrl);
+      setValue('source_type', 'manual');
+
+      const descriptionParts = [];
+      if (data.content?.requirements)
+        descriptionParts.push(`[지원자격]\n${data.content.requirements}`);
+      if (data.content?.preferred) descriptionParts.push(`[우대사항]\n${data.content.preferred}`);
+      if (data.content?.description) descriptionParts.push(data.content.description);
+
+      setValue('content', descriptionParts.join('\n\n'));
+
+      if (data.deadlineText === '상시채용') {
+        setIsAlwaysRecruit(true);
+      } else if (data.deadline) {
+        setValue(
+          'deadline',
+          data.deadline.includes('T') ? data.deadline.split('T')[0] : data.deadline,
+        );
+        setIsAlwaysRecruit(false);
+      }
+    } catch (error: unknown) {
+      console.error(error);
+      let errorMessage = 'URL 분석 중 오류가 발생했습니다.';
+
+      if (axios.isAxiosError(error)) {
+        const err = error;
+        if (err.code === 'ECONNABORTED' || err.message?.includes('timeout')) {
+          errorMessage = '타임아웃: 서버 응답이 지연되고 있습니다.';
+        } else if (!err.response) {
+          errorMessage = '네트워크 오류: 인터넷 연결을 확인해주세요.';
+        } else if (err.response?.status === 400) {
+          errorMessage = '지원하지 않는 사이트이거나 잘못된 URL입니다.';
+        } else if (err.response?.status) {
+          errorMessage = `서버 오류 (${err.response.status}): 잠시 후 다시 시도해주세요.`;
+        }
+      }
+      alert(errorMessage);
+    } finally {
       setIsParsing(false);
-      alert(
-        'URL 파싱 기능은 아직 준비 중입니다. 입력하신 URL을 공고 URL 필드에 자동으로 채워드렸습니다.',
-      );
-      setValue('source_url', crawlUrl);
-    }, 1000);
+    }
   };
 
-  const onSubmit = (data: JobPostFields) => {
-    const displayData = {
-      ...data,
-      company_logo: data.company_logo
-        ? data.company_logo.length > 50
-          ? `${data.company_logo.substring(0, 50)}... [생략됨]`
-          : data.company_logo
-        : null,
-    };
+  const onSubmit = async (data: JobPostFields) => {
+    try {
+      if (data.source_type === 'manual') {
+        const requestData = {
+          title: data.title,
+          companyName: data.company_name,
+          externalId:
+            mode === 'edit' && initialData?.externalId
+              ? initialData.externalId
+              : crypto.randomUUID(),
+          sourceUrl: data.source_url || '',
+          companyLogo: data.company_logo || '',
+          location: data.location || undefined,
+          experience: data.experience || undefined,
+          deadline: data.deadline ? new Date(data.deadline).toISOString() : undefined,
+          deadlineText: isAlwaysRecruit ? '상시채용' : undefined,
+          content: JSON.stringify({
+            ...(parsedData?.content || {}),
+            description: data.content,
+          }),
+        };
+        await saveParsedJob(requestData);
+        alert(mode === 'edit' ? '성공적으로 수정되었습니다.' : '성공적으로 등록되었습니다.');
+      } else {
+        const requestData = {
+          title: data.title,
+          companyName: data.company_name,
+          location: data.location,
+          experience: data.experience,
+          companyLogo: data.company_logo || undefined,
+          deadline: data.deadline || undefined,
+          deadlineText: isAlwaysRecruit ? '상시채용' : '',
+          description: data.content,
+          sourceUrl: data.source_url,
+        };
 
-    alert(JSON.stringify(displayData, null, 2));
-    handleClose();
+        if (mode === 'edit' && initialData?.externalId) {
+          await updateJob(initialData.externalId, requestData, initialData.sourceType);
+          alert('성공적으로 수정되었습니다.');
+        } else {
+          await createJob(requestData);
+          alert('성공적으로 등록되었습니다.');
+        }
+      }
+      handleClose();
+    } catch (error) {
+      console.error(error);
+      alert('저장 중 오류가 발생했습니다.');
+    }
   };
 
   if (!isOpen) return null;
 
   return (
-    <div className={STYLES.overlay} onClick={handleClose}>
+    <div className={STYLES.overlay} onClick={handleOverlayClick}>
       <div className={STYLES.modalContent} onClick={(e) => e.stopPropagation()}>
         <div className={STYLES.header}>
           <div className={STYLES.title}>
-            <Plus size={18} strokeWidth={3} /> 새 공고 등록
+            <Plus size={18} strokeWidth={3} /> {mode === 'create' ? '새 공고 등록' : '공고 수정'}
           </div>
           <button onClick={handleReset} className={STYLES.resetBtn}>
             초기화
           </button>
         </div>
 
-        <CrawlBar
-          url={crawlUrl}
-          onUrlChange={setCrawlUrl}
-          onParse={handleParse}
-          isParsing={isParsing}
-        />
+        {mode === 'create' && (
+          <CrawlBar
+            url={crawlUrl}
+            onUrlChange={setCrawlUrl}
+            onParse={handleParse}
+            isParsing={isParsing}
+          />
+        )}
 
         <div className={STYLES.topSection}>
           <Controller
@@ -162,7 +293,7 @@ const JobModal = ({ isOpen, onClose }: JobModalProps) => {
             control={control}
             render={({ field }) => (
               <div className={STYLES.logoWrapper}>
-                <LogoUpload value={field.value} onChange={field.onChange} />
+                <LogoUpload value={field.value || ''} onChange={field.onChange} />
               </div>
             )}
           />
@@ -235,7 +366,7 @@ const JobModal = ({ isOpen, onClose }: JobModalProps) => {
             취소
           </button>
           <button className={STYLES.submitBtn} onClick={handleSubmit(onSubmit)}>
-            등록하기
+            {mode === 'create' ? '등록하기' : '수정하기'}
           </button>
         </div>
       </div>

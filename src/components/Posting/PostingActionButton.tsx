@@ -1,4 +1,3 @@
-// src/components/Posting/PostingActionButtons.tsx
 import React, { useState } from 'react';
 import { toggleScrap } from '@/api/Scrap';
 import { usePostingStore } from '@/store/usePostingStore';
@@ -55,7 +54,7 @@ const styles = {
   },
 };
 
-const PostingActionButtons: React.FC<PostingActionButtonsProps> = ({ job }) => {
+const PostingActionButton: React.FC<PostingActionButtonsProps> = ({ job }) => {
   const { toggleScrapStatus, deleteJob } = usePostingStore();
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
 
@@ -72,7 +71,7 @@ const PostingActionButtons: React.FC<PostingActionButtonsProps> = ({ job }) => {
         alert('스크랩이 해제되었습니다.');
       }
     } catch (error: unknown) {
-      console.error('스크랩 처리 중 오류 발생:', error);
+      console.error(error);
       const err = error as { response?: { status?: number } };
       if (err.response?.status === 401) {
         alert('로그인이 필요한 기능입니다. 로그인 후 이용해주세요.');
@@ -91,7 +90,6 @@ const PostingActionButtons: React.FC<PostingActionButtonsProps> = ({ job }) => {
     window.open(job.url, '_blank', 'noopener,noreferrer');
   };
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const handleEditClick = (e: React.MouseEvent) => {
     e.stopPropagation();
     setIsEditModalOpen(true);
@@ -104,14 +102,21 @@ const PostingActionButtons: React.FC<PostingActionButtonsProps> = ({ job }) => {
       try {
         await deleteJob(job.externalId, job.sourceType);
         alert('공고가 삭제되었습니다.');
-      } catch (error) {
-        console.error('삭제 에러:', error);
-        alert('삭제 중 오류가 발생했습니다.');
+      } catch (error: unknown) {
+        console.error(error);
+        const err = error as { response?: { status?: number } };
+        if (err.response?.status === 401) {
+          alert('로그인이 필요한 기능입니다. 로그인 후 이용해주세요.');
+        } else if (err.response?.status === 0 || err.response?.status === undefined) {
+          alert('네트워크 오류가 발생했습니다. 연결을 확인해주세요.');
+        } else {
+          alert('삭제 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요.');
+        }
       }
     }
   };
 
-  const isManual = job.sourceType !== 'auto';
+  const isManual = job.sourceType === 'manual' || job.sourceType === 'direct';
 
   const applyBtnStyle = job.url
     ? { ...styles.btn, ...styles.applyBtn }
@@ -132,9 +137,14 @@ const PostingActionButtons: React.FC<PostingActionButtonsProps> = ({ job }) => {
     <>
       <div style={{ ...styles.buttonGroup, minWidth: isManual ? '240px' : '170px' }}>
         {isManual && (
-          <button style={{ ...styles.btn, ...styles.deleteBtn }} onClick={handleDeleteClick}>
-            삭제
-          </button>
+          <>
+            <button style={{ ...styles.btn, ...styles.editBtn }} onClick={handleEditClick}>
+              수정
+            </button>
+            <button style={{ ...styles.btn, ...styles.deleteBtn }} onClick={handleDeleteClick}>
+              삭제
+            </button>
+          </>
         )}
         <button style={currentScrapStyle} onClick={handleScrapClick}>
           {job.isScrapped ? '★ 저장됨' : '☆ 스크랩'}
@@ -156,4 +166,4 @@ const PostingActionButtons: React.FC<PostingActionButtonsProps> = ({ job }) => {
   );
 };
 
-export default PostingActionButtons;
+export default PostingActionButton;

@@ -1,18 +1,26 @@
 export interface BackendJob {
   id: string | number;
   title: string;
-  company_name: string;
-  source_type: string;
+  company_name?: string;
+  companyName?: string;
+  source_type?: string;
+  sourceType?: string;
   source_url?: string;
+  sourceUrl?: string;
   company_logo?: string;
+  companyLogo?: string;
   location?: string;
   experience?: string;
   deadline?: string;
   deadline_text?: string;
+  deadlineText?: string;
   external_id?: string;
+  externalId?: string;
   content?: string;
   source_site_name?: string;
+  sourceSiteName?: string;
   created_at?: string;
+  createdAt?: string;
 }
 
 export interface JobPosting {
@@ -26,9 +34,37 @@ export interface JobPosting {
   experienceLevel?: string;
   deadline: string;
   isScrapped?: boolean;
+  sourceType?: string;
+  externalId?: string;
+  description?: string;
 }
 
 export interface PostingResponse {
   jobs: BackendJob[];
   totalCount: number;
+}
+
+export interface DirectJobRequest {
+  title: string;
+  companyName: string;
+  location?: string;
+  experience?: string;
+  companyLogo?: string;
+  deadline?: string;
+  deadlineText?: string;
+  description?: string;
+  sourceUrl?: string;
+}
+
+export interface ManualSaveRequest {
+  title: string;
+  companyName: string;
+  externalId: string;
+  sourceUrl: string;
+  companyLogo?: string;
+  location?: string;
+  experience?: string;
+  deadline?: string;
+  deadlineText?: string;
+  content?: Record<string, unknown> | string;
 }
