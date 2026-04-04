@@ -37,7 +37,6 @@ const PostingActionButtons: React.FC<PostingActionButtonsProps> = ({ job }) => {
     }
   };
 
-  // 기존 handleApplyClick을 사이트 가기 로직으로 활용
   const handleSiteGoClick = (e: React.MouseEvent) => {
     e.stopPropagation();
     if (!job.url) {
@@ -91,7 +90,6 @@ const PostingActionButtons: React.FC<PostingActionButtonsProps> = ({ job }) => {
           {job.isScrapped ? '저장됨' : '스크랩'}
         </Button>
 
-        {/* '지원하기' -> '사이트 가기'로 명칭 및 스타일 변경 */}
         <Button
           variant="primary"
           size="sm"
@@ -99,7 +97,7 @@ const PostingActionButtons: React.FC<PostingActionButtonsProps> = ({ job }) => {
           onClick={handleSiteGoClick}
           disabled={!job.url}
         >
-          <ExternalLink size={14} /> 사이트 가기
+          <ExternalLink size={14} /> 원본 사이트
         </Button>
 
         {isManual && (
