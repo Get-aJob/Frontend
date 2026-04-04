@@ -1,121 +1,99 @@
-import { MoreVertical } from 'lucide-react';
-import { useEffect, useRef, useState } from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useResumeItemMenuStore } from '@/store/useResumeItemMenuStore';
-import { useDeleteResume, useDuplicateResume } from '@/hooks/resume';
+import { FileText, Calendar, Download, Trash2, Edit3, Pencil } from 'lucide-react';
+import Button from '@/components/common/UI/Button';
+import Badge from '@/components/common/UI/Badge';
+import ResumeDownloadButton from '@/components/resumeForm/ResumeDownloadButton';
 import UpdateTitleForm from './UpdateTitleForm';
-import ResumeDownloadButton from '../resumeForm/ResumeDownloadButton';
+
+import type { ResumeInfo } from '@/types/ResumeFormType';
 
 interface ResumeItemProps {
-  title: string;
-  id: string;
-  updatedAt: string;
+  resume: ResumeInfo;
+  onDelete?: () => void;
 }
 
-const ResumeItem = ({ title, id, updatedAt }: ResumeItemProps) => {
-  const [isOpen, setIsOpen] = useState(false);
-  const [isFormOpen, setIsFormOpen] = useState(false);
-  const menuRef = useRef<HTMLButtonElement | null>(null);
-  const itemRef = useRef<HTMLDivElement | null>(null);
+const ResumeItem = ({ resume, onDelete }: ResumeItemProps) => {
   const navigate = useNavigate();
-  const { mutate: deleteMutate } = useDeleteResume();
-  const { mutate: duplicateMutate } = useDuplicateResume();
-
-  const { isAnyMenuOpen, setIsAnyMenuOpen } = useResumeItemMenuStore();
-
-  useEffect(() => {
-    const handleClickOutside = (e: MouseEvent) => {
-      if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
-        if (isOpen) {
-          setIsOpen(false);
-          setIsAnyMenuOpen(false);
-        }
-      }
-    };
-    document.addEventListener('click', handleClickOutside);
-    return () => document.removeEventListener('click', handleClickOutside);
-  }, [isOpen, setIsAnyMenuOpen]);
-
-  useEffect(() => {
-    const handleClickOutside = (e: MouseEvent) => {
-      if (
-        itemRef.current &&
-        menuRef.current &&
-        !menuRef.current.contains(e.target as Node) &&
-        !itemRef.current.contains(e.target as Node)
-      ) {
-        if (isFormOpen) {
-          setIsFormOpen(false);
-        }
-      }
-    };
-    document.addEventListener('click', handleClickOutside);
-    return () => document.removeEventListener('click', handleClickOutside);
-  }, [isFormOpen, isOpen, setIsAnyMenuOpen]);
-
-  const date = new Date(updatedAt);
+  const [isEditingTitle, setIsEditingTitle] = useState(false);
 
   return (
-    <div className="w-full h-64 xl:h-75 relative group hover:scale-[101%]">
-      <div
-        ref={itemRef}
-        className="w-full h-full rounded-2xl p-7 bg-white border-2 border-black/10 z-0"
-        onClick={() => {
-          if (!isAnyMenuOpen && !isOpen && !isFormOpen) {
-            navigate(`/resume/${id}`);
-          }
-        }}
-      >
-        {isFormOpen ? (
-          <UpdateTitleForm id={id} title={title} setIsFormOpen={setIsFormOpen} />
-        ) : (
-          <>
-            <h1 className="text-2xl">{title}</h1>
-            <p>{date.toISOString().split('T')[0]}</p>
-          </>
-        )}
+    <div
+      onClick={() => navigate(`/resume/${resume.id}`)}
+      className="group bg-white border border-gray-200 rounded-xl p-6 hover:shadow-md transition-all duration-300 cursor-pointer border-l-4 border-l-transparent hover:border-l-btn-point flex flex-col h-full min-h-48"
+    >
+      <div className="flex justify-between items-start mb-5">
+        <div className="p-3 bg-indigo-50 rounded-lg text-btn-point group-hover:bg-btn-point group-hover:text-white transition-colors">
+          <FileText size={24} />
+        </div>
+        <div className="flex gap-2 items-center">
+          <Badge variant="point">이력서</Badge>
+          {onDelete && (
+            <button
+              onClick={(e: React.MouseEvent) => {
+                e.stopPropagation();
+                onDelete();
+              }}
+              className="text-gray-300 hover:text-status-error transition-colors p-1.5 rounded-md hover:bg-red-50"
+              title="삭제"
+            >
+              <Trash2 size={16} />
+            </button>
+          )}
+        </div>
       </div>
-      <button
-        onClick={(e) => {
-          e.stopPropagation();
-          const nextState = !isOpen;
-          if (isFormOpen) {
-            setIsFormOpen(false);
-          }
-          setIsOpen(nextState);
-          setIsAnyMenuOpen(nextState);
-        }}
-        ref={menuRef}
-        className="absolute top-5 right-7 rounded-2xl py-2 px-0.5 hover:bg-black/5 z-10"
-      >
-        <MoreVertical size={30} />
-      </button>
-      {isOpen && (
-        <div
-          className={
-            'absolute flex flex-col top-14 right-7 w-52 rounded-xl overflow-hidden bg-white z-20 shadow-md'
-          }
-        >
+
+      {isEditingTitle ? (
+        <UpdateTitleForm
+          id={String(resume.id)}
+          title={resume.title}
+          setIsFormOpen={setIsEditingTitle}
+        />
+      ) : (
+        <div className="flex items-center justify-between gap-2 mb-2 min-h-4xl">
+          <h3 className="text-subtitle font-bold text-gray-900 line-clamp-1 group-hover:text-btn-point transition-colors">
+            {resume.title || '제목 없는 이력서'}
+          </h3>
           <button
-            onClick={() => {
-              setIsFormOpen(true);
+            onClick={(e) => {
+              e.stopPropagation();
+              setIsEditingTitle(true);
             }}
-            className="p-3 hover:bg-black/5 text-start"
+            className="text-gray-300 hover:text-btn-point opacity-0 group-hover:opacity-100 transition-opacity p-1.5 rounded-md hover:bg-indigo-50 shrink-0"
+            title="제목 수정"
           >
-            이력서 제목 변경
-          </button>
-          <button onClick={() => duplicateMutate(id)} className="p-3 hover:bg-black/5 text-start">
-            사본 만들기
-          </button>
-          <ResumeDownloadButton id={id} className="w-full p-3 hover:bg-black/5 text-start">
-            다운로드
-          </ResumeDownloadButton>
-          <p className="p-3 hover:bg-black/5">미리보기</p>
-          <button onClick={() => deleteMutate(id)} className="p-3 hover:bg-black/5 text-start">
-            이력서 삭제
+            <Pencil size={14} />
           </button>
         </div>
       )}
+
+      <div className="flex items-center text-xs text-gray-500 mb-6 gap-1.5 font-medium mt-auto">
+        <Calendar size={14} />
+        <span>작성일: {new Date(resume.createdAt).toLocaleDateString()}</span>
+      </div>
+
+      <div className="flex gap-2">
+        <Button
+          variant="outline"
+          size="sm"
+          className="flex-1 gap-1.5"
+          onClick={(e: React.MouseEvent) => {
+            e.stopPropagation();
+            navigate(`/resume/${resume.id}`);
+          }}
+        >
+          <Edit3 size={14} /> 내용 수정
+        </Button>
+
+        <div onClick={(e) => e.stopPropagation()}>
+          <ResumeDownloadButton
+            id={String(resume.id)}
+            className="inline-flex items-center justify-center border-[1.5px] border-btn-point text-btn-point bg-white hover:bg-purple-50 rounded-md px-3 py-1.5 transition-all duration-200 active:scale-95 cursor-pointer h-full"
+          >
+            <Download size={14} />
+          </ResumeDownloadButton>
+        </div>
+      </div>
     </div>
   );
 };
