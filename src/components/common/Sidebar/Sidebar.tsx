@@ -5,13 +5,13 @@ import { NAV_SECTIONS } from './constants';
 
 const Sidebar = () => {
   return (
-    <aside className="flex flex-col shrink-0 w-57.5 h-screen bg-white border-r border-[#e8eaf0] shadow-[2px_0_8px_rgba(0,0,0,0.03)] z-20">
+    <aside className="flex flex-col shrink-0 w-60 h-screen bg-white border-r border-border-light shadow-sm z-20">
       <SidebarLogo />
 
-      <nav className="flex-1 px-2.5 py-3 overflow-y-auto">
+      <nav className="flex-1 px-3 py-4 overflow-y-auto">
         {NAV_SECTIONS.map((section, idx) => (
-          <div key={idx} className="mb-4.5 last:mb-0">
-            <div className="px-2.5 mb-1.5 text-[9.5px] font-bold text-[#9ca3af] tracking-[1.5px] uppercase">
+          <div key={idx} className="mb-6 last:mb-0">
+            <div className="px-3 mb-2 text-[10px] font-bold text-gray-400 tracking-wider uppercase">
               {section.title}
             </div>
 
