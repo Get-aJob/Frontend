@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { PATH } from '@/router/Path';
 import LoginForm from './LoginForm';
 import PasswordResetForm from './PasswordResetForm';
-import { loginApi } from '@/api/Auth';
+import { loginApi, googleCredentialLoginApi } from '@/api/Auth'; // 👈 구글 api 추가
 import type { LoginField } from '@/types/Auth';
 import { useAuthStore } from '@/store/useAuthStore';
 
@@ -15,10 +15,16 @@ interface LoginProps {
 const Login: React.FC<LoginProps> = ({ onSwitchRegister }) => {
   const navigate = useNavigate();
   const loginAction = useAuthStore((state) => state.login);
-
   const [mode, setMode] = useState<'login' | 'reset'>('login');
 
+  const [isLoading, setIsLoading] = useState(false);
+  const [errorMsg, setErrorMsg] = useState('');
+
+  // 1. 일반 이메일 로그인 처리
   const handleLogin = async (data: LoginField) => {
+    setIsLoading(true);
+    setErrorMsg('');
+
     try {
       const response = await loginApi(data);
       if (response && response.user) {
@@ -28,7 +34,6 @@ const Login: React.FC<LoginProps> = ({ onSwitchRegister }) => {
           email: response.user.email,
           profile_image_url: response.user.profile_image_url,
         });
-        alert('로그인 성공!');
         navigate(PATH.ROOT);
       }
     } catch (error: unknown) {
@@ -36,7 +41,38 @@ const Login: React.FC<LoginProps> = ({ onSwitchRegister }) => {
       if (axios.isAxiosError(error)) {
         errorMessage = error.response?.data?.error || errorMessage;
       }
-      alert(errorMessage);
+      setErrorMsg(errorMessage);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleGoogleLogin = async (credential?: string) => {
+    if (!credential) {
+      setErrorMsg('Google 로그인 응답이 올바르지 않습니다.');
+      return;
+    }
+
+    setIsLoading(true);
+    setErrorMsg('');
+
+    try {
+      const response = await googleCredentialLoginApi(credential);
+      if (!response?.user?.name || !response?.user?.email) {
+        setErrorMsg('사용자 정보를 불러올 수 없습니다.');
+        return;
+      }
+      loginAction({
+        id: response.user.id,
+        name: response.user.name,
+        email: response.user.email,
+        profile_image_url: response.user.profile_image_url,
+      });
+      navigate(PATH.ROOT);
+    } catch {
+      setErrorMsg('Google 로그인에 실패했습니다. 다시 시도해주세요.');
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -46,15 +82,18 @@ const Login: React.FC<LoginProps> = ({ onSwitchRegister }) => {
 
   return (
     <div className="flex flex-col animate-[fadeUp_0.3s_ease]">
-      <div className="mb-6">
-        <h2 className="text-xl font-bold text-[#111827]">로그인</h2>
-        <p className="text-sm text-[#9ca3af] mt-1">Job-Moa 서비스 이용을 위해 로그인해주세요.</p>
+      <div className="mb-6 text-center">
+        <h2 className="text-title font-bold text-gray-900">로그인</h2>
+        <p className="text-sm text-gray-500 mt-1">Job-Moa 서비스 이용을 위해 로그인해주세요.</p>
       </div>
 
       <LoginForm
         onSubmit={handleLogin}
+        onGoogleLogin={handleGoogleLogin}
         onSwitchRegister={onSwitchRegister}
         onForgotPassword={() => setMode('reset')}
+        isLoading={isLoading}
+        errorMsg={errorMsg}
       />
     </div>
   );

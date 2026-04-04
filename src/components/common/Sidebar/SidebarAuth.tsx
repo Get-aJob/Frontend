@@ -1,25 +1,31 @@
 // src/components/common/Sidebar/SidebarAuth.tsx
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { PATH } from '@/router/Path';
 import { useAuthStore } from '@/store/useAuthStore';
 import { logoutApi } from '@/api/Auth';
 import Button from '@/components/common/UI/Button';
-import { LogIn } from 'lucide-react';
+import ConfirmModal from '@/components/common/UI/ConfirmModal';
+import { LogIn, Loader2 } from 'lucide-react';
 
 const SidebarAuth = () => {
   const navigate = useNavigate();
   const { isLoggedIn, userInfo, logout } = useAuthStore();
 
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
+
   const handleLogout = async () => {
-    if (!window.confirm('로그아웃 하시겠습니까?')) return;
+    setIsLoggingOut(true);
+
     try {
       await logoutApi();
       logout();
-      alert('로그아웃 되었습니다.');
       navigate(PATH.POSTING);
     } catch (error) {
       console.error('로그아웃 실패:', error);
-      alert('로그아웃 처리 중 오류가 발생했습니다.');
+    } finally {
+      setIsLoggingOut(false);
     }
   };
 
@@ -53,14 +59,32 @@ const SidebarAuth = () => {
 
           <div className="flex items-center gap-1.5 shrink-0">
             <button
-              onClick={handleLogout}
-              className="px-2 py-1 text-[11px] font-bold text-gray-500 hover:text-status-error hover:bg-red-50 rounded-md transition-colors cursor-pointer"
+              onClick={() => setIsModalOpen(true)}
+              disabled={isLoggingOut}
+              className="flex items-center gap-1 px-2 py-1 text-[11px] font-bold text-gray-500 hover:text-status-error hover:bg-red-50 rounded-md transition-colors cursor-pointer disabled:opacity-50"
             >
-              로그아웃
+              {isLoggingOut ? (
+                <>
+                  <Loader2 size={12} className="animate-spin" />
+                  처리중
+                </>
+              ) : (
+                '로그아웃'
+              )}
             </button>
           </div>
         </div>
       )}
+
+      <ConfirmModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        title="로그아웃"
+        message="정말 로그아웃 하시겠습니까?"
+        confirmText="로그아웃"
+        isDanger={true}
+        onConfirm={handleLogout}
+      />
     </div>
   );
 };
