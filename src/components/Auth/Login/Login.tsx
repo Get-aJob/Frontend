@@ -84,7 +84,6 @@ const Login: React.FC<LoginProps> = ({ onSwitchRegister }) => {
     <div className="flex flex-col animate-[fadeUp_0.3s_ease]">
       <div className="mb-6 text-center">
         <h2 className="text-title font-bold text-gray-900">로그인</h2>
-        <p className="text-sm text-gray-500 mt-1">Job-Moa 서비스 이용을 위해 로그인해주세요.</p>
       </div>
 
       <LoginForm

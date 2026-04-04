@@ -20,7 +20,6 @@ const AuthLayout: React.FC<AuthLayoutProps> = ({ children }) => {
               <img src="/GobMoa.png" alt="취업모아 로고" className="h-14 w-auto object-contain" />
               <div className="text-title font-black tracking-tight text-gray-950">취업모아</div>
             </div>
-            <div className="text-body tracking-wide text-gray-400">취업 지원 관리 서비스</div>
           </div>
           <div className="animate-[fadeUp_0.2s_ease]">{children}</div>
         </div>

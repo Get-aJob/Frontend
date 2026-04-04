@@ -40,7 +40,6 @@ const Register: React.FC<RegisterProps> = ({ onSwitchLogin }) => {
     <div className="flex flex-col animate-[fadeUp_0.3s_ease]">
       <div className="mb-6 text-center">
         <h2 className="text-title font-bold text-gray-900">회원가입</h2>
-        <p className="text-sm text-gray-500 mt-1">Job-Moa와 함께 취업 준비를 시작해 보세요.</p>
       </div>
 
       <RegisterForm
