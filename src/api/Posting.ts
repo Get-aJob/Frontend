@@ -8,18 +8,19 @@ import type {
 
 export const getPostings = async (
   page: number,
-  size: number = 30,
-  sourceType: 'auto' | 'manual' | 'direct' = 'auto',
+  limit: number,
+  sourceType: string,
+  site?: string,
 ): Promise<PostingResponse> => {
-  const url = sourceType === 'direct' ? '/jobs/direct' : '/jobs';
-  const params: Record<string, string | number> = {
-    limit: size,
-    offset: (page - 1) * size,
-  };
-  if (sourceType !== 'direct') {
-    params.sourceType = sourceType;
-  }
-  const response = await api.get<PostingResponse>(url, { params });
+  const params = new URLSearchParams({
+    sourceType,
+    limit: String(limit),
+    offset: String((page - 1) * limit),
+  });
+
+  if (site) params.append('site', site);
+
+  const response = await api.get(`/jobs?${params.toString()}`);
   return response.data;
 };
 

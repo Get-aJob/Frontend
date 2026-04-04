@@ -1,59 +1,14 @@
-// src/components/Posting/PostingActionButtons.tsx
 import React, { useState } from 'react';
 import { toggleScrap } from '@/api/Scrap';
 import { usePostingStore } from '@/store/usePostingStore';
 import JobModal from '@/components/jobPostForm/JobModal';
 import type { JobPosting } from '@/types/Posting';
+import Button from '@/components/common/UI/Button';
+import { Bookmark, ExternalLink, Trash2 } from 'lucide-react';
 
 interface PostingActionButtonsProps {
   job: JobPosting & { isScrapped?: boolean; sourceType?: string; externalId?: string };
 }
-
-const styles = {
-  buttonGroup: {
-    display: 'flex',
-    gap: '8px',
-    minWidth: '170px',
-    flexWrap: 'wrap' as const,
-    flex: '1 1 auto',
-  },
-  btn: {
-    flex: 1,
-    padding: '8px 0',
-    borderRadius: '8px',
-    fontSize: '13px',
-    fontWeight: 700,
-    cursor: 'pointer',
-    transition: 'all 0.15s ease',
-    textAlign: 'center' as const,
-    border: '1.5px solid transparent',
-  },
-  scrapBtn: {
-    border: '1.5px solid #fbd38d',
-    background: '#fffaf0',
-    color: '#d97706',
-  },
-  scrapBtnActive: {
-    border: '1.5px solid #d97706',
-    background: '#d97706',
-    color: '#ffffff',
-  },
-  applyBtn: {
-    border: '1.5px solid #4f46e5',
-    background: '#4f46e5',
-    color: '#fff',
-  },
-  editBtn: {
-    border: '1.5px solid #cbd5e1',
-    background: '#f8fafc',
-    color: '#475569',
-  },
-  deleteBtn: {
-    border: '1.5px solid #fecaca',
-    background: '#fff1f1',
-    color: '#dc2626',
-  },
-};
 
 const PostingActionButtons: React.FC<PostingActionButtonsProps> = ({ job }) => {
   const { toggleScrapStatus, deleteJob } = usePostingStore();
@@ -61,23 +16,22 @@ const PostingActionButtons: React.FC<PostingActionButtonsProps> = ({ job }) => {
 
   const handleScrapClick = async (e: React.MouseEvent) => {
     e.stopPropagation();
-
     try {
       const result = await toggleScrap(String(job.id));
       toggleScrapStatus(job.id);
 
       if (result.added) {
-        alert('공고가 스크랩되었습니다. 스크랩 페이지에서 확인하세요!');
+        alert('공고가 저장되었습니다.');
       } else {
-        alert('스크랩이 해제되었습니다.');
+        alert('저장이 해제되었습니다.');
       }
     } catch (error: unknown) {
-      console.error('스크랩 처리 중 오류 발생:', error);
+      // any 대신 unknown 사용
       const err = error as { response?: { status?: number } };
       if (err.response?.status === 401) {
-        alert('로그인이 필요한 기능입니다. 로그인 후 이용해주세요.');
+        alert('로그인이 필요한 기능입니다.');
       } else {
-        alert('스크랩 처리에 실패했습니다. 잠시 후 다시 시도해주세요.');
+        alert('처리에 실패했습니다.');
       }
     }
   };
@@ -85,29 +39,22 @@ const PostingActionButtons: React.FC<PostingActionButtonsProps> = ({ job }) => {
   const handleApplyClick = (e: React.MouseEvent) => {
     e.stopPropagation();
     if (!job.url) {
-      alert('이동할 수 있는 지원 공고 주소가 없습니다.');
+      alert('지원 주소가 없습니다.');
       return;
     }
     window.open(job.url, '_blank', 'noopener,noreferrer');
   };
 
-  // 3. 빌드 에러 방지를 위해 주석 처리
-  /*
-  const handleEditClick = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    setIsEditModalOpen(true);
-  };
-  */
-
   const handleDeleteClick = async (e: React.MouseEvent) => {
     e.stopPropagation();
     if (!job.externalId) return;
-    if (window.confirm('정말 이 공고를 삭제하시겠습니까?')) {
+    if (window.confirm('이 공고를 삭제하시겠습니까?')) {
       try {
         await deleteJob(job.externalId, job.sourceType);
-        alert('공고가 삭제되었습니다.');
+        alert('삭제되었습니다.');
       } catch (error) {
-        console.error('삭제 에러:', error);
+        // error 변수를 로그에 활용하여 미사용 경고 해결
+        console.error('삭제 중 오류 발생:', error);
         alert('삭제 중 오류가 발생했습니다.');
       }
     }
@@ -115,35 +62,39 @@ const PostingActionButtons: React.FC<PostingActionButtonsProps> = ({ job }) => {
 
   const isManual = job.sourceType !== 'auto';
 
-  const applyBtnStyle = job.url
-    ? { ...styles.btn, ...styles.applyBtn }
-    : {
-        ...styles.btn,
-        ...styles.applyBtn,
-        background: '#e5e7eb',
-        borderColor: '#d1d5db',
-        color: '#9ca3af',
-        cursor: 'not-allowed',
-      };
-
-  const currentScrapStyle = job.isScrapped
-    ? { ...styles.btn, ...styles.scrapBtnActive }
-    : { ...styles.btn, ...styles.scrapBtn };
-
   return (
     <>
-      <div style={{ ...styles.buttonGroup, minWidth: isManual ? '240px' : '170px' }}>
+      <div className="flex gap-2 w-full mt-4 items-center">
         {isManual && (
-          <button style={{ ...styles.btn, ...styles.deleteBtn }} onClick={handleDeleteClick}>
-            삭제
-          </button>
+          <Button
+            variant="outline"
+            size="sm"
+            className="flex-1 border-status-error text-status-error hover:bg-red-50 gap-1.5"
+            onClick={handleDeleteClick}
+          >
+            <Trash2 size={14} /> 삭제
+          </Button>
         )}
-        <button style={currentScrapStyle} onClick={handleScrapClick}>
-          {job.isScrapped ? '★ 저장됨' : '☆ 스크랩'}
-        </button>
-        <button style={applyBtnStyle} onClick={handleApplyClick}>
-          지원하기
-        </button>
+
+        <Button
+          variant={job.isScrapped ? 'primary' : 'outline'}
+          size="sm"
+          className={`flex-1 gap-1.5 ${!job.isScrapped ? 'border-btn-point text-btn-point' : ''}`}
+          onClick={handleScrapClick}
+        >
+          <Bookmark size={14} fill={job.isScrapped ? 'currentColor' : 'none'} />
+          {job.isScrapped ? '저장됨' : '스크랩'}
+        </Button>
+
+        <Button
+          variant="primary"
+          size="sm"
+          className="flex-1 gap-1.5 bg-gray-900 border-gray-900 hover:bg-black disabled:bg-gray-200 disabled:border-gray-200"
+          onClick={handleApplyClick}
+          disabled={!job.url}
+        >
+          <ExternalLink size={14} /> 지원하기
+        </Button>
       </div>
 
       {isEditModalOpen && (

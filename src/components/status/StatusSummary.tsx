@@ -1,9 +1,9 @@
-interface StatusSummaryItem {
+interface StatusItem {
   statusName: string;
 }
 
 interface StatusSummaryProps {
-  items: StatusSummaryItem[];
+  items: StatusItem[];
 }
 
 const StatusSummary = ({ items }: StatusSummaryProps) => {
@@ -18,7 +18,7 @@ const StatusSummary = ({ items }: StatusSummaryProps) => {
     <section className="flex flex-nowrap gap-3 overflow-x-auto pb-2 scrollbar-hide">
       <div className="w-32 shrink-0 rounded-2xl border border-border-light bg-white p-4 shadow-sm">
         <p className="text-2xl font-black text-btn-point">{items.length}</p>
-        <p className="mt-1 text-[11px] font-bold text-gray-500 uppercase tracking-wider">Total</p>
+        <p className="mt-1 text-[11px] font-bold text-gray-500 uppercase tracking-wider">전체</p>
       </div>
 
       {statusList.map(([name, count]) => (

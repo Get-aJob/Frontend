@@ -1,136 +1,75 @@
-import React, { useState } from 'react';
-import { RefreshCw } from 'lucide-react';
-import PostingList from '@/components/Posting/PostingList';
+// src/view/Posting.tsx
+import { useEffect } from 'react';
 import { usePostingStore } from '@/store/usePostingStore';
-import JobModal from '@/components/jobPostForm/JobModal';
+import PostingList from '@/components/Posting/PostingList';
+import PostingFilter from '@/components/Posting/PostingFilter';
+import Pagination from '@/components/Posting/Pagination';
+import EmptyState from '@/components/common/UI/EmptyState';
+import PostingNotice from '@/components/Posting/PostingNotice';
+import { Briefcase } from 'lucide-react';
 
-const styles = {
-  container: {
-    padding: '24px',
-    display: 'flex',
-    flexDirection: 'column' as const,
-    flex: 1,
-    background: '#f4f5f8',
-    minHeight: '100%',
-  },
-  apiBar: {
-    background: 'linear-gradient(135deg, #eef2ff, #f5f3ff)',
-    border: '1.5px solid #c7d2fe',
-    borderRadius: '12px',
-    padding: '14px 18px',
-    marginBottom: '18px',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    gap: '14px',
-  },
-  apiStatus: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: '6px',
-    fontSize: '13px',
-    fontWeight: 600,
-    color: '#4f46e5',
-  },
-  apiDot: {
-    width: '8px',
-    height: '8px',
-    borderRadius: '50%',
-    background: '#10b981',
-    flexShrink: 0,
-    animation: 'pulse 2s infinite',
-  },
-  crawlingText: {
-    fontSize: '13px',
-    fontWeight: 700,
-    color: '#111827',
-  },
-  flexRow: {
-    display: 'flex',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: '18px',
-  },
-  title: {
-    fontSize: '20px',
-    fontWeight: 700,
-    color: '#111827',
-  },
-  tabContainer: {
-    display: 'flex',
-    background: '#e2e8f0',
-    padding: '4px',
-    borderRadius: '8px',
-    gap: '4px',
-  },
-  tab: (isActive: boolean) => ({
-    padding: '6px 12px',
-    fontSize: '13px',
-    fontWeight: 600,
-    borderRadius: '6px',
-    cursor: 'pointer',
-    background: isActive ? '#fff' : 'transparent',
-    color: isActive ? '#1e293b' : '#64748b',
-    boxShadow: isActive ? '0 1px 3px rgba(0,0,0,0.1)' : 'none',
-    border: 'none',
-    transition: 'all 0.2s',
-  }),
-  addBtn: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: '6px',
-    background: '#4f46e5',
-    color: '#fff',
-    border: 'none',
-    padding: '8px 16px',
-    borderRadius: '8px',
-    fontSize: '13px',
-    fontWeight: 600,
-    cursor: 'pointer',
-    transition: 'background 0.2s',
-  },
-};
+const Posting = () => {
+  const { postings, isLoading, fetchPostings, totalPages, sourceType, currentPage, selectedSite } =
+    usePostingStore(); //
 
-const PostingView: React.FC = () => {
-  const { sourceType, setSourceType } = usePostingStore();
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  useEffect(() => {
+    fetchPostings(currentPage, selectedSite);
+  }, [currentPage, sourceType, selectedSite, fetchPostings]); //
+
+  const handlePageChange = (page: number) => {
+    fetchPostings(page, selectedSite);
+  }; //
+
+  const handlePageReset = () => {
+    handlePageChange(1);
+  }; //
+
+  // ... 상단 import 생략
 
   return (
-    <div style={styles.container}>
-      <style>
-        {`
-          @keyframes pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.4; }
-          }
-        `}
-      </style>
+    <div className="animate-[fadeUp_0.3s_ease] pb-20">
+      <PostingFilter totalCount={postings.length} onPageReset={handlePageReset} />
 
-      <div style={styles.apiBar}>
-        <div style={{ ...styles.crawlingText, display: 'flex', alignItems: 'center', gap: '8px' }}>
-          <RefreshCw size={14} color="#4f46e5" />
-          <span>6시간 마다 채용 공고 크롤링</span>
-        </div>
+      <PostingNotice />
+
+      <div className="mt-8">
+        {/* 1. 로딩 중일 때는 무조건 스켈레톤만! */}
+        {isLoading ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {[...Array(6)].map((_, i) => (
+              <div
+                key={i}
+                className="h-64 bg-gray-50 animate-pulse rounded-2xl border border-gray-100"
+              />
+            ))}
+          </div>
+        ) : (
+          <>
+            {postings.length > 0 ? (
+              <>
+                <PostingList postings={postings} />
+                <div className="mt-12">
+                  <Pagination
+                    currentPage={currentPage}
+                    totalPages={totalPages}
+                    onPageChange={handlePageChange}
+                  />
+                </div>
+              </>
+            ) : (
+              <div className="flex items-center justify-center py-20">
+                <EmptyState
+                  icon={<Briefcase size={44} />}
+                  title="현재 등록된 공고가 없습니다"
+                  description="잠시 후 다시 확인하거나, 새로운 공고를 직접 등록해보세요."
+                />
+              </div>
+            )}
+          </>
+        )}
       </div>
-
-      <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '18px' }}>
-        <div style={styles.tabContainer}>
-          <button style={styles.tab(sourceType === 'auto')} onClick={() => setSourceType('auto')}>
-            전체 공고
-          </button>
-          <button
-            style={styles.tab(sourceType === 'manual')}
-            onClick={() => setSourceType('manual')}
-          >
-            내가 등록한 공고
-          </button>
-        </div>
-      </div>
-
-      <PostingList />
-      {isModalOpen && <JobModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} />}
     </div>
   );
 };
 
-export default PostingView;
+export default Posting;

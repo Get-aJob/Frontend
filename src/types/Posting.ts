@@ -42,6 +42,7 @@ export interface JobPosting {
 export interface PostingResponse {
   jobs: BackendJob[];
   totalCount: number;
+  sourceSites?: string[];
 }
 
 export interface DirectJobRequest {
