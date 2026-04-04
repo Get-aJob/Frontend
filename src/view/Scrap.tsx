@@ -3,10 +3,12 @@ import type { ChangeEvent } from 'react';
 import { getMyScraps, toggleScrap, type ScrapItem } from '@/api/Scrap';
 import ScrapHeader from '@/components/scrap/ScrapHeader';
 import ScrapList from '@/components/scrap/ScrapList';
+import { LoaderCircle } from 'lucide-react';
 
 const Scrap = () => {
   const [scraps, setScraps] = useState<ScrapItem[]>([]);
   const [sortBy, setSortBy] = useState<'latest' | 'deadline'>('latest');
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     const fetchScraps = async () => {
@@ -15,6 +17,8 @@ const Scrap = () => {
         setScraps(data);
       } catch (error) {
         console.error('스크랩 목록 로드 실패:', error);
+      } finally {
+        setIsLoading(false);
       }
     };
     fetchScraps();
@@ -48,11 +52,17 @@ const Scrap = () => {
   }, [scraps, sortBy]);
 
   return (
-    <div className="p-8 bg-[#f4f5f8] min-h-screen">
-      <div className="max-w-5xl mx-auto">
-        <ScrapHeader count={scraps.length} sortBy={sortBy} onSortChange={handleSortChange} />
+    <div className="max-w-7xl mx-auto pb-20 pt-6 px-4 sm:px-6 animate-[fadeUp_0.3s_ease]">
+      <ScrapHeader count={scraps.length} sortBy={sortBy} onSortChange={handleSortChange} />
+
+      {isLoading ? (
+        <div className="flex flex-col items-center justify-center min-h-100 text-gray-400">
+          <LoaderCircle size={36} className="animate-spin text-btn-point mb-4" />
+          <p className="font-medium tracking-wide">저장된 공고를 불러오는 중입니다...</p>
+        </div>
+      ) : (
         <ScrapList scraps={sortedScraps} onUnscrap={handleUnscrap} />
-      </div>
+      )}
     </div>
   );
 };

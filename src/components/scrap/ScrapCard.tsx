@@ -1,4 +1,3 @@
-// src/components/scrap/ScrapCard.tsx
 import React from 'react';
 import type { ScrapItem } from '@/api/Scrap';
 
@@ -66,11 +65,12 @@ const ScrapCard: React.FC<ScrapCardProps> = ({ scrap, onUnscrap }) => {
   const dday = calculateDday(scrap.deadline);
 
   return (
-    <div className="bg-white p-5 rounded-2xl border border-gray-200 hover:border-indigo-500 hover:shadow-[0_4px_20px_rgba(0,0,0,0.06)] hover:-translate-y-1 transition-all duration-200 flex flex-col justify-between min-h-42.5 cursor-pointer group">
+    // ✨ min-h-[170px]를 min-h-[140px]로 줄였습니다.
+    <div className="bg-white p-5 rounded-2xl border border-gray-200 hover:border-btn-point hover:shadow-[0_4px_20px_rgba(0,0,0,0.06)] hover:-translate-y-1 transition-all duration-200 flex flex-col justify-between min-h-[140px] cursor-pointer group">
       <div className="flex justify-between items-start gap-4">
         <div className="flex gap-3.5 min-w-0 flex-1">
           <div
-            className="w-12 h-12 rounded-xl shrink-0 flex items-center justify-center font-bold text-white text-lg shadow-sm"
+            className="w-11 h-11 rounded-xl shrink-0 flex items-center justify-center font-bold text-white text-lg shadow-sm"
             style={{
               background: scrap.companyLogo ? 'transparent' : getGradientForName(scrap.companyName),
             }}
@@ -103,7 +103,8 @@ const ScrapCard: React.FC<ScrapCardProps> = ({ scrap, onUnscrap }) => {
         </div>
       </div>
 
-      <div className="flex justify-between items-center mt-5 pt-4 border-t border-gray-100">
+      {/* ✨ mt-5를 mt-4로 줄여 상하 간격을 좁혔습니다. */}
+      <div className="flex justify-between items-center mt-4 pt-4 border-t border-gray-100">
         <span className="text-[11px] text-gray-400 font-medium tracking-wide">
           📌 {new Date(scrap.createdAt).toLocaleDateString()} 저장
         </span>
@@ -113,7 +114,7 @@ const ScrapCard: React.FC<ScrapCardProps> = ({ scrap, onUnscrap }) => {
               e.stopPropagation();
               onUnscrap(scrap.jobPostingId);
             }}
-            className="text-xs px-3 py-1.5 border border-gray-200 bg-white rounded-lg text-gray-500 font-bold hover:bg-gray-50 hover:text-gray-700 transition-colors"
+            className="text-xs px-3 py-1.5 border border-gray-200 bg-white rounded-lg text-gray-500 font-bold hover:bg-red-50 hover:text-status-error hover:border-red-200 transition-colors"
           >
             해제
           </button>
@@ -122,7 +123,7 @@ const ScrapCard: React.FC<ScrapCardProps> = ({ scrap, onUnscrap }) => {
               e.stopPropagation();
               /* TODO: 지원하기 URL 연결 */ alert('지원 페이지로 이동합니다.');
             }}
-            className="text-xs px-3 py-1.5 bg-indigo-600 text-white rounded-lg font-bold hover:bg-indigo-700 transition-colors"
+            className="text-xs px-3 py-1.5 bg-btn-point text-white rounded-lg font-bold hover:opacity-90 transition-opacity"
           >
             지원하기
           </button>
