@@ -1,3 +1,4 @@
+// common/UI/ConfirmModal.tsx 전체 코드
 import Button from './Button';
 
 interface ConfirmModalProps {
@@ -8,7 +9,7 @@ interface ConfirmModalProps {
   cancelText?: string;
   onConfirm: () => void;
   onClose: () => void;
-  isDanger?: boolean; // 삭제나 로그아웃 같은 경고성 작업일 때 true를 줍니다.
+  isDanger?: boolean;
 }
 
 const ConfirmModal = ({
@@ -25,15 +26,16 @@ const ConfirmModal = ({
 
   return (
     <div
-      className="fixed inset-0 flex items-center justify-center bg-gray-900/50 backdrop-blur-sm z-2000"
+      // 💡 z-index를 최상위급인 9999로 설정하고 배경색 투명도를 살짝 조절했습니다.
+      className="fixed inset-0 flex items-center justify-center bg-black/60 backdrop-blur-sm z-[9999]"
       onClick={onClose}
     >
       <div
-        className="bg-white rounded-(--radius-card) p-6 w-100 shadow-xl animate-[fadeInUp_0.2s_ease]"
+        className="bg-white rounded-(--radius-card) p-6 w-100 shadow-2xl animate-[fadeInUp_0.2s_ease]"
         onClick={(e) => e.stopPropagation()}
       >
         <h2 className="text-title font-extrabold text-gray-900 mb-2">{title}</h2>
-        <p className="text-sm text-gray-600 mb-8 leading-relaxed whitespace-pre-wrap">{message}</p>
+        <p className="text-sm text-gray-600 mb-8">{message}</p>
 
         <div className="flex justify-end gap-2.5">
           <Button variant="ghost" onClick={onClose}>

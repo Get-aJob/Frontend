@@ -1,3 +1,4 @@
+// common/Topbar/Topbar.tsx 전체 코드
 import { useState, useRef, useEffect } from 'react';
 import JobModal from '@/components/jobPostForm/JobModal';
 import { useAuthStore } from '@/store/useAuthStore';
@@ -41,7 +42,8 @@ const Topbar = ({
 
   return (
     <>
-      <header className="flex items-center px-6 gap-3 min-h-20 w-full py-4 bg-white border-b border-border-light z-100 shrink-0">
+      {/* 💡 z-50을 제거했습니다. */}
+      <header className="flex items-center px-6 gap-3 min-h-20 w-full py-4 bg-white border-b border-border-light shrink-0">
         <div className="flex items-center gap-2 text-title font-extrabold text-gray-900">
           <span>{title}</span>
           {badge && <Badge variant="point">{badge}</Badge>}
