@@ -7,7 +7,7 @@
   --font-sans: 'Inter', 'Noto Sans KR', sans-serif;
 
   /* [배경색] 각 View(페이지 본문)에 적용할 회색 */
-  --color-bg-view: #f3f4f6;
+  --color-bg-view: white;
 
   /* [버튼 색상] 로그인, 공고 등록 등 주요 액션용 보라색 */
   --color-btn-point: #4f46e5;
