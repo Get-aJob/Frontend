@@ -35,11 +35,11 @@ const Layout = () => {
   };
 
   const config = getTopbarConfig();
-
   const publicPaths: string[] = [PATH.ROOT, PATH.POSTING, PATH.POSTING_FEED];
   const isPublicPath = publicPaths.includes(location.pathname);
+
   return (
-    <div className="flex h-screen bg-[#f8f9fc] overflow-hidden">
+    <div className="flex h-screen bg-white overflow-hidden">
       <Sidebar />
       <div className="flex flex-col flex-1 overflow-hidden">
         <Topbar
@@ -48,18 +48,19 @@ const Layout = () => {
           showSearch={config.showSearch}
           showAddButton={config.showAddButton}
         />
-        <main className="flex-1 overflow-y-auto">
+        <main className="flex-1 overflow-y-auto bg-bg-view">
           {!isLoggedIn && !isPublicPath ? (
             <div className="flex items-center justify-center h-full w-full">
-              <p className="text-[#6b7280] text-[16px] font-medium">로그인 후 이용가능합니다.</p>
+              <p className="text-gray-500 text-subtitle font-medium">로그인 후 이용가능합니다.</p>
             </div>
           ) : (
-            <Outlet />
+            <div className="p-6">
+              <Outlet />
+            </div>
           )}
         </main>
       </div>
     </div>
   );
 };
-
 export default Layout;
