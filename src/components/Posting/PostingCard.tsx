@@ -1,6 +1,6 @@
 import React from 'react';
 import type { JobPosting } from '@/types/Posting';
-import PostingActionButton from './PostingActionButton';
+import PostingActionButton from './PostingActionButtons';
 
 interface PostingCardProps {
   job: JobPosting & { isScrapped?: boolean };

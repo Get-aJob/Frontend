@@ -91,11 +91,13 @@ const PostingActionButtons: React.FC<PostingActionButtonsProps> = ({ job }) => {
     window.open(job.url, '_blank', 'noopener,noreferrer');
   };
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  // 3. 빌드 에러 방지를 위해 주석 처리
+  /*
   const handleEditClick = (e: React.MouseEvent) => {
     e.stopPropagation();
     setIsEditModalOpen(true);
   };
+  */
 
   const handleDeleteClick = async (e: React.MouseEvent) => {
     e.stopPropagation();

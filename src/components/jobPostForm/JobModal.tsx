@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
-import { useForm, Controller } from 'react-hook-form';
+import { useForm, Controller, type SubmitHandler } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Plus } from 'lucide-react';
@@ -32,6 +32,7 @@ const STYLES = {
     'px-[13px] py-[6px] text-[12px] bg-[#4f46e5] text-white rounded hover:bg-[#4338ca] transition-colors',
 };
 
+// 1. source_type을 확실하게 string으로 정의하여 undefined 방지
 const jobPostSchema = z.object({
   title: z.string().min(1, '공고 제목을 입력해 주세요.'),
   company_name: z.string().min(1, '회사명을 입력해 주세요.'),
@@ -41,7 +42,7 @@ const jobPostSchema = z.object({
   deadline: z.string().nullish(),
   source_url: z.string().url('올바른 URL 형식이 아닙니다.').or(z.literal('')),
   content: z.string().optional(),
-  source_type: z.string().default('direct'),
+  source_type: z.string(), // undefined 허용 안 함
   source_site_name: z.string().nullish(),
 });
 
@@ -86,6 +87,7 @@ const JobModal = ({ isOpen, onClose, mode = 'create', initialData }: JobModalPro
     setValue,
     formState: { errors },
   } = useForm<JobPostFields>({
+    // 제네릭 타입 명시
     resolver: zodResolver(jobPostSchema),
     defaultValues: {
       title: '',
@@ -213,7 +215,8 @@ const JobModal = ({ isOpen, onClose, mode = 'create', initialData }: JobModalPro
     }
   };
 
-  const onSubmit = async (data: JobPostFields) => {
+  // 2. SubmitHandler를 사용하여 handleSubmit과의 타입 일치
+  const onSubmit: SubmitHandler<JobPostFields> = async (data) => {
     try {
       if (data.source_type === 'manual') {
         const requestData = {
