@@ -18,7 +18,7 @@ const Month = ({ currentDate, events, onEventClick }: Props) => {
     cells.push(
       <div
         key={`empty-${i}`}
-        className="min-h-37.5 bg-gray-50/20 border-r border-b border-gray-100"
+        className="min-h-37.5 bg-gray-50/20 border-r border-b border-border-light"
       />,
     );
   }
@@ -38,8 +38,8 @@ const Month = ({ currentDate, events, onEventClick }: Props) => {
   }
 
   return (
-    <div className="border-t border-l border-gray-100 rounded-3xl overflow-hidden shadow-sm">
-      <div className="grid grid-cols-7 bg-gray-50/50 border-b border-gray-100">
+    <div className="border-t border-l border-border-light rounded-3xl overflow-hidden shadow-sm">
+      <div className="grid grid-cols-7 bg-gray-50/50 border-b border-border-light">
         {['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'].map((day) => (
           <div
             key={day}
