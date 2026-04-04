@@ -14,12 +14,11 @@ const AuthLayout: React.FC<AuthLayoutProps> = ({ children }) => {
 
       <main className="relative z-10 flex flex-1 items-center justify-center px-5 py-10">
         <div className="w-full max-w-105 rounded-2xl border-[1.5px] border-border-light bg-white p-10 shadow-[0_20px_60px_rgba(0,0,0,0.1),0_8px_20px_rgba(0,0,0,0.06)]">
-          <div className="mb-8 flex flex-col items-center justify-center gap-2">
-            <div className="flex items-center gap-2.5">
-              <div className="flex h-10 w-10 items-center justify-center rounded-[11px] bg-btn-point font-['DM_Mono'] text-[16px] font-black text-white shadow-md">
-                JOB
-              </div>
-              <div className="text-title font-black tracking-tight">Job-Moa</div>
+          <div className="mb-8 flex flex-col items-center justify-center gap-3">
+            {' '}
+            <div className="flex items-center gap-3">
+              <img src="/GobMoa.png" alt="취업모아 로고" className="h-14 w-auto object-contain" />
+              <div className="text-title font-black tracking-tight text-gray-950">취업모아</div>
             </div>
             <div className="text-body tracking-wide text-gray-400">취업 지원 관리 서비스</div>
           </div>
@@ -28,7 +27,8 @@ const AuthLayout: React.FC<AuthLayoutProps> = ({ children }) => {
       </main>
 
       <footer className="relative z-10 p-4 text-center text-body text-gray-400">
-        © 2026 <span className="font-semibold text-gray-500">Job-Moa</span> · 취업 지원 관리 서비스
+        © 2026 <span className="font-semibold text-gray-500">취업모아(Job-Moa)</span> · 취업 지원
+        관리 서비스
       </footer>
     </div>
   );
