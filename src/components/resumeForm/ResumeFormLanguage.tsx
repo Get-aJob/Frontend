@@ -2,6 +2,7 @@ import type { LanguageLevelType, ResumeFormInputs } from '@/types/ResumeFormType
 import { Trash2 } from 'lucide-react';
 import { useFieldArray, useFormContext } from 'react-hook-form';
 import AddLanguageTest from './AddLanguageTest';
+import Button from '@/components/common/UI/Button';
 
 const ResumeFormLanguage = () => {
   const { register, control } = useFormContext<ResumeFormInputs>();
@@ -18,29 +19,31 @@ const ResumeFormLanguage = () => {
   ];
 
   return (
-    <div className="w-full mt-20">
-      <label className="text-xl ml-2">언어</label>
-      <div className="w-full mt-3 ml-2 h-px bg-black/40" />
-      {fields.map((field, index) => (
-        <div
-          key={field.id}
-          className="w-full relative flex mt-5 group has-focus:outline-2 outline-blue-200 rounded-lg p-3 hover:outline-2"
-        >
-          <div className="flex-1">
-            <div className="w-full flex">
+    <section className="bg-white p-8 rounded-2xl border border-gray-100 shadow-sm mb-10">
+      <h2 className="text-subtitle font-bold mb-6 flex items-center gap-2">
+        <span className="w-1.5 h-5 bg-btn-point rounded-full" />
+        외국어
+      </h2>
+      <div className="space-y-4">
+        {fields.map((field, index) => (
+          <div
+            key={field.id}
+            className="relative p-6 rounded-xl border border-gray-100 bg-gray-50/40 group focus-within:border-btn-point focus-within:ring-1 focus-within:bg-white transition-all"
+          >
+            <div className="flex flex-wrap items-center gap-4 mb-4">
               <input
                 {...register(`language.${index}.name`)}
                 type="text"
-                placeholder="언어명"
-                className="w-1/3 outline-none resize-none"
+                placeholder="언어명 (예: 영어)"
+                className="bg-transparent text-lg font-bold text-gray-900 outline-none placeholder:text-gray-300 w-48"
               />
               <select
                 {...register(`language.${index}.level`)}
                 defaultValue=""
-                className="py-2 px-1 rounded-md bg-white hover:bg-black/10 appearance-none focus:outline-none [text-align-last:center]"
+                className="py-1.5 px-3 rounded-lg border border-gray-200 bg-white text-sm text-gray-600 hover:border-btn-point focus:outline-none focus:border-btn-point cursor-pointer transition-colors"
               >
                 <option value="" disabled hidden>
-                  수준
+                  수준 선택
                 </option>
                 {typeOption.map((option) => (
                   <option key={option.value} value={option.value}>
@@ -49,43 +52,32 @@ const ResumeFormLanguage = () => {
                 ))}
               </select>
             </div>
-            <AddLanguageTest fieldIndex={index} />
-          </div>
 
-          <div className="absolute -bottom-14 left-[48%] w-14 h-14 p-2">
+            <div className="w-full h-px bg-gray-200 my-4" />
+
+            <AddLanguageTest fieldIndex={index} />
+
             <button
               type="button"
-              onClick={() => {
-                append({
-                  name: '',
-                  level: undefined,
-                  test: [],
-                });
-              }}
-              className="w-full h-full rounded-full bg-blue-100 text-blue-500 text-3xl text-center justify-center hidden group-hover:flex hover:bg-blue-200"
+              onClick={() => remove(index)}
+              className="absolute top-4 right-4 p-2 text-gray-400 hover:text-status-error hover:bg-red-50 rounded-lg transition-colors opacity-0 group-hover:opacity-100"
+              title="삭제"
             >
-              +
+              <Trash2 size={16} />
             </button>
           </div>
-          <button
-            type="button"
-            onClick={() => {
-              if (fields.length === 1) {
-                append({
-                  name: '',
-                  level: undefined,
-                  test: [],
-                });
-              }
-              remove(index);
-            }}
-            className="absolute top-4 right-4 w-8 h-8 p-1.5 hidden group-hover:flex items-center justify-center bg-blue-100 rounded-sm hover:bg-blue-200"
-          >
-            <Trash2 className="text-blue-600" />
-          </button>
-        </div>
-      ))}
-    </div>
+        ))}
+
+        <Button
+          type="button"
+          variant="outline"
+          className="w-full border-dashed border-2 py-6 text-gray-500 hover:text-btn-point hover:border-btn-point hover:bg-purple-50/50 rounded-xl"
+          onClick={() => append({ name: '', level: undefined, test: [] })}
+        >
+          + 외국어 항목 추가하기
+        </Button>
+      </div>
+    </section>
   );
 };
 

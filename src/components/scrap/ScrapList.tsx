@@ -21,7 +21,7 @@ const ScrapList: React.FC<ScrapListProps> = ({ scraps, onUnscrap }) => {
       {/* 탐색 유도 빈 카드 */}
       <div
         onClick={() => navigate(PATH.POSTING)}
-        className="border-2 border-dashed border-gray-200 bg-transparent rounded-2xl flex flex-col items-center justify-center gap-3 text-gray-400 min-h-[170px] cursor-pointer hover:border-indigo-400 hover:bg-indigo-50 hover:text-indigo-500 transition-all"
+        className="border-2 border-dashed border-gray-200 bg-transparent rounded-2xl flex flex-col items-center justify-center gap-3 text-gray-400 min-h-42.5 cursor-pointer hover:border-indigo-400 hover:bg-indigo-50 hover:text-indigo-500 transition-all"
       >
         <div className="text-3xl">🔍</div>
         <div className="text-[14px] font-bold">새로운 공고 탐색하러 가기</div>
