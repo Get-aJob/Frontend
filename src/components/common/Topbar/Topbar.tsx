@@ -1,4 +1,3 @@
-// common/Topbar/Topbar.tsx 전체 코드
 import { useState, useRef, useEffect } from 'react';
 import JobModal from '@/components/jobPostForm/JobModal';
 import { useAuthStore } from '@/store/useAuthStore';
@@ -42,30 +41,38 @@ const Topbar = ({
 
   return (
     <>
-      {/* 💡 z-50을 제거했습니다. */}
-      <header className="flex items-center px-6 gap-3 min-h-20 w-full py-4 bg-white border-b border-border-light shrink-0">
-        <div className="flex items-center gap-2 text-title font-extrabold text-gray-900">
+      <header className="flex items-center px-8 gap-4 h-20 w-full bg-white border-b border-border-light shrink-0 sticky top-0 z-30">
+        <div className="flex items-center gap-3 text-title font-extrabold text-gray-900">
           <span>{title}</span>
           {badge && <Badge variant="point">{badge}</Badge>}
         </div>
 
-        <div className="flex items-center gap-2.5 ml-auto">
+        <div className="flex items-center gap-3 ml-auto">
           {showSearch && (
-            <div className="flex items-center gap-1.75 w-55 px-3.5 py-2 bg-bg-view border-[1.5px] border-border-light rounded-lg">
+            <div className="flex items-center gap-2 w-64 px-4 py-2 bg-bg-view border border-border-light rounded-xl transition-all focus-within:border-btn-point focus-within:ring-1 focus-within:ring-btn-point">
               <label htmlFor="topbar-search" className="sr-only">
                 공고 검색
               </label>
-              <span aria-hidden="true">🔍</span>
+              <span aria-hidden="true" className="text-gray-400 text-sm">
+                🔍
+              </span>
               <input
                 id="topbar-search"
                 aria-label="공고 검색"
-                className="w-full bg-transparent border-none outline-none text-body focus-visible:ring-2 focus-visible:ring-btn-point rounded-sm"
+                className="w-full bg-transparent border-none outline-none text-[13px] placeholder:text-gray-400"
                 placeholder="검색어를 입력하세요..."
               />
             </div>
           )}
 
-          {showAddButton && <Button onClick={handleAddButtonClick}>＋ 공고 등록</Button>}
+          {showAddButton && (
+            <Button
+              onClick={handleAddButtonClick}
+              className="px-5 py-2.5 h-11 rounded-xl shadow-sm font-bold"
+            >
+              ＋ 공고 등록
+            </Button>
+          )}
         </div>
       </header>
 
