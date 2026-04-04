@@ -1,38 +1,17 @@
 import { useState, useEffect, useCallback } from 'react';
-import axios from 'axios';
 import { useForm, Controller, type SubmitHandler } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Plus } from 'lucide-react';
+import { RotateCcw, X } from 'lucide-react';
 import CrawlBar from './CrawlBar';
 import LogoUpload from './LogoUpload';
 import TextInput from './TextInput';
 import TextareaInput from './TextareaInput';
 import DeadlineInput from './DeadlineInput';
 import { usePostingStore } from '@/store/usePostingStore';
-import type { JobPosting } from '@/types/Posting';
+import type { JobPosting, ParsedJobData } from '@/types/Posting';
+import Button from '@/components/common/UI/Button';
 
-const STYLES = {
-  overlay:
-    'fixed inset-0 bg-[#111827]/50 backdrop-blur-[3px] z-[1000] flex items-center justify-center transition-opacity duration-200 opacity-100 pointer-events-auto p-4',
-  modalContent:
-    'bg-white rounded-[16px] p-[20px] sm:p-[30px] w-full max-w-[750px] max-h-[90vh] overflow-y-auto shadow-[0_10px_30px_rgba(0,0,0,0.1)]',
-  header: 'flex justify-between items-center mb-[22px]',
-  title: 'text-[18px] font-[800] !m-0 flex items-center gap-1.5',
-  resetBtn:
-    'text-[11.5px] px-[11px] py-[5px] text-[#9ca3af] border border-[#e8eaf0] rounded hover:bg-gray-50 transition-colors',
-  topSection: 'flex flex-col sm:grid sm:grid-cols-[160px_1fr] gap-[24px] mb-[20px]',
-  logoWrapper: 'flex justify-center sm:block',
-  formGroup: 'flex flex-col gap-[13px]',
-  gridRow: 'grid grid-cols-1 sm:grid-cols-2 gap-[12px]',
-  footer: 'flex justify-end gap-[10px] mt-[20px] pt-[18px] border-t-[1.5px] border-[#e8eaf0]',
-  cancelBtn:
-    'px-[13px] py-[6px] text-[12px] bg-white text-[#111827] border border-[#e8eaf0] rounded hover:bg-gray-50 transition-colors',
-  submitBtn:
-    'px-[13px] py-[6px] text-[12px] bg-[#4f46e5] text-white rounded hover:bg-[#4338ca] transition-colors',
-};
-
-// source_type을 필수 string으로 정의하여 undefined 오류를 방지합니다.
 const jobPostSchema = z.object({
   title: z.string().min(1, '공고 제목을 입력해 주세요.'),
   company_name: z.string().min(1, '회사명을 입력해 주세요.'),
@@ -55,23 +34,6 @@ interface JobModalProps {
   initialData?: JobPosting;
 }
 
-interface ParsedJobData {
-  title?: string;
-  companyName?: string;
-  companyLogo?: string;
-  location?: string;
-  experience?: string;
-  sourceUrl?: string;
-  content?: {
-    requirements?: string;
-    preferred?: string;
-    description?: string;
-    [key: string]: unknown;
-  };
-  deadlineText?: string;
-  deadline?: string;
-}
-
 const JobModal = ({ isOpen, onClose, mode = 'create', initialData }: JobModalProps) => {
   const { createJob, updateJob, parseJobUrl, saveParsedJob } = usePostingStore();
   const [isAlwaysRecruit, setIsAlwaysRecruit] = useState(false);
@@ -87,7 +49,6 @@ const JobModal = ({ isOpen, onClose, mode = 'create', initialData }: JobModalPro
     setValue,
     formState: { errors },
   } = useForm<JobPostFields>({
-    // 제네릭 타입을 명시하여 타입 안정성을 확보합니다.
     resolver: zodResolver(jobPostSchema),
     defaultValues: {
       title: '',
@@ -126,13 +87,6 @@ const JobModal = ({ isOpen, onClose, mode = 'create', initialData }: JobModalPro
     handleReset();
   };
 
-  const handleOverlayClick = (e: React.MouseEvent) => {
-    if (e.target === e.currentTarget) {
-      e.stopPropagation();
-      handleClose();
-    }
-  };
-
   useEffect(() => {
     if (isOpen) {
       if (mode === 'edit' && initialData) {
@@ -142,7 +96,10 @@ const JobModal = ({ isOpen, onClose, mode = 'create', initialData }: JobModalPro
           company_logo: initialData.companyLogo || null,
           location: initialData.location || '',
           experience: initialData.experienceLevel || '',
-          deadline: null,
+          deadline:
+            initialData.deadline && !initialData.deadline.includes('상시')
+              ? initialData.deadline.split('T')[0]
+              : null,
           source_url: initialData.url || '',
           content: initialData.description || '',
           source_type: initialData.sourceType || 'direct',
@@ -155,18 +112,11 @@ const JobModal = ({ isOpen, onClose, mode = 'create', initialData }: JobModalPro
     }
   }, [isOpen, mode, initialData, reset, handleReset]);
 
-  const handleAlwaysRecruitChange = (checked: boolean) => {
-    setIsAlwaysRecruit(checked);
-    if (checked) {
-      setValue('deadline', null);
-    }
-  };
-
   const handleParse = async () => {
     if (!crawlUrl.trim()) return;
     setIsParsing(true);
     try {
-      const data = (await parseJobUrl(crawlUrl)) as ParsedJobData;
+      const data: ParsedJobData = await parseJobUrl(crawlUrl);
       setParsedData(data);
       setValue('title', data.title || '');
       setValue('company_name', data.companyName || '');
@@ -176,50 +126,31 @@ const JobModal = ({ isOpen, onClose, mode = 'create', initialData }: JobModalPro
       setValue('source_url', data.sourceUrl || crawlUrl);
       setValue('source_type', 'manual');
 
-      const descriptionParts = [];
+      const descriptionParts: string[] = [];
       if (data.content?.requirements)
         descriptionParts.push(`[지원자격]\n${data.content.requirements}`);
       if (data.content?.preferred) descriptionParts.push(`[우대사항]\n${data.content.preferred}`);
       if (data.content?.description) descriptionParts.push(data.content.description);
-
       setValue('content', descriptionParts.join('\n\n'));
 
       if (data.deadlineText === '상시채용') {
         setIsAlwaysRecruit(true);
+        setValue('deadline', null);
       } else if (data.deadline) {
-        setValue(
-          'deadline',
-          data.deadline.includes('T') ? data.deadline.split('T')[0] : data.deadline,
-        );
+        setValue('deadline', data.deadline.split('T')[0]);
         setIsAlwaysRecruit(false);
       }
-    } catch (error: unknown) {
-      console.error(error);
-      let errorMessage = 'URL 분석 중 오류가 발생했습니다.';
-
-      if (axios.isAxiosError(error)) {
-        const err = error;
-        if (err.code === 'ECONNABORTED' || err.message?.includes('timeout')) {
-          errorMessage = '타임아웃: 서버 응답이 지연되고 있습니다.';
-        } else if (!err.response) {
-          errorMessage = '네트워크 오류: 인터넷 연결을 확인해주세요.';
-        } else if (err.response?.status === 400) {
-          errorMessage = '지원하지 않는 사이트이거나 잘못된 URL입니다.';
-        } else if (err.response?.status) {
-          errorMessage = `서버 오류 (${err.response.status}): 잠시 후 다시 시도해주세요.`;
-        }
-      }
-      alert(errorMessage);
+    } catch {
+      alert('URL 분석 중 오류가 발생했습니다.');
     } finally {
       setIsParsing(false);
     }
   };
 
-  // SubmitHandler 타입을 명시하여 handleSubmit과의 호환성 문제를 해결합니다.
   const onSubmit: SubmitHandler<JobPostFields> = async (data) => {
     try {
       if (data.source_type === 'manual') {
-        const requestData = {
+        await saveParsedJob({
           title: data.title,
           companyName: data.company_name,
           externalId:
@@ -232,13 +163,8 @@ const JobModal = ({ isOpen, onClose, mode = 'create', initialData }: JobModalPro
           experience: data.experience || undefined,
           deadline: data.deadline ? new Date(data.deadline).toISOString() : undefined,
           deadlineText: isAlwaysRecruit ? '상시채용' : undefined,
-          content: JSON.stringify({
-            ...(parsedData?.content || {}),
-            description: data.content,
-          }),
-        };
-        await saveParsedJob(requestData);
-        alert(mode === 'edit' ? '성공적으로 수정되었습니다.' : '성공적으로 등록되었습니다.');
+          content: JSON.stringify({ ...(parsedData?.content || {}), description: data.content }),
+        });
       } else {
         const requestData = {
           title: data.title,
@@ -251,18 +177,15 @@ const JobModal = ({ isOpen, onClose, mode = 'create', initialData }: JobModalPro
           description: data.content,
           sourceUrl: data.source_url,
         };
-
         if (mode === 'edit' && initialData?.externalId) {
           await updateJob(initialData.externalId, requestData, initialData.sourceType);
-          alert('성공적으로 수정되었습니다.');
         } else {
           await createJob(requestData);
-          alert('성공적으로 등록되었습니다.');
         }
       }
+      alert('공고가 저장되었습니다.');
       handleClose();
-    } catch (error) {
-      console.error(error);
+    } catch {
       alert('저장 중 오류가 발생했습니다.');
     }
   };
@@ -270,14 +193,31 @@ const JobModal = ({ isOpen, onClose, mode = 'create', initialData }: JobModalPro
   if (!isOpen) return null;
 
   return (
-    <div className={STYLES.overlay} onClick={handleOverlayClick}>
-      <div className={STYLES.modalContent} onClick={(e) => e.stopPropagation()}>
-        <div className={STYLES.header}>
-          <div className={STYLES.title}>
-            <Plus size={18} strokeWidth={3} /> {mode === 'create' ? '새 공고 등록' : '공고 수정'}
+    <div
+      className="fixed inset-0 bg-gray-900/50 backdrop-blur-sm z-[1000] flex items-center justify-center p-4 animate-in fade-in duration-200"
+      onClick={handleClose}
+    >
+      <div
+        className="bg-white rounded-[32px] p-8 sm:p-10 w-full max-w-3xl max-h-[90vh] overflow-y-auto shadow-2xl animate-in slide-in-from-bottom-4 duration-300 relative"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <button
+          onClick={handleClose}
+          className="absolute top-6 right-6 text-gray-400 hover:text-gray-600 transition-colors"
+        >
+          <X size={24} />
+        </button>
+
+        <div className="flex justify-between items-center mb-8 pb-4 border-b border-gray-50">
+          <div className="text-xl font-black text-gray-900 flex items-center gap-2">
+            <span className="w-1.5 h-5 bg-btn-point rounded-full" />
+            {mode === 'create' ? '새 공고 등록' : '공고 수정'}
           </div>
-          <button onClick={handleReset} className={STYLES.resetBtn}>
-            초기화
+          <button
+            onClick={handleReset}
+            className="flex items-center gap-1.5 text-xs font-bold text-gray-400 hover:text-btn-point transition-colors"
+          >
+            <RotateCcw size={14} /> 초기화
           </button>
         </div>
 
@@ -290,36 +230,33 @@ const JobModal = ({ isOpen, onClose, mode = 'create', initialData }: JobModalPro
           />
         )}
 
-        <div className={STYLES.topSection}>
+        <div className="flex flex-col sm:grid sm:grid-cols-[160px_1fr] gap-8 mb-6">
           <Controller
             name="company_logo"
             control={control}
             render={({ field }) => (
-              <div className={STYLES.logoWrapper}>
+              <div className="flex justify-center sm:block">
                 <LogoUpload value={field.value || ''} onChange={field.onChange} />
               </div>
             )}
           />
-          <div className={STYLES.formGroup}>
+          <div className="flex flex-col gap-4">
             <TextInput
               label="공고 제목"
               placeholder="예: 프론트엔드 개발자"
-              wrapperClassName="mb-0"
               {...register('title')}
               error={errors.title?.message}
             />
-            <div className={STYLES.gridRow}>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <TextInput
                 label="회사명"
                 placeholder="예: 네이버"
-                wrapperClassName="mb-0"
                 {...register('company_name')}
                 error={errors.company_name?.message}
               />
               <TextInput
                 label="회사위치"
-                placeholder="예: 서울 강남구 / 판교 / 재택"
-                wrapperClassName="mb-0"
+                placeholder="예: 서울 강남구 / 판교"
                 {...register('location')}
                 error={errors.location?.message}
               />
@@ -327,11 +264,10 @@ const JobModal = ({ isOpen, onClose, mode = 'create', initialData }: JobModalPro
           </div>
         </div>
 
-        <div className={STYLES.gridRow}>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4">
           <TextInput
             label="신입/경력"
             placeholder="예: 신입 / 경력(2년 이상)"
-            title="신입/경력 유무"
             {...register('experience')}
             error={errors.experience?.message}
           />
@@ -341,7 +277,7 @@ const JobModal = ({ isOpen, onClose, mode = 'create', initialData }: JobModalPro
             render={({ field }) => (
               <DeadlineInput
                 isAlwaysRecruit={isAlwaysRecruit}
-                onAlwaysRecruitChange={handleAlwaysRecruitChange}
+                onAlwaysRecruitChange={setIsAlwaysRecruit}
                 value={field.value ?? ''}
                 onChange={field.onChange}
                 error={errors.deadline?.message}
@@ -356,21 +292,20 @@ const JobModal = ({ isOpen, onClose, mode = 'create', initialData }: JobModalPro
           {...register('source_url')}
           error={errors.source_url?.message}
         />
-
         <TextareaInput
-          label="상세 메모 (주요업무 / 자격요건 / 우대사항 등)"
-          placeholder="공고와 관련된 상세 내용을 입력해 주세요."
+          label="상세 메모"
+          placeholder="공고 상세 내용을 입력해 주세요."
           {...register('content')}
           error={errors.content?.message}
         />
 
-        <div className={STYLES.footer}>
-          <button className={STYLES.cancelBtn} onClick={handleClose}>
+        <div className="flex justify-end gap-3 mt-8 pt-6 border-t border-gray-100">
+          <Button variant="outline" onClick={handleClose} className="px-6">
             취소
-          </button>
-          <button className={STYLES.submitBtn} onClick={handleSubmit(onSubmit)}>
+          </Button>
+          <Button onClick={handleSubmit(onSubmit)} className="px-8 font-black">
             {mode === 'create' ? '등록하기' : '수정하기'}
-          </button>
+          </Button>
         </div>
       </div>
     </div>

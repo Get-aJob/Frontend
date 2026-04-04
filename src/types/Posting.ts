@@ -69,3 +69,20 @@ export interface ManualSaveRequest {
   deadlineText?: string;
   content?: Record<string, unknown> | string;
 }
+
+export interface ParsedJobData {
+  title?: string;
+  companyName?: string;
+  companyLogo?: string;
+  location?: string;
+  experience?: string;
+  sourceUrl?: string;
+  deadline?: string;
+  deadlineText?: string;
+  content?: {
+    requirements?: string;
+    preferred?: string;
+    description?: string;
+    [key: string]: unknown;
+  };
+}
