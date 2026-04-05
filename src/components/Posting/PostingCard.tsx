@@ -1,8 +1,12 @@
+import { useEffect, useState, useCallback } from 'react';
 import type { JobPosting } from '@/types/Posting';
 import Badge from '@/components/common/UI/Badge';
 import { MessageSquare, Eye } from 'lucide-react';
 import { ddayVariant } from '@/utils/statusUtils';
 import PostingActionButtons from './PostingActionButtons';
+import { getJobComments } from '@/api/Comment';
+import type { RawCommentData } from './Comment/useJobComment';
+import { usePostingStore } from '@/store/usePostingStore';
 
 interface PostingCardProps {
   posting: JobPosting;
@@ -14,18 +18,62 @@ interface PostingCardProps {
 const PostingCard = ({ posting, isScrapped, onScrap, onDetail }: PostingCardProps) => {
   const dday = posting.deadline || '상시채용';
 
-  const handleCardClick = () => {
-    onDetail(posting);
-  };
+  // 💡 1. 전역 스토어 구독 및 업데이트 함수 가져오기
+  const storePostings = usePostingStore((state) => state.postings);
+  const updateCommentCount = usePostingStore((state) => state.updateCommentCount);
+  const currentStoreJob = storePostings.find((p) => String(p.id) === String(posting.id));
+
+  // 💡 2. API 호출 결과를 저장할 상태
+  const [apiCommentCount, setApiCommentCount] = useState<number | null>(null);
+
+  // 💡 3. 표시될 댓글 수 결정
+  const displayCommentCount =
+    currentStoreJob?.commentCount ?? apiCommentCount ?? posting.commentCount ?? 0;
+
+  const fetchCount = useCallback(async () => {
+    try {
+      const response = await getJobComments(String(posting.id));
+      const list: RawCommentData[] = Array.isArray(response)
+        ? response
+        : (response as { comments?: RawCommentData[] }).comments || [];
+
+      const count = list.length;
+      setApiCommentCount(count);
+
+      // 💡 [중요] 가져온 개수를 전역 스토어에도 반영합니다.
+      // 이렇게 하면 새로고침 후에도 스토어가 최신 값을 유지하려 노력합니다.
+      if (currentStoreJob && currentStoreJob.commentCount !== count) {
+        updateCommentCount(posting.id, count - (currentStoreJob.commentCount || 0));
+      }
+    } catch (error) {
+      console.error('댓글수 조회 실패:', error);
+    }
+  }, [posting.id, currentStoreJob, updateCommentCount]);
+
+  // 💡 4. [ESLint 해결] useEffect 내 비동기 호출
+  useEffect(() => {
+    let isMounted = true;
+
+    const getCount = async () => {
+      if (isMounted) {
+        await fetchCount();
+      }
+    };
+
+    getCount();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [fetchCount]);
 
   return (
     <article
-      onClick={handleCardClick}
       className="group relative bg-white border border-border-light rounded-3xl p-6 transition-all hover:border-btn-point hover:shadow-md cursor-pointer flex flex-col h-full"
+      onClick={() => onDetail(posting)}
     >
       <div className="flex justify-between items-start mb-5">
         <div className="flex items-center gap-4">
-          {/* 💡 로고 영역: 클릭 전파를 차단하여 페이지 이동 방지 */}
           <div
             className="w-14 h-14 rounded-2xl bg-gray-50 border border-border-light overflow-hidden flex items-center justify-center shadow-sm cursor-default"
             onClick={(e) => e.stopPropagation()}
@@ -78,7 +126,7 @@ const PostingCard = ({ posting, isScrapped, onScrap, onDetail }: PostingCardProp
           <Eye size={14} strokeWidth={3} /> {posting.viewCount || 0}
         </span>
         <span className="flex items-center gap-1.5">
-          <MessageSquare size={14} strokeWidth={3} /> {posting.commentCount || 0}
+          <MessageSquare size={14} strokeWidth={3} /> {displayCommentCount}
         </span>
       </div>
     </article>

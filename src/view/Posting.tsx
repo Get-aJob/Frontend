@@ -1,12 +1,13 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import { usePostingStore } from '@/store/usePostingStore';
-import type { ExtendedJobPosting } from '@/store/usePostingStore';
 import PostingList from '@/components/Posting/PostingList';
 import PostingFilter from '@/components/Posting/PostingFilter';
 import Pagination from '@/components/Posting/Pagination';
 import EmptyState from '@/components/common/UI/EmptyState';
 import PostingDetailModal from '@/components/Posting/PostingDetailModal';
 import { Briefcase } from 'lucide-react';
+import { incrementViewCount } from '@/api/Posting';
+import type { ExtendedJobPosting } from '@/store/usePostingStore';
 
 const Posting = () => {
   const {
@@ -17,11 +18,12 @@ const Posting = () => {
     currentPage,
     selectedSite,
     toggleScrapStatus,
-    updateViewCount, // 💡 스토어에서 조회수 업데이트 함수 가져오기
+    updateViewCount,
   } = usePostingStore();
 
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
-  const [selectedJob, setSelectedJob] = useState<ExtendedJobPosting | null>(null);
+  // 💡 데이터 객체 대신 ID만 저장하여 스토어와 실시간 동기화 유도
+  const [selectedJobId, setSelectedJobId] = useState<string | number | null>(null);
 
   useEffect(() => {
     fetchPostings(currentPage, selectedSite);
@@ -36,22 +38,32 @@ const Posting = () => {
     fetchPostings(page, selectedSite);
   };
 
+  // 💡 상세 모달에 넘겨줄 데이터를 스토어에서 실시간으로 찾음
+  // 이렇게 하면 모달이 열린 상태에서 댓글 수가 변해도 모달 UI에 즉시 반영됩니다.
+  const selectedJob = useMemo(() => {
+    return postings.find((job) => String(job.id) === String(selectedJobId)) || null;
+  }, [postings, selectedJobId]);
+
   const handleDetailOpen = (job: ExtendedJobPosting) => {
-    setSelectedJob(job);
+    setSelectedJobId(job.id);
     setIsDetailModalOpen(true);
 
-    // 💡 모달이 열릴 때마다 프론트엔드의 조회수 상태를 1 증가시킵니다.
+    // 1. 프론트엔드 조회수 상태 즉시 업데이트
     updateViewCount(job.id);
+
+    // 2. 서버에 조회수 증가 요청
+    incrementViewCount(job.id);
   };
 
   const handleDetailClose = () => {
     setIsDetailModalOpen(false);
-    setSelectedJob(null);
+    setSelectedJobId(null);
   };
 
   return (
     <div className="flex flex-col gap-8">
       <PostingFilter totalCount={postings.length} />
+
       <div className="w-full">
         {isLoading ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -92,7 +104,6 @@ const Posting = () => {
         )}
       </div>
 
-      {/* 4. 공고 상세 보기 모달 연결 */}
       <PostingDetailModal
         isOpen={isDetailModalOpen}
         onClose={handleDetailClose}

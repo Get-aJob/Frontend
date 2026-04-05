@@ -24,6 +24,30 @@ export interface ExtendedJobPosting extends JobPosting {
   isScrapped?: boolean;
 }
 
+// 💡 any 타입 대체를 위해 백엔드 원본 데이터 스키마를 엄격하게 확장
+export interface ExtendedBackendJob extends BackendJob {
+  comment_count?: number;
+  commentCount?: number;
+  view_count?: number;
+  viewCount?: number;
+  source_site_name?: string;
+  sourceSiteName?: string;
+  deadline_text?: string;
+  deadlineText?: string;
+  company_name?: string;
+  companyName?: string;
+  company_logo?: string;
+  companyLogo?: string;
+  source_url?: string;
+  sourceUrl?: string;
+  source_type?: string;
+  sourceType?: string;
+  external_id?: string;
+  externalId?: string;
+  created_at?: string;
+  createdAt?: string;
+}
+
 // 공고 상세 내용(JSON 또는 문자열)을 파싱하는 헬퍼 함수
 const parseDescription = (content: string | Record<string, unknown> | undefined): string => {
   if (!content) return '';
@@ -91,8 +115,7 @@ export const usePostingStore = create<PostingState>()(
           let data: PostingResponse = { jobs: [], totalCount: 0 };
 
           if (currentSourceType === 'auto') {
-            // 💡 서버에는 사이트 구분 없이 전체 데이터를 요청합니다.
-            data = await getPostings(page, PAGE_SIZE, 'auto');
+            data = await getPostings(page, PAGE_SIZE, 'auto'); // 전체 데이터 요청
           } else if (!isLoggedIn) {
             set({ postings: [], totalPages: 1, isLoading: false, sourceSites: [] });
             return;
@@ -132,34 +155,30 @@ export const usePostingStore = create<PostingState>()(
 
           const rawJobs = data.jobs || [];
 
-          // 💡 [프론트엔드 필터링 로직]
-          // 넘겨받은 전체 데이터를 프론트엔드에서 직접 필터링합니다.
+          // 💡 프론트엔드 강제 필터링 로직 (any 없이 ExtendedBackendJob 인터페이스 활용)
           let filteredJobs = rawJobs;
           if (currentSourceType === 'auto' && currentSite) {
             filteredJobs = rawJobs.filter((j: BackendJob) => {
-              const siteName = j.source_site_name || j.sourceSiteName || '';
+              const jobData = j as ExtendedBackendJob;
+              const siteName = jobData.source_site_name || jobData.sourceSiteName || '';
               return siteName === currentSite;
             });
           }
 
-          // 필터링 된 데이터 길이에 맞춰 총 갯수를 재조정합니다.
           const totalCount = currentSite
             ? filteredJobs.length
             : data.totalCount || filteredJobs.length;
 
           const sortedJobs = [...filteredJobs].sort((a: BackendJob, b: BackendJob) => {
-            const dateA = new Date(a.created_at || a.createdAt || 0).getTime();
-            const dateB = new Date(b.created_at || b.createdAt || 0).getTime();
+            const extA = a as ExtendedBackendJob;
+            const extB = b as ExtendedBackendJob;
+            const dateA = new Date(extA.created_at || extA.createdAt || 0).getTime();
+            const dateB = new Date(extB.created_at || extB.createdAt || 0).getTime();
             return dateB - dateA;
           });
 
           const mappedJobs: ExtendedJobPosting[] = sortedJobs.map((j: BackendJob) => {
-            const jobData = j as BackendJob & {
-              comment_count?: number;
-              commentCount?: number;
-              view_count?: number;
-              viewCount?: number;
-            };
+            const jobData = j as ExtendedBackendJob;
 
             let finalDeadline = '상시채용';
             const deadline = jobData.deadline;
@@ -211,7 +230,6 @@ export const usePostingStore = create<PostingState>()(
             currentPage: page,
             totalPages: Math.ceil(totalCount / PAGE_SIZE) || 1,
             isLoading: false,
-            // 💡 전체 사이트 목록 버튼들이 사라지지 않도록 데이터 보존
             sourceSites: currentSite ? get().sourceSites : data.sourceSites || get().sourceSites,
           });
         } catch (error: unknown) {
