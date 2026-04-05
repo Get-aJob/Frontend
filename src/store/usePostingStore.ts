@@ -2,6 +2,7 @@ import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 import {
   getPostings,
+  getDirectJobs,
   createDirectJob,
   updateDirectJob,
   deleteDirectJob,
@@ -85,7 +86,7 @@ export const usePostingStore = create<PostingState>()(
           const currentSite = site !== undefined ? site : get().selectedSite;
           const isLoggedIn = useAuthStore.getState().isLoggedIn;
 
-          let data: PostingResponse;
+          let data: PostingResponse = { jobs: [], totalCount: 0 };
 
           if (currentSourceType === 'auto') {
             data = await getPostings(page, PAGE_SIZE, 'auto', currentSite);
@@ -93,14 +94,16 @@ export const usePostingStore = create<PostingState>()(
             set({ postings: [], totalPages: 1, isLoading: false, sourceSites: [] });
             return;
           } else {
+            // [핵심수정] manual은 /jobs?sourceType=manual, direct는 /jobs/direct 엔드포인트로 각각 호출
             const [manualData, directData] = await Promise.all([
               getPostings(page, PAGE_SIZE, 'manual'),
-              getPostings(page, PAGE_SIZE, 'direct'),
+              getDirectJobs(page, PAGE_SIZE),
             ]);
 
             const manualJobs = Array.isArray(manualData)
               ? manualData
               : (manualData as PostingResponse).jobs || [];
+
             const directJobs = Array.isArray(directData)
               ? directData
               : (directData as PostingResponse).jobs || [];
@@ -108,6 +111,7 @@ export const usePostingStore = create<PostingState>()(
             const manualTotal = Array.isArray(manualData)
               ? manualData.length
               : (manualData.totalCount ?? manualJobs.length);
+
             const directTotal = Array.isArray(directData)
               ? directData.length
               : (directData.totalCount ?? directJobs.length);
@@ -124,7 +128,7 @@ export const usePostingStore = create<PostingState>()(
             : [];
           const scrappedIds = new Set(scrapData.map((s: ScrapItem) => String(s.jobPostingId)));
 
-          const rawJobs = data.jobs || (Array.isArray(data) ? data : []);
+          const rawJobs = data.jobs || [];
           const totalCount = data.totalCount || rawJobs.length;
 
           const sortedJobs = [...rawJobs].sort((a: BackendJob, b: BackendJob) => {
@@ -173,14 +177,14 @@ export const usePostingStore = create<PostingState>()(
               isScrapped: scrappedIds.has(String(j.id)),
               sourceType: finalSourceType,
               externalId: j.external_id || j.externalId || String(j.id),
-              description: parseDescription(j.content),
+              description: j.description || parseDescription(j.content),
             };
           });
 
           set({
             postings: mappedJobs,
             currentPage: page,
-            totalPages: Math.ceil(totalCount / PAGE_SIZE),
+            totalPages: Math.ceil(totalCount / PAGE_SIZE) || 1,
             isLoading: false,
             sourceSites: data.sourceSites || get().sourceSites,
           });
@@ -214,24 +218,11 @@ export const usePostingStore = create<PostingState>()(
         }
       },
 
-      updateJob: async (externalId, data, type) => {
+      // [핵심수정] JobModal에서 PUT /jobs/direct/:externalId 로 통일하여 쏘므로 단일 로직으로 단순화
+      updateJob: async (externalId, data) => {
         set({ isLoading: true });
         try {
-          if (type === 'manual') {
-            await get().saveParsedJob({
-              title: data.title || '',
-              companyName: data.companyName || '',
-              externalId,
-              sourceUrl: data.sourceUrl || '',
-              companyLogo: data.companyLogo,
-              location: data.location,
-              experience: data.experience,
-              deadline: data.deadline,
-              content: data.description || '',
-            });
-          } else {
-            await updateDirectJob(externalId, data);
-          }
+          await updateDirectJob(externalId, data);
           await get().fetchPostings(get().currentPage);
         } catch (err) {
           set({ error: (err as Error).message });
@@ -291,7 +282,7 @@ export const usePostingStore = create<PostingState>()(
     {
       name: 'posting-storage',
       storage: createJSONStorage(() => localStorage),
-      partialize: (state) => ({ sourceType: state.sourceType }), // sourceType만 로컬 스토리지에 유지
+      partialize: (state) => ({ sourceType: state.sourceType }),
     },
   ),
 );

@@ -16,7 +16,8 @@ export interface BackendJob {
   deadlineText?: string;
   external_id?: string;
   externalId?: string;
-  content?: string;
+  content?: string | Record<string, unknown>;
+  description?: string;
   source_site_name?: string;
   sourceSiteName?: string;
   created_at?: string;
@@ -41,7 +42,7 @@ export interface JobPosting {
 
 export interface PostingResponse {
   jobs: BackendJob[];
-  totalCount: number;
+  totalCount?: number;
   sourceSites?: string[];
 }
 
@@ -77,6 +78,7 @@ export interface ParsedJobData {
   location?: string;
   experience?: string;
   sourceUrl?: string;
+  externalId?: string;
   deadline?: string;
   deadlineText?: string;
   content?: {
