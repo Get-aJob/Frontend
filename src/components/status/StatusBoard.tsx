@@ -1,69 +1,78 @@
-import Badge from '@/components/common/UI/Badge';
-import { ddayVariant } from '@/utils/statusUtils';
+import React, { useEffect } from 'react';
+import { DragDropContext, type DropResult } from '@hello-pangea/dnd';
+import { useStatusStore } from '@/store/useStatusStore';
+import { updateApplication } from '@/api/Status';
+import StatusList from './StatusList';
 
-interface StatusItem {
-  id: string;
-  company: string;
-  role: string;
-  statusName: string;
-  dday: string;
-  deadline: string;
-}
+const StatusBoard: React.FC = () => {
+  const { applications, statuses, fetchData, isLoading } = useStatusStore();
 
-interface StatusBoardProps {
-  items: StatusItem[];
-  onOpenDetail: (id: string) => void;
-}
+  useEffect(() => {
+    fetchData();
+  }, [fetchData]);
 
-const StatusBoard = ({ items, onOpenDetail }: StatusBoardProps) => {
-  const statusGroups = Array.from(new Set(items.map((item) => item.statusName)));
+  const onDragEnd = async (result: DropResult) => {
+    const { destination, source, draggableId } = result;
+    if (
+      !destination ||
+      (destination.droppableId === source.droppableId && destination.index === source.index)
+    )
+      return;
+
+    try {
+      await updateApplication(draggableId, { statusId: destination.droppableId });
+      await fetchData();
+    } catch (error) {
+      console.error('상태 업데이트 실패:', error);
+    }
+  };
+
+  if (isLoading && statuses.length === 0) {
+    return (
+      <div className="flex items-center justify-center min-h-[400px] text-gray-400 font-bold">
+        보드 데이터를 불러오는 중...
+      </div>
+    );
+  }
 
   return (
-    <section className="flex gap-6 overflow-x-auto pb-4 min-h-125">
-      {statusGroups.map((status) => (
-        <div key={status} className="w-72 shrink-0 flex flex-col">
-          {/* 컬럼 헤더 */}
-          <div className="mb-4 flex items-center justify-between px-1">
-            <div className="flex items-center gap-2">
-              <span className="h-2 w-2 rounded-full bg-btn-point" />
-              <h3 className="font-black text-gray-800 text-sm">{status}</h3>
-            </div>
-            <span className="text-xs font-bold text-gray-400">
-              {items.filter((i) => i.statusName === status).length}
-            </span>
-          </div>
+    <DragDropContext onDragEnd={onDragEnd}>
+      {/* ✨ 배경색 bg-[#F8FAFC] 제거 및 투명 처리, p-6 제거하여 Layout 여백 활용 */}
+      <div className="flex gap-6 overflow-x-auto min-h-[calc(100vh-320px)] items-start scrollbar-hide pb-10">
+        {statuses.map((status) => {
+          const columnApps = applications.filter(
+            (app) => String(app.statusId) === String(status.id),
+          );
 
-          {/* 카드 리스트 영역 */}
-          <div className="flex flex-col gap-3 rounded-2xl bg-gray-50/50 p-3 border border-dashed border-gray-200 flex-1">
-            {items
-              .filter((item) => item.statusName === status)
-              .map((item) => (
-                <article
-                  key={item.id}
-                  onClick={() => onOpenDetail(item.id)}
-                  className="rounded-xl border border-border-light bg-white p-4 shadow-sm transition-all hover:border-btn-point hover:shadow-md cursor-pointer group"
-                >
-                  <h4 className="font-black text-gray-900 text-sm group-hover:text-btn-point transition-colors">
-                    {item.company}
-                  </h4>
-                  <p className="mt-1 text-xs font-medium text-gray-500 truncate">{item.role}</p>
-
-                  <div className="mt-4 flex items-center justify-between border-t border-gray-50 pt-3">
-                    <Badge variant={ddayVariant(item.dday)}>{item.dday}</Badge>
-                    <span className="text-[10px] font-bold text-gray-300">{item.deadline}</span>
-                  </div>
-                </article>
-              ))}
-
-            {items.filter((item) => item.statusName === status).length === 0 && (
-              <div className="py-10 text-center text-xs text-gray-400 font-medium">
-                일정이 없습니다.
+          return (
+            <div
+              key={status.id}
+              /* ✨ 컬럼 디자인: 흰색 배경 유지, 테두리와 그림자로 구분감 부여 */
+              className="flex flex-col min-w-[320px] max-w-[320px] bg-white rounded-[24px] p-5 border border-border-light shadow-sm hover:shadow-md transition-shadow"
+            >
+              <div className="flex justify-between items-center mb-6 px-2">
+                <div className="flex items-center gap-2.5">
+                  {/* 상태 포인트 컬러 점 */}
+                  <div className="w-2 h-2 rounded-full bg-blue-500 shadow-[0_0_8px_rgba(59,130,246,0.4)]" />
+                  <h3 className="font-bold text-slate-800 text-lg tracking-tight">
+                    {status.displayName}
+                  </h3>
+                  {/* 개수 뱃지 */}
+                  <span className="text-xs font-bold text-blue-600 bg-blue-50 px-2.5 py-0.5 rounded-full border border-blue-100">
+                    {columnApps.length}
+                  </span>
+                </div>
               </div>
-            )}
-          </div>
-        </div>
-      ))}
-    </section>
+
+              {/* 리스트 영역 (Droppable) */}
+              <div className="flex-1 min-h-[150px]">
+                <StatusList statusId={String(status.id)} items={columnApps} />
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    </DragDropContext>
   );
 };
 
