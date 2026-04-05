@@ -1,20 +1,28 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom'; // ✨ 페이지 이동을 위해 추가
 import { toggleScrap } from '@/api/Scrap';
 import { usePostingStore } from '@/store/usePostingStore';
 import JobModal from '@/components/jobPostForm/JobModal';
-import PostingDetailModal from '@/components/Posting/PostingDetailModal'; // 상세 보기 모달 추가
+import PostingDetailModal from '@/components/Posting/PostingDetailModal';
+import ConfirmModal from '@/components/common/UI/ConfirmModal'; // ✨ Confirm 모달 임포트
 import type { JobPosting } from '@/types/Posting';
 import Button from '@/components/common/UI/Button';
-import { Bookmark, ExternalLink, Trash2, Search } from 'lucide-react'; // Search 아이콘 추가
+import { Bookmark, ExternalLink, Trash2, Search } from 'lucide-react';
+import { PATH } from '@/router/Path'; // ✨ 경로 상수 임포트
 
 interface PostingActionButtonsProps {
   job: JobPosting & { isScrapped?: boolean; sourceType?: string; externalId?: string };
 }
 
 const PostingActionButtons: React.FC<PostingActionButtonsProps> = ({ job }) => {
+  const navigate = useNavigate(); // ✨ 네비게이션 훅
   const { toggleScrapStatus, deleteJob } = usePostingStore();
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-  const [isDetailModalOpen, setIsDetailModalOpen] = useState(false); // 상세 보기 상태 추가
+  const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
+
+  // ✨ 스크랩 완료/해제 확인 모달 상태 추가
+  const [isScrapModalOpen, setIsScrapModalOpen] = useState(false);
+  const [isScrapAdded, setIsScrapAdded] = useState(false); // 저장인지 해제인지 구분
 
   const handleScrapClick = async (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -22,11 +30,9 @@ const PostingActionButtons: React.FC<PostingActionButtonsProps> = ({ job }) => {
       const result = await toggleScrap(String(job.id));
       toggleScrapStatus(job.id);
 
-      if (result.added) {
-        alert('공고가 저장되었습니다.');
-      } else {
-        alert('저장이 해제되었습니다.');
-      }
+      // ✨ alert 대신 모달 상태 업데이트 및 띄우기
+      setIsScrapAdded(result.added);
+      setIsScrapModalOpen(true);
     } catch (error: unknown) {
       const err = error as { response?: { status?: number } };
       if (err.response?.status === 401) {
@@ -35,6 +41,12 @@ const PostingActionButtons: React.FC<PostingActionButtonsProps> = ({ job }) => {
         alert('처리에 실패했습니다.');
       }
     }
+  };
+
+  // ✨ 스크랩 페이지로 이동
+  const handleGoToScrap = () => {
+    setIsScrapModalOpen(false);
+    navigate(PATH.SCRAP);
   };
 
   const handleSiteGoClick = (e: React.MouseEvent) => {
@@ -62,7 +74,7 @@ const PostingActionButtons: React.FC<PostingActionButtonsProps> = ({ job }) => {
 
   const handleDetailClick = (e: React.MouseEvent) => {
     e.stopPropagation();
-    setIsDetailModalOpen(true); // 상세 보기 모달 열기
+    setIsDetailModalOpen(true);
   };
 
   const isManual = job.sourceType !== 'auto';
@@ -70,7 +82,7 @@ const PostingActionButtons: React.FC<PostingActionButtonsProps> = ({ job }) => {
   return (
     <>
       <div className="flex gap-2 w-full mt-4 items-center">
-        {/* 상세보기 버튼 추가 */}
+        {/* 상세보기 버튼 */}
         <Button
           variant="outline"
           size="sm"
@@ -80,6 +92,7 @@ const PostingActionButtons: React.FC<PostingActionButtonsProps> = ({ job }) => {
           <Search size={14} /> 상세보기
         </Button>
 
+        {/* 스크랩 버튼 */}
         <Button
           variant={job.isScrapped ? 'primary' : 'outline'}
           size="sm"
@@ -90,6 +103,7 @@ const PostingActionButtons: React.FC<PostingActionButtonsProps> = ({ job }) => {
           {job.isScrapped ? '저장됨' : '스크랩'}
         </Button>
 
+        {/* 원본 사이트 버튼 */}
         <Button
           variant="primary"
           size="sm"
@@ -100,6 +114,7 @@ const PostingActionButtons: React.FC<PostingActionButtonsProps> = ({ job }) => {
           <ExternalLink size={14} /> 원본 사이트
         </Button>
 
+        {/* 삭제 버튼 (수동 등록일 경우만) */}
         {isManual && (
           <Button
             variant="outline"
@@ -121,6 +136,7 @@ const PostingActionButtons: React.FC<PostingActionButtonsProps> = ({ job }) => {
         />
       )}
 
+      {/* 공고 수정 모달 */}
       {isEditModalOpen && (
         <JobModal
           isOpen={isEditModalOpen}
@@ -129,6 +145,22 @@ const PostingActionButtons: React.FC<PostingActionButtonsProps> = ({ job }) => {
           initialData={job}
         />
       )}
+
+      {/* ✨ 스크랩 완료/해제 확인 모달 */}
+      <div className="relative z-[200]">
+        <ConfirmModal
+          isOpen={isScrapModalOpen}
+          onClose={() => setIsScrapModalOpen(false)}
+          // 저장 시 스크랩 페이지로 이동, 해제 시 그냥 닫기
+          onConfirm={isScrapAdded ? handleGoToScrap : () => setIsScrapModalOpen(false)}
+          title={isScrapAdded ? '스크랩 완료' : '스크랩 해제'}
+          message={
+            isScrapAdded ? '공고가 성공적으로 저장되었습니다.' : '공고 저장이 해제되었습니다.'
+          }
+          confirmText={isScrapAdded ? '스크랩 확인하기' : '확인'}
+          cancelText="닫기"
+        />
+      </div>
     </>
   );
 };
