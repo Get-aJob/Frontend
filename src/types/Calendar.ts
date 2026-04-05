@@ -1,5 +1,5 @@
 export type ViewType = 'month' | 'week' | 'day';
-
+export type EventFilterType = 'all' | 'deadline' | 'applied';
 export interface ScheduleEvent {
   jobPostingId: string;
   type: 'job_post';

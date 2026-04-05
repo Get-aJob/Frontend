@@ -2,6 +2,7 @@ import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 import {
   getPostings,
+  getDirectJobs,
   createDirectJob,
   updateDirectJob,
   deleteDirectJob,
@@ -19,10 +20,11 @@ import type {
   PostingResponse,
 } from '@/types/Posting';
 
-interface ExtendedJobPosting extends JobPosting {
+export interface ExtendedJobPosting extends JobPosting {
   isScrapped?: boolean;
 }
 
+// 공고 상세 내용(JSON 또는 문자열)을 파싱하는 헬퍼 함수
 const parseDescription = (content: string | Record<string, unknown> | undefined): string => {
   if (!content) return '';
   if (typeof content === 'object') return (content.description as string) || '';
@@ -39,10 +41,13 @@ interface PostingState {
   currentPage: number;
   totalPages: number;
   isLoading: boolean;
+  sourceSites: string[];
+  selectedSite: string;
   error: string | null;
   sourceType: 'auto' | 'manual' | 'direct';
   setSourceType: (type: 'auto' | 'manual' | 'direct') => void;
-  fetchPostings: (page: number) => Promise<void>;
+  setSelectedSite: (site: string) => void;
+  fetchPostings: (page: number, site?: string) => Promise<void>;
   toggleScrapStatus: (jobId: string | number) => void;
   createJob: (data: DirectJobRequest) => Promise<void>;
   updateJob: (externalId: string, data: Partial<DirectJobRequest>, type?: string) => Promise<void>;
@@ -58,39 +63,55 @@ export const usePostingStore = create<PostingState>()(
       currentPage: 1,
       totalPages: 1,
       isLoading: false,
+      sourceSites: [],
+      selectedSite: '',
       error: null,
       sourceType: 'auto',
 
       setSourceType: (type) => {
-        set({ sourceType: type, currentPage: 1 });
+        set({ sourceType: type, currentPage: 1, selectedSite: '' });
         get().fetchPostings(1);
       },
 
-      fetchPostings: async (page: number) => {
+      setSelectedSite: (site) => {
+        set({ selectedSite: site, currentPage: 1 });
+        get().fetchPostings(1, site);
+      },
+
+      fetchPostings: async (page: number, site?: string) => {
         set({ isLoading: true, error: null });
         try {
           const PAGE_SIZE = 30;
           const currentSourceType = get().sourceType;
+          const currentSite = site !== undefined ? site : get().selectedSite;
           const isLoggedIn = useAuthStore.getState().isLoggedIn;
 
-          let data: PostingResponse;
+          let data: PostingResponse = { jobs: [], totalCount: 0 };
+
           if (currentSourceType === 'auto') {
-            data = await getPostings(page, PAGE_SIZE, 'auto');
+            data = await getPostings(page, PAGE_SIZE, 'auto', currentSite);
           } else if (!isLoggedIn) {
-            set({ postings: [], totalPages: 1, isLoading: false });
+            set({ postings: [], totalPages: 1, isLoading: false, sourceSites: [] });
             return;
           } else {
+            // [핵심수정] manual은 /jobs?sourceType=manual, direct는 /jobs/direct 엔드포인트로 각각 호출
             const [manualData, directData] = await Promise.all([
               getPostings(page, PAGE_SIZE, 'manual'),
-              getPostings(page, PAGE_SIZE, 'direct'),
+              getDirectJobs(page, PAGE_SIZE),
             ]);
 
-            const manualJobs = Array.isArray(manualData) ? manualData : manualData.jobs || [];
-            const directJobs = Array.isArray(directData) ? directData : directData.jobs || [];
+            const manualJobs = Array.isArray(manualData)
+              ? manualData
+              : (manualData as PostingResponse).jobs || [];
+
+            const directJobs = Array.isArray(directData)
+              ? directData
+              : (directData as PostingResponse).jobs || [];
 
             const manualTotal = Array.isArray(manualData)
               ? manualData.length
               : (manualData.totalCount ?? manualJobs.length);
+
             const directTotal = Array.isArray(directData)
               ? directData.length
               : (directData.totalCount ?? directJobs.length);
@@ -98,6 +119,7 @@ export const usePostingStore = create<PostingState>()(
             data = {
               jobs: [...manualJobs, ...directJobs],
               totalCount: manualTotal + directTotal,
+              sourceSites: [],
             };
           }
 
@@ -106,7 +128,7 @@ export const usePostingStore = create<PostingState>()(
             : [];
           const scrappedIds = new Set(scrapData.map((s: ScrapItem) => String(s.jobPostingId)));
 
-          const rawJobs = data.jobs || (Array.isArray(data) ? data : []);
+          const rawJobs = data.jobs || [];
           const totalCount = data.totalCount || rawJobs.length;
 
           const sortedJobs = [...rawJobs].sort((a: BackendJob, b: BackendJob) => {
@@ -118,7 +140,6 @@ export const usePostingStore = create<PostingState>()(
           const mappedJobs: ExtendedJobPosting[] = sortedJobs.map((j: BackendJob) => {
             let finalDeadline = '상시채용';
             const deadline = j.deadline;
-            // 백엔드 응답이 스네이크 케이스(deadline_text)와 카멜 케이스(deadlineText)가 혼용될 수 있으므로 둘 다 체크
             const deadlineText = j.deadline_text || j.deadlineText;
 
             if (deadline) {
@@ -134,26 +155,18 @@ export const usePostingStore = create<PostingState>()(
               else if (diffDays > 0) finalDeadline = `D-${diffDays}`;
               else finalDeadline = `마감 (D+${Math.abs(diffDays)})`;
             } else if (deadlineText) {
-              if (deadlineText.includes('상시')) finalDeadline = '상시채용';
-              else finalDeadline = deadlineText;
+              finalDeadline = deadlineText.includes('상시') ? '상시채용' : deadlineText;
             }
 
-            // 백엔드 필드명 혼용 대응 (source_type vs sourceType, company_name vs companyName 등)
             const sourceType = j.source_type || j.sourceType || 'manual';
             const finalSourceType = sourceType === 'auto' ? 'auto' : sourceType;
 
-            const companyName = j.company_name || j.companyName || '회사명 미상';
-            const companyLogo = j.company_logo || j.companyLogo;
-            const sourceUrl = j.source_url || j.sourceUrl;
-            const externalId = j.external_id || j.externalId || String(j.id);
-            const description = parseDescription(j.content);
-
             return {
               id: j.id,
-              companyName,
-              companyLogo,
+              companyName: j.company_name || j.companyName || '회사명 미상',
+              companyLogo: j.company_logo || j.companyLogo,
               title: j.title || '제목 없음',
-              url: sourceUrl,
+              url: j.source_url || j.sourceUrl,
               site:
                 finalSourceType === 'auto'
                   ? j.source_site_name || j.sourceSiteName || '자동크롤링'
@@ -163,16 +176,17 @@ export const usePostingStore = create<PostingState>()(
               deadline: finalDeadline,
               isScrapped: scrappedIds.has(String(j.id)),
               sourceType: finalSourceType,
-              externalId: externalId,
-              description: description,
+              externalId: j.external_id || j.externalId || String(j.id),
+              description: j.description || parseDescription(j.content),
             };
           });
 
           set({
             postings: mappedJobs,
             currentPage: page,
-            totalPages: Math.ceil(totalCount / PAGE_SIZE),
+            totalPages: Math.ceil(totalCount / PAGE_SIZE) || 1,
             isLoading: false,
+            sourceSites: data.sourceSites || get().sourceSites,
           });
         } catch (error: unknown) {
           const err = error as Error;
@@ -204,27 +218,11 @@ export const usePostingStore = create<PostingState>()(
         }
       },
 
-      updateJob: async (externalId, data, type) => {
+      // [핵심수정] JobModal에서 PUT /jobs/direct/:externalId 로 통일하여 쏘므로 단일 로직으로 단순화
+      updateJob: async (externalId, data) => {
         set({ isLoading: true });
         try {
-          if (type === 'manual') {
-            // 수동(manual) 크롤링 공고는 saveParsedJob (POST /jobs/manual/save) 엔드포인트를
-            // 사용하여 upsert 방식으로 업데이트를 시도합니다.
-            await get().saveParsedJob({
-              title: data.title || '',
-              companyName: data.companyName || '',
-              externalId,
-              sourceUrl: data.sourceUrl || '',
-              companyLogo: data.companyLogo,
-              location: data.location,
-              experience: data.experience,
-              deadline: data.deadline,
-              content: data.description || '',
-            });
-          } else {
-            // 직접(direct) 입력 및 자동(auto) 수집 공고는 전용 업데이트 API를 호출합니다.
-            await updateDirectJob(externalId, data);
-          }
+          await updateDirectJob(externalId, data);
           await get().fetchPostings(get().currentPage);
         } catch (err) {
           set({ error: (err as Error).message });
@@ -244,8 +242,6 @@ export const usePostingStore = create<PostingState>()(
           if (type === 'manual') {
             await deleteManualJob(externalId);
           } else {
-            // 'auto'와 'direct'는 모두 /jobs/direct 엔드포인트를 사용한다고 가정하거나,
-            // 필요 시 서버 API 설계에 맞게 분기합니다.
             await deleteDirectJob(externalId);
           }
           await get().fetchPostings(get().currentPage);

@@ -1,4 +1,4 @@
-import React from 'react';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
 
 interface PaginationProps {
   currentPage: number;
@@ -6,79 +6,56 @@ interface PaginationProps {
   onPageChange: (page: number) => void;
 }
 
-const styles = {
-  container: {
-    display: 'flex',
-    justifyContent: 'center',
-    alignItems: 'center',
-    gap: '8px',
-    marginTop: '32px',
-    paddingBottom: '20px',
-  },
-  btn: {
-    width: '36px',
-    height: '36px',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderRadius: '8px',
-    border: '1px solid #e8eaf0',
-    backgroundColor: '#ffffff',
-    color: '#6b7280',
-    fontSize: '13px',
-    fontWeight: 600,
-    cursor: 'pointer',
-    transition: 'all 0.15s',
-  },
-  activeBtn: {
-    backgroundColor: '#4f46e5',
-    color: '#ffffff',
-    borderColor: '#4f46e5',
-  },
-  disabledBtn: {
-    opacity: 0.5,
-    pointerEvents: 'none' as const,
-  },
-};
+const Pagination = ({ currentPage, totalPages, onPageChange }: PaginationProps) => {
+  // 표시할 페이지 번호 생성 로직
+  const getPageNumbers = () => {
+    const pages = [];
+    const maxVisible = 5;
+    let start = Math.max(1, currentPage - Math.floor(maxVisible / 2));
+    const end = Math.min(totalPages, start + maxVisible - 1);
 
-const Pagination: React.FC<PaginationProps> = ({ currentPage, totalPages, onPageChange }) => {
-  const pages = [];
+    if (end - start + 1 < maxVisible) {
+      start = Math.max(1, end - maxVisible + 1);
+    }
 
-  const pageLimit = 5;
-  // 소수점 버림을 이용하여 현재 속한 5개 단위의 시작 페이지 계산 (예: 1~5면 시작은 1, 6~10이면 시작은 6)
-  const startPage = Math.floor((currentPage - 1) / pageLimit) * pageLimit + 1;
-  const endPage = Math.min(startPage + pageLimit - 1, totalPages);
+    for (let i = start; i <= end; i++) {
+      pages.push(i);
+    }
+    return pages;
+  };
 
-  for (let i = startPage; i <= endPage; i++) {
-    pages.push(i);
-  }
+  if (totalPages <= 1) return null;
 
   return (
-    <div style={styles.container}>
-      {/* 이전 블록(5장 뒤로) 이동 화살표 */}
+    <div className="flex items-center justify-center gap-2 mt-12 mb-6">
       <button
-        style={{ ...styles.btn, ...(startPage === 1 ? styles.disabledBtn : {}) }}
-        onClick={() => onPageChange(startPage - 1)}
+        disabled={currentPage === 1}
+        onClick={() => onPageChange(currentPage - 1)}
+        className="p-2 rounded-xl border border-border-light text-gray-400 hover:bg-gray-50 disabled:opacity-20 disabled:cursor-not-allowed transition-all cursor-pointer"
       >
-        ❮
+        <ChevronLeft size={20} strokeWidth={2.5} />
       </button>
 
-      {pages.map((page) => (
+      {getPageNumbers().map((page) => (
         <button
           key={page}
-          style={page === currentPage ? { ...styles.btn, ...styles.activeBtn } : styles.btn}
           onClick={() => onPageChange(page)}
+          className={`w-10 h-10 rounded-xl text-sm font-black transition-all cursor-pointer ${
+            currentPage === page
+              ? 'bg-btn-point text-white shadow-lg shadow-purple-100 scale-105'
+              : 'text-gray-400 hover:bg-gray-100 hover:text-gray-600'
+          }`}
         >
           {page}
         </button>
       ))}
 
-      {/* 다음 블록(5장 앞으로) 이동 화살표 */}
       <button
-        style={{ ...styles.btn, ...(endPage === totalPages ? styles.disabledBtn : {}) }}
-        onClick={() => onPageChange(endPage + 1)}
+        disabled={currentPage === totalPages}
+        onClick={() => onPageChange(currentPage + 1)}
+        className="p-2 rounded-xl border border-border-light text-gray-400 hover:bg-gray-50 disabled:opacity-20 disabled:cursor-not-allowed transition-all cursor-pointer"
       >
-        ❯
+        <ChevronRight size={20} strokeWidth={2.5} />
       </button>
     </div>
   );

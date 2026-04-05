@@ -1,42 +1,36 @@
-export interface ApplicationJobPosting {
-	title: string;
-	content: string;
-	deadline: string;
-	companyName: string;
+// 백엔드 job_postings 테이블 조인 결과
+export interface JobPostingSummary {
+  id: string;
+  title: string;
+  companyName: string;
 }
 
-export interface StatusHistory {
-	toStatusId : string;
-	toStatusName: string;
-	changedAt: string;
-}
-
-export interface ApplicationStatusOption {
-	id: string;
-	name: string;
+export interface ApplicationStatus {
+  id: number | string;
+  displayName: string;
 }
 
 export interface ApplicationRecord {
-	id: string;
-	userId: string;
-	jobPostingId: string;
-	appliedAt: string;
-	notes: string;
-	createdAt: string;
-	updatedAt: string;
-	statusId: string;
-	statusName: string;
-	jobPostings: ApplicationJobPosting;
-	histories?: StatusHistory[];
+  id: string;
+  userId: string;
+  jobPostingId: string;
+  statusId: number | string;
+  appliedAt: string;
+  notes: string | null;
+  createdAt: string;
+  updatedAt: string;
+  jobPostings: JobPostingSummary;
+  applicationStatuses?: ApplicationStatus;
 }
 
-export interface ApplicationsResponse {
-	applications?: ApplicationRecord[];
-	items?: ApplicationRecord[];
+export interface CreateApplicationPayload {
+  jobPostingId: string;
+  statusId: number | string;
+  appliedAt: string;
+  notes?: string;
 }
 
-export interface ApplicationDetailResponse {
-	application?: ApplicationRecord;
-	item?: ApplicationRecord;
-	data?: ApplicationRecord;
+export interface UpdateApplicationPayload {
+  statusId?: number | string;
+  notes?: string;
 }

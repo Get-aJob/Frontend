@@ -1,67 +1,36 @@
 import { create } from 'zustand';
-import { getApplicationById, getApplicationStatusOptions, getUserApplications } from '@/api/Status';
-import type { ApplicationRecord, ApplicationStatusOption } from '@/types/Status';
+import { getUserApplications, getApplicationStatuses } from '@/api/Status';
+import type { ApplicationRecord, ApplicationStatus } from '@/types/Status';
 
 interface StatusState {
   applications: ApplicationRecord[];
-  statuses: string[];
-  statusOptions: ApplicationStatusOption[];
-  applicationDetail: ApplicationRecord | null;
+  statuses: ApplicationStatus[];
   isLoading: boolean;
-  isDetailLoading: boolean;
   error: string | null;
-  detailError: string | null;
-  fetchApplications: () => Promise<void>;
-  fetchApplicationDetail: (id: string) => Promise<void>;
-  clearApplicationDetail: () => void;
+  fetchData: () => Promise<void>;
+
+  // ✨ 상세 슬라이드 관리를 위한 전역 상태 추가
+  selectedApplication: ApplicationRecord | null;
+  setSelectedApplication: (app: ApplicationRecord | null) => void;
 }
 
 export const useStatusStore = create<StatusState>((set) => ({
   applications: [],
   statuses: [],
-  statusOptions: [],
-  applicationDetail: null,
   isLoading: false,
-  isDetailLoading: false,
   error: null,
-  detailError: null,
-  fetchApplications: async () => {
+  selectedApplication: null,
+  setSelectedApplication: (app) => set({ selectedApplication: app }),
+
+  fetchData: async () => {
     set({ isLoading: true, error: null });
     try {
-      const [applicationsResult, statusesResult] = await Promise.allSettled([
-        getUserApplications(),
-        getApplicationStatusOptions(),
-      ]);
-
-      const applications = applicationsResult.status === 'fulfilled' ? applicationsResult.value : [];
-      const statusOptions = statusesResult.status === 'fulfilled' ? statusesResult.value : [];
-      const statuses = statusOptions.map((item) => item.name);
-
-      set({ applications, statuses, statusOptions, isLoading: false });
-
-      if (applicationsResult.status === 'rejected') {
-        throw applicationsResult.reason;
-      }
-    } catch (error: unknown) {
-      const err = error as Error;
-      set({
-        isLoading: false,
-        error: err.message || '지원 현황 데이터를 불러오지 못했습니다',
-      });
+      const [apps, stats] = await Promise.all([getUserApplications(), getApplicationStatuses()]);
+      set({ applications: apps, statuses: stats, isLoading: false });
+    } catch (err) {
+      console.error('데이터 로드 실패:', err);
+      const errorMessage = err instanceof Error ? err.message : '데이터를 불러오는데 실패했습니다.';
+      set({ error: errorMessage, isLoading: false });
     }
   },
-  fetchApplicationDetail: async (id: string) => {
-    set({ isDetailLoading: true, detailError: null });
-    try {
-      const detail = await getApplicationById(id);
-      set({ applicationDetail: detail, isDetailLoading: false });
-    } catch (error: unknown) {
-      const err = error as Error;
-      set({
-        isDetailLoading: false,
-        detailError: err.message || '지원 상세 데이터를 불러오지 못했습니다',
-      });
-    }
-  },
-  clearApplicationDetail: () => set({ applicationDetail: null, detailError: null, isDetailLoading: false }),
 }));

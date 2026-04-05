@@ -1,5 +1,5 @@
 import type { ResumeFormInputs } from '@/types/ResumeFormType';
-import { Trash2 } from 'lucide-react';
+import { Plus, Trash2 } from 'lucide-react';
 import { useFieldArray, useFormContext } from 'react-hook-form';
 import ResumeFormDatePicker from './ResumeFormDatePicker';
 
@@ -11,30 +11,21 @@ const AddLanguageTest = ({ fieldIndex }: { fieldIndex: number }) => {
   });
 
   return (
-    <div>
-      <button
-        type="button"
-        onClick={() => {
-          append({ testName: '', score: '', date: null });
-        }}
-        className="p-2 hover:bg-black/10 rounded-lg"
-      >
-        +어학시험 추가
-      </button>
+    <div className="space-y-3">
       {fields.map((field, index) => (
-        <div key={field.id} className="w-full group relative p-2 rounded-xl hover:bg-black/10">
-          <div className="flex gap-1">
-            <input
-              {...register(`language.${fieldIndex}.test.${index}.testName`)}
-              type="text"
-              placeholder="시험명"
-            />
-            <input
-              {...register(`language.${fieldIndex}.test.${index}.score`)}
-              type="text"
-              placeholder="점수/등급"
-            />
-          </div>
+        <div key={field.id} className="flex flex-wrap items-center gap-2 relative group/test">
+          <input
+            {...register(`language.${fieldIndex}.test.${index}.testName`)}
+            type="text"
+            placeholder="시험명 (예: TOEIC)"
+            className="w-40 bg-white border border-gray-200 rounded-lg px-3 py-1.5 text-sm outline-none focus:border-btn-point transition-colors"
+          />
+          <input
+            {...register(`language.${fieldIndex}.test.${index}.score`)}
+            type="text"
+            placeholder="점수/등급"
+            className="w-28 bg-white border border-gray-200 rounded-lg px-3 py-1.5 text-sm outline-none focus:border-btn-point transition-colors"
+          />
           <ResumeFormDatePicker
             name={`language.${fieldIndex}.test.${index}.date`}
             control={control}
@@ -42,22 +33,20 @@ const AddLanguageTest = ({ fieldIndex }: { fieldIndex: number }) => {
           />
           <button
             type="button"
-            onClick={() => {
-              if (fields.length === 1) {
-                append({
-                  testName: '',
-                  score: '',
-                  date: null,
-                });
-              }
-              remove(index);
-            }}
-            className="absolute top-2 right-2 w-8 h-8 p-1.5 hidden group-hover:flex items-center shadow-sm justify-center bg-white rounded-sm hover:bg-black/5"
+            onClick={() => remove(index)}
+            className="p-1.5 text-gray-400 hover:text-status-error rounded-md transition-colors opacity-0 group-hover/test:opacity-100"
           >
-            <Trash2 className="text-black" />
+            <Trash2 size={16} />
           </button>
         </div>
       ))}
+      <button
+        type="button"
+        onClick={() => append({ testName: '', score: '', date: null })}
+        className="inline-flex items-center gap-1 mt-2 text-sm font-bold text-btn-point hover:text-purple-700 transition-colors px-1"
+      >
+        <Plus size={14} strokeWidth={3} /> 어학시험 추가
+      </button>
     </div>
   );
 };

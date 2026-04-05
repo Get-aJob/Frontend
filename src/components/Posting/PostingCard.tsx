@@ -1,222 +1,97 @@
-import React from 'react';
-import type { JobPosting } from '@/types/Posting';
-import PostingActionButton from './PostingActionButtons';
+import { MapPin, Briefcase, Calendar } from 'lucide-react';
+import type { ExtendedJobPosting } from '@/store/usePostingStore';
+import Badge from '@/components/common/UI/Badge';
+import PostingActionButtons from './PostingActionButtons'; // ✨ 버튼 컴포넌트 임포트
 
 interface PostingCardProps {
-  job: JobPosting & { isScrapped?: boolean };
+  job: ExtendedJobPosting;
+  onDetail: (job: ExtendedJobPosting) => void;
 }
 
-const styles = {
-  card: {
-    background: '#ffffff',
-    border: '1.5px solid #e8eaf0',
-    borderRadius: '16px',
-    padding: '24px',
-    boxShadow: '0 2px 8px rgba(0, 0, 0, 0.04)',
-    display: 'flex',
-    flexDirection: 'column' as const,
-    justifyContent: 'space-between',
-    minHeight: '180px',
-    transition: 'all 0.15s ease',
-    cursor: 'pointer',
-    fontFamily: '"Noto Sans KR", sans-serif',
-  },
-  topSection: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: '16px',
-    position: 'relative' as const,
-  },
-  logoBoxInfo: {
-    width: '54px',
-    height: '54px',
-    borderRadius: '14px',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    fontSize: '22px',
-    fontWeight: 800,
-    color: '#fff',
-    backgroundColor: '#4ade80',
-    flexShrink: 0,
-  },
-  logoImg: {
-    width: '54px',
-    height: '54px',
-    borderRadius: '14px',
-    objectFit: 'contain' as const,
-    backgroundColor: '#fff',
-    border: '1px solid #f3f4f6',
-    flexShrink: 0,
-  },
-  textContainer: {
-    display: 'flex',
-    flexDirection: 'column' as const,
-    flex: 1,
-    paddingRight: '60px',
-  },
-  title: {
-    fontSize: '18px',
-    fontWeight: 700,
-    color: '#1f2937',
-    marginBottom: '6px',
-    letterSpacing: '-0.3px',
-    lineHeight: '1.3',
-    display: '-webkit-box',
-    WebkitLineClamp: 1,
-    WebkitBoxOrient: 'vertical' as const,
-    overflow: 'hidden',
-  },
-  company: {
-    fontSize: '14px',
-    fontWeight: 600,
-    color: '#6b7280',
-    letterSpacing: '-0.2px',
-  },
-  deadline: {
-    position: 'absolute' as const,
-    top: '4px',
-    right: '0',
-    fontSize: '14px',
-    fontWeight: 800,
-  },
-  bottomSection: {
-    display: 'flex',
-    justifyContent: 'space-between',
-    alignItems: 'flex-end',
-    marginTop: '28px',
-    flexWrap: 'wrap' as const,
-    gap: '12px',
-  },
-  tagsLeft: {
-    display: 'flex',
-    flexDirection: 'column' as const,
-    gap: '10px',
-    flex: '1 1 auto',
-    overflow: 'hidden',
-  },
-  tagRow: {
-    display: 'flex',
-    gap: '8px',
-    flexWrap: 'wrap' as const,
-  },
-  expTag: {
-    background: '#f3f0ff',
-    color: '#7c3aed',
-    fontSize: '12px',
-    fontWeight: 700,
-    padding: '4px 10px',
-    borderRadius: '6px',
-    whiteSpace: 'nowrap' as const,
-  },
-  locTag: {
-    background: '#f3f0ff',
-    color: '#7c3aed',
-    fontSize: '12px',
-    fontWeight: 700,
-    padding: '4px 10px',
-    borderRadius: '6px',
-    whiteSpace: 'nowrap' as const,
-    overflow: 'hidden',
-    textOverflow: 'ellipsis',
-    maxWidth: '180px',
-  },
-  sourceTag: {
-    background: '#f0f9ff',
-    color: '#0284c7',
-    fontSize: '12px',
-    fontWeight: 700,
-    padding: '4px 10px',
-    borderRadius: '6px',
-    width: 'max-content',
-    maxWidth: '100%',
-    overflow: 'hidden',
-    textOverflow: 'ellipsis',
-    whiteSpace: 'nowrap' as const,
-  },
+// ✨ D-Day 계산 로직
+const calculateDday = (deadline: string | undefined) => {
+  if (!deadline) return { text: '기한 미상', color: 'bg-gray-50 text-gray-500 border-gray-100' };
+  if (deadline.includes('상시'))
+    return { text: '상시채용', color: 'bg-green-50 text-green-600 border-green-200' };
+
+  const deadlineDate = new Date(deadline);
+  if (isNaN(deadlineDate.getTime()))
+    return { text: deadline, color: 'bg-gray-50 text-gray-600 border-gray-100' };
+
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  deadlineDate.setHours(0, 0, 0, 0);
+
+  const diffDays = Math.ceil((deadlineDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
+
+  if (diffDays < 0) return { text: '마감', color: 'bg-gray-100 text-gray-400 border-gray-200' };
+  if (diffDays === 0) return { text: 'D-Day', color: 'bg-red-50 text-red-500 border-red-200' };
+  if (diffDays <= 3)
+    return { text: `D-${diffDays}`, color: 'bg-red-50 text-red-500 border-red-200' };
+  return { text: `D-${diffDays}`, color: 'bg-purple-50 text-btn-point border-purple-100' };
 };
 
-const PostingCard: React.FC<PostingCardProps> = ({ job }) => {
-  const getDdayColor = (dday: string) => {
-    if (dday === 'D-Day' || dday.includes('마감')) return '#f43f5e';
+// ✨ 마감일 날짜 포맷 (~ 10.25)
+const formatDeadlineDate = (dateString: string | undefined) => {
+  if (!dateString || dateString.includes('상시')) return null;
+  const d = new Date(dateString);
+  if (isNaN(d.getTime())) return null;
+  const month = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return `~ ${month}.${day}`;
+};
 
-    const match = dday.match(/^D-(\d+)$/);
-    if (match) {
-      const days = parseInt(match[1], 10);
-      if (days <= 3) return '#f43f5e';
-      if (days <= 7) return '#f59e0b';
-      return '#10b981';
-    }
-    return '#6b7280';
-  };
-
-  const handleClick = () => {
-    if (job.url) {
-      window.open(job.url, '_blank', 'noopener,noreferrer');
-    }
-  };
-
-  const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter' || e.key === ' ') {
-      if (e.key === ' ') e.preventDefault();
-      handleClick();
-    }
-  };
+const PostingCard = ({ job, onDetail }: PostingCardProps) => {
+  const ddayInfo = calculateDday(job.deadline);
+  const exactDate = formatDeadlineDate(job.deadline);
 
   return (
-    <div
-      style={styles.card}
-      onClick={handleClick}
-      onKeyDown={handleKeyDown}
-      role="button"
-      tabIndex={0}
-    >
-      <div style={styles.topSection}>
-        {job.companyLogo ? (
-          <img src={job.companyLogo} alt={job.companyName} style={styles.logoImg} />
-        ) : (
-          <div style={styles.logoBoxInfo}>
-            {job.companyName ? job.companyName.charAt(0).toUpperCase() : 'C'}
-          </div>
-        )}
-
-        <div style={styles.textContainer}>
-          <div style={styles.title}>{job.title}</div>
-          <div style={styles.company}>{job.companyName}</div>
+    <div className="bg-white border border-gray-100 rounded-3xl p-6 hover:border-btn-point/30 hover:shadow-lg transition-all group relative flex flex-col h-full">
+      {/* 1. 상단: 배지 영역 */}
+      <div className="flex justify-between items-start mb-4">
+        <div className="flex items-center gap-2">
+          <Badge variant="point" className="px-2.5 py-1 text-[11px] font-bold">
+            {job.site}
+          </Badge>
+          <span className="text-[10px] text-gray-300 font-bold uppercase tracking-wider">
+            {job.sourceType === 'auto' ? '자동' : '수동'}
+          </span>
         </div>
-
         <div
-          style={{
-            ...styles.deadline,
-            color: job.deadline.includes('상시') ? '#059669' : getDdayColor(job.deadline),
-            ...(job.deadline.includes('상시') || job.deadline.includes('채용시')
-              ? {
-                  background: '#ecfdf5',
-                  padding: '3px 8px',
-                  borderRadius: '6px',
-                  border: '1px solid #a7f3d0',
-                  fontSize: '11px',
-                  top: '0px',
-                }
-              : {}),
-          }}
+          className={`px-3 py-1 rounded-full border text-[11px] font-black tracking-wide ${ddayInfo.color}`}
         >
-          {job.deadline}
+          {ddayInfo.text}
         </div>
       </div>
 
-      <div style={styles.bottomSection}>
-        <div style={styles.tagsLeft}>
-          <div style={styles.tagRow}>
-            {job.experienceLevel && <span style={styles.expTag}>{job.experienceLevel}</span>}
-            <span style={styles.locTag}>{job.location || '전국'}</span>
-          </div>
-          <div style={styles.tagRow}>
-            <span style={styles.sourceTag}>{job.site}</span>
-          </div>
-        </div>
+      {/* 2. 본문: 제목 및 회사명 (클릭 시 상세 모달 오픈) */}
+      <div className="flex-1 cursor-pointer" onClick={() => onDetail(job)}>
+        <h3 className="text-[17px] font-black text-gray-900 leading-snug mb-2 group-hover:text-btn-point transition-colors line-clamp-2">
+          {job.title}
+        </h3>
+        <p className="text-[13px] font-bold text-gray-500 mb-5">{job.companyName}</p>
+      </div>
 
-        <PostingActionButton job={job} />
+      {/* 3. 정보 영역: 지역, 경력 및 남은 기한 날짜 */}
+      <div className="flex items-center gap-4 text-[12px] font-medium text-gray-400 mb-2">
+        <div className="flex items-center gap-1.5">
+          <MapPin size={14} />
+          <span className="truncate max-w-[80px]">{job.location || '지역무관'}</span>
+        </div>
+        <div className="flex items-center gap-1.5">
+          <Briefcase size={14} />
+          <span className="truncate">{job.experienceLevel || '경력무관'}</span>
+        </div>
+        {exactDate && (
+          <div className="flex items-center gap-1.5 ml-auto text-gray-400 font-bold">
+            <Calendar size={13} />
+            <span>{exactDate}</span>
+          </div>
+        )}
+      </div>
+
+      <div className="border-t border-gray-50">
+        <PostingActionButtons job={job} />
       </div>
     </div>
   );

@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { createComment, deleteComment, getJobComments, updateComment } from '@/api/Comment';
-import type { JobCommentApiItem } from '@/types/Comment';
-import { mapApiToFeed, type FeedComment } from '@/components/PostingFeedDetail/feedComment';
+import type { JobCommentApiItem, FeedComment } from '@/types/Comment'; // ✨ 여기서 FeedComment 임포트
+import { mapApiToFeed } from '@/components/Posting/Comment/useJobComment';
 
 type UsePostingFeedCommentsParams = {
   jobId?: string;
@@ -15,7 +15,6 @@ const getErrorMessage = (error: unknown, fallback: string) => {
     response?: { data?: { error?: string; message?: string } };
     message?: string;
   };
-
   return err.response?.data?.error ?? err.response?.data?.message ?? err.message ?? fallback;
 };
 
@@ -41,14 +40,13 @@ export const usePostingFeedComments = ({
       setIsLoadingComments(false);
       return;
     }
-
     let cancelled = false;
     (async () => {
       setIsLoadingComments(true);
       setLoadError(null);
       try {
-        const { comments: list } = await getJobComments(jobId);
-        if (!cancelled) setComments(list.map(mapApiToFeed));
+        const response = await getJobComments(jobId);
+        if (!cancelled) setComments(response.comments.map(mapApiToFeed));
       } catch (error: unknown) {
         if (cancelled) return;
         setLoadError(getErrorMessage(error, '댓글을 불러오지 못했습니다.'));
@@ -57,7 +55,6 @@ export const usePostingFeedComments = ({
         if (!cancelled) setIsLoadingComments(false);
       }
     })();
-
     return () => {
       cancelled = true;
     };
@@ -71,6 +68,7 @@ export const usePostingFeedComments = ({
     setSubmitError(null);
     try {
       const raw = (await createComment(jobId, { content: trimmed })) as unknown;
+
       const payload =
         raw &&
         typeof raw === 'object' &&
@@ -82,39 +80,31 @@ export const usePostingFeedComments = ({
       if (payload) {
         setComments((prev) => [mapApiToFeed(payload), ...prev]);
       } else {
+        // ✨ 에러 해결: author 객체 타입 명시
         const flat = raw as {
           id?: string;
           content?: string;
+          userId?: string;
+          userNickname?: string;
           createdAt?: string;
           created_at?: string;
           author?: {
             id?: string;
-            email?: string;
             name?: string;
             profile_image_url?: string | null;
           };
         };
-        const createdAt =
-          flat.createdAt ??
-          flat.created_at ??
-          new Date().toLocaleString('ko-KR', {
-            year: 'numeric',
-            month: '2-digit',
-            day: '2-digit',
-            hour: '2-digit',
-            minute: '2-digit',
-            hour12: false,
-          });
-        const authorIdStr = flat.author?.id ?? '';
+
+        const createdAt = flat.createdAt ?? flat.created_at ?? new Date().toISOString();
+
         setComments((prev) => [
           {
-            id: flat.id ?? `local-${Date.now()}`,
-            authorUserId: authorIdStr,
-            authorId: flat.author?.email ?? flat.author?.name ?? authorIdStr,
-            authorName: flat.author?.name ?? currentUserName,
-            authorImage: flat.author?.profile_image_url ?? currentUserImage,
-            createdAt,
+            id: String(flat.id ?? `local-${Date.now()}`),
+            userId: String(flat.author?.id ?? flat.userId ?? currentUserDbId ?? ''),
+            userNickname: flat.author?.name ?? flat.userNickname ?? currentUserName,
+            userImage: flat.author?.profile_image_url ?? currentUserImage,
             content: flat.content ?? trimmed,
+            createdAt,
           },
           ...prev,
         ]);
@@ -125,11 +115,11 @@ export const usePostingFeedComments = ({
     } finally {
       setIsSubmitting(false);
     }
-  }, [comment, jobId, currentUserName, currentUserImage]);
+  }, [comment, jobId, currentUserName, currentUserImage, currentUserDbId]);
 
   const startEditComment = useCallback((item: FeedComment) => {
     setSubmitError(null);
-    setEditingCommentId(item.id);
+    setEditingCommentId(String(item.id));
     setEditingContent(item.content);
   }, []);
 
@@ -141,7 +131,7 @@ export const usePostingFeedComments = ({
   const saveEditComment = useCallback(
     async (item: FeedComment) => {
       if (!jobId) return;
-      if (savingCommentId === item.id) return;
+      if (savingCommentId === String(item.id)) return;
 
       const trimmed = editingContent.trim();
       if (!trimmed || trimmed === item.content) {
@@ -150,11 +140,12 @@ export const usePostingFeedComments = ({
       }
 
       setSubmitError(null);
-      setEditingCommentId(item.id);
-      setSavingCommentId(item.id);
+      setSavingCommentId(String(item.id));
       try {
-        const updated = await updateComment(jobId, item.id, { content: trimmed });
-        setComments((prev) => prev.map((c) => (c.id === item.id ? mapApiToFeed(updated) : c)));
+        const updated = await updateComment(jobId, String(item.id), { content: trimmed });
+        setComments((prev) =>
+          prev.map((c) => (String(c.id) === String(item.id) ? mapApiToFeed(updated) : c)),
+        );
         cancelEditComment();
       } catch (error: unknown) {
         setSubmitError(getErrorMessage(error, '댓글 수정에 실패했습니다.'));
@@ -168,16 +159,17 @@ export const usePostingFeedComments = ({
   const deleteCommentItem = useCallback(
     async (item: FeedComment) => {
       if (!jobId) return;
-      if (deletingCommentId === item.id) return;
+      const commentId = String(item.id);
+      if (deletingCommentId === commentId) return;
 
       const ok = window.confirm('해당 댓글을 삭제하시겠습니까?');
       if (!ok) return;
 
       setSubmitError(null);
-      setDeletingCommentId(item.id);
+      setDeletingCommentId(commentId);
       try {
-        await deleteComment(jobId, item.id);
-        setComments((prev) => prev.filter((c) => c.id !== item.id));
+        await deleteComment(jobId, commentId);
+        setComments((prev) => prev.filter((c) => String(c.id) !== commentId));
       } catch (error: unknown) {
         setSubmitError(getErrorMessage(error, '댓글 삭제에 실패했습니다.'));
       } finally {
@@ -188,7 +180,8 @@ export const usePostingFeedComments = ({
   );
 
   const isMine = useCallback(
-    (item: FeedComment) => currentUserDbId != null && item.authorUserId === currentUserDbId,
+    (item: FeedComment) =>
+      currentUserDbId != null && String(item.userId) === String(currentUserDbId),
     [currentUserDbId],
   );
 
