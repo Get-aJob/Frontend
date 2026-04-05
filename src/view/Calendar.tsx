@@ -1,4 +1,3 @@
-// src/view/Calendar.tsx
 import { useEffect, useState, useMemo } from 'react';
 import { getSchedules } from '@/api/Schedules';
 import type { ScheduleEvent, ViewType, EventFilterType } from '@/types/Calendar';
@@ -13,9 +12,6 @@ const Calendar = () => {
   const [selectedEvent, setSelectedEvent] = useState<ScheduleEvent | null>(null);
   const [isSlideOpen, setIsSlideOpen] = useState(false);
   const [filter, setFilter] = useState<EventFilterType>('all');
-
-  // 💡 현재 날짜 정보를 Topbar 등 외부에서 알 수 있게 처리하는 로직이 필요할 수 있습니다.
-  // 일단은 본문 내에서 날짜가 사라진 문제를 해결하기 위해 Header를 다시 조정합니다.
 
   useEffect(() => {
     let isMounted = true;
@@ -60,25 +56,24 @@ const Calendar = () => {
   };
 
   return (
-    <div className="bg-bg-view min-h-screen p-4 md:p-6 relative overflow-hidden">
-      <div className="w-full max-w-400 mx-auto bg-white rounded-[32px] shadow-2xl p-6 md:p-10 min-h-[calc(100vh-5rem)] flex flex-col border border-border-light">
-        <CalendarHeader
-          view={view}
-          setView={setView}
-          currentDate={currentDate}
-          setCurrentDate={setCurrentDate}
-          filter={filter}
-          setFilter={setFilter}
-        />
+    /* ✨ Layout의 p-8 여백 안에서 꽉 차는 흰색 컨테이너로 변경 */
+    <div className="w-full bg-white rounded-[32px] shadow-sm p-8 flex flex-col border border-border-light min-h-[800px]">
+      <CalendarHeader
+        view={view}
+        setView={setView}
+        currentDate={currentDate}
+        setCurrentDate={setCurrentDate}
+        filter={filter}
+        setFilter={setFilter}
+      />
 
-        <div className="flex-1 mt-10">
-          <CalendarGrid
-            view={view}
-            currentDate={currentDate}
-            events={filteredEvents}
-            onEventClick={handleEventClick}
-          />
-        </div>
+      <div className="flex-1 mt-8 border-t border-gray-50 pt-8">
+        <CalendarGrid
+          view={view}
+          currentDate={currentDate}
+          events={filteredEvents}
+          onEventClick={handleEventClick}
+        />
       </div>
 
       <CalendarDetailSlide
