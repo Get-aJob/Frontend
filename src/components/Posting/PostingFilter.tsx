@@ -1,3 +1,5 @@
+import Badge from '@/components/common/UI/Badge';
+import { Filter, Info, Globe } from 'lucide-react';
 import { usePostingStore } from '@/store/usePostingStore';
 
 interface PostingFilterProps {
@@ -5,75 +7,87 @@ interface PostingFilterProps {
 }
 
 const PostingFilter = ({ totalCount }: PostingFilterProps) => {
-  const { sourceSites, selectedSite, setSelectedSite, sourceType, setSourceType } =
+  const { sourceType, setSourceType, sourceSites, selectedSite, setSelectedSite } =
     usePostingStore();
 
-  return (
-    <div className="flex flex-col gap-6 w-full">
-      {/* 상단 바: 탭 메뉴와 전체 개수 양끝 정렬 */}
-      <div className="flex items-end justify-between border-b border-gray-100 pb-4">
-        {/* 왼쪽: 수집 모드 탭 */}
-        <div className="flex gap-6">
-          <button
-            onClick={() => setSourceType('auto')}
-            className={`pb-2 text-sm font-bold transition-all relative ${
-              sourceType === 'auto' ? 'text-black' : 'text-gray-400 hover:text-gray-600'
-            }`}
-          >
-            자동 수집
-            {sourceType === 'auto' && (
-              <div className="absolute bottom-[-17px] left-0 w-full h-[2px] bg-black" />
-            )}
-          </button>
-          <button
-            onClick={() => setSourceType('manual')}
-            className={`pb-2 text-sm font-bold transition-all relative ${
-              sourceType !== 'auto' ? 'text-black' : 'text-gray-400 hover:text-gray-600'
-            }`}
-          >
-            직접/수동 등록
-            {sourceType !== 'auto' && (
-              <div className="absolute bottom-[-17px] left-0 w-full h-[2px] bg-black" />
-            )}
-          </button>
-        </div>
+  const filterOptions: { id: 'auto' | 'manual' | 'direct'; label: string }[] = [
+    { id: 'auto', label: '자동 수집' },
+    { id: 'manual', label: '수동 등록' },
+    { id: 'direct', label: '직접 작성' },
+  ];
 
-        {/* 오른쪽: 전체 개수 표시 */}
-        <div className="flex items-center gap-1.5 text-sm font-medium pb-1">
-          <span className="text-gray-400">전체</span>
-          <span className="text-btn-point font-bold text-xl">{totalCount}</span>
-          <span className="text-gray-400">건</span>
+  return (
+    <div className="flex flex-col gap-6 mb-8">
+      <div className="flex justify-between items-center px-1">
+        <div className="text-xs font-bold text-gray-400">
+          총 <span className="text-btn-point">{totalCount}</span>개의 공고
         </div>
       </div>
 
-      {/* 하단: 사이트별 칩 필터 (자동 수집 모드일 때만 표시) */}
-      {sourceType === 'auto' && sourceSites.length > 0 && (
-        <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-hide">
-          <button
-            onClick={() => setSelectedSite('')}
-            className={`px-4 py-1.5 rounded-full text-xs font-semibold transition-colors whitespace-nowrap ${
-              selectedSite === ''
-                ? 'bg-black text-white'
-                : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-            }`}
-          >
-            전체
-          </button>
-          {sourceSites.map((site) => (
+      <div className="space-y-4">
+        {/* 1. 출처(Source Type) 필터 */}
+        <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-hide">
+          <div className="flex items-center gap-1.5 text-gray-400 mr-2 shrink-0">
+            <Filter size={14} strokeWidth={3} />
+            <span className="text-[10px] font-black uppercase tracking-wider">출처</span>
+          </div>
+          {filterOptions.map((type) => (
             <button
-              key={site}
-              onClick={() => setSelectedSite(site)}
-              className={`px-4 py-1.5 rounded-full text-xs font-semibold transition-colors whitespace-nowrap ${
-                selectedSite === site
-                  ? 'bg-blue-600 text-white'
-                  : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-              }`}
+              key={type.id}
+              onClick={() => {
+                // 💡 불필요한 중복 렌더링/요청 유발 함수 제거
+                setSourceType(type.id);
+              }}
+              className="cursor-pointer shrink-0"
             >
-              {site}
+              <Badge variant={sourceType === type.id ? 'point' : 'default'}>{type.label}</Badge>
             </button>
           ))}
         </div>
-      )}
+
+        {/* 2. 플랫폼(Source Site) 필터 - 자동 수집일 때만 노출 */}
+        {sourceType === 'auto' && sourceSites && sourceSites.length > 0 && (
+          <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-hide animate-[fadeIn_0.3s_ease]">
+            <div className="flex items-center gap-1.5 text-gray-400 mr-2 shrink-0">
+              <Globe size={14} strokeWidth={3} />
+              <span className="text-[10px] font-black uppercase tracking-wider">사이트</span>
+            </div>
+
+            {/* 전체 보기 버튼 */}
+            <button
+              onClick={() => {
+                setSelectedSite(''); // 💡 onPageReset 제거
+              }}
+              className="cursor-pointer shrink-0"
+            >
+              <Badge variant={selectedSite === '' ? 'point' : 'default'}>전체</Badge>
+            </button>
+
+            {/* 개별 사이트 목록 렌더링 */}
+            {sourceSites.map((site) => (
+              <button
+                key={site}
+                onClick={() => {
+                  setSelectedSite(site);
+                }}
+                className="cursor-pointer shrink-0"
+              >
+                <Badge variant={selectedSite === site ? 'point' : 'default'}>{site}</Badge>
+              </button>
+            ))}
+          </div>
+        )}
+
+        {/* 3. 자동 수집 안내 문구 */}
+        {sourceType === 'auto' && (
+          <div className="flex items-center gap-2 px-4 py-3 bg-purple-50/50 border border-purple-100 rounded-xl">
+            <Info size={16} className="text-btn-point shrink-0" />
+            <p className="text-[11px] font-bold text-purple-700">
+              자동 크롤링 데이터는 6시간마다 업데이트됩니다.
+            </p>
+          </div>
+        )}
+      </div>
     </div>
   );
 };

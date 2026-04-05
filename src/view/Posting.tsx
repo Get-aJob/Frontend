@@ -1,15 +1,27 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { usePostingStore } from '@/store/usePostingStore';
+import type { ExtendedJobPosting } from '@/store/usePostingStore';
 import PostingList from '@/components/Posting/PostingList';
 import PostingFilter from '@/components/Posting/PostingFilter';
 import Pagination from '@/components/Posting/Pagination';
 import EmptyState from '@/components/common/UI/EmptyState';
-import PostingNotice from '@/components/Posting/PostingNotice';
+import PostingDetailModal from '@/components/Posting/PostingDetailModal';
 import { Briefcase } from 'lucide-react';
 
 const Posting = () => {
-  const { postings, isLoading, fetchPostings, totalPages, currentPage, selectedSite } =
-    usePostingStore();
+  const {
+    postings,
+    isLoading,
+    fetchPostings,
+    totalPages,
+    currentPage,
+    selectedSite,
+    toggleScrapStatus,
+    updateViewCount, // 💡 스토어에서 조회수 업데이트 함수 가져오기
+  } = usePostingStore();
+
+  const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
+  const [selectedJob, setSelectedJob] = useState<ExtendedJobPosting | null>(null);
 
   useEffect(() => {
     fetchPostings(currentPage, selectedSite);
@@ -17,7 +29,6 @@ const Posting = () => {
   }, []);
 
   const handlePageChange = (page: number) => {
-    // Layout의 main 스크롤 영역을 상단으로 이동
     const mainElement = document.querySelector('main');
     if (mainElement) {
       mainElement.scrollTo({ top: 0, behavior: 'smooth' });
@@ -25,15 +36,22 @@ const Posting = () => {
     fetchPostings(page, selectedSite);
   };
 
+  const handleDetailOpen = (job: ExtendedJobPosting) => {
+    setSelectedJob(job);
+    setIsDetailModalOpen(true);
+
+    // 💡 모달이 열릴 때마다 프론트엔드의 조회수 상태를 1 증가시킵니다.
+    updateViewCount(job.id);
+  };
+
+  const handleDetailClose = () => {
+    setIsDetailModalOpen(false);
+    setSelectedJob(null);
+  };
+
   return (
     <div className="flex flex-col gap-8">
-      {/* 1. 상단 공지/배너 */}
-      <PostingNotice />
-
-      {/* 2. 필터 및 전체 개수 (PostingFilter 내부에서 양끝 정렬 처리) */}
       <PostingFilter totalCount={postings.length} />
-
-      {/* 3. 공고 리스트 영역 */}
       <div className="w-full">
         {isLoading ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -48,7 +66,11 @@ const Posting = () => {
           <div className="flex flex-col gap-12">
             {postings.length > 0 ? (
               <>
-                <PostingList postings={postings} />
+                <PostingList
+                  postings={postings}
+                  onScrap={toggleScrapStatus}
+                  onDetail={handleDetailOpen}
+                />
                 <div className="mt-4">
                   <Pagination
                     currentPage={currentPage}
@@ -69,6 +91,13 @@ const Posting = () => {
           </div>
         )}
       </div>
+
+      {/* 4. 공고 상세 보기 모달 연결 */}
+      <PostingDetailModal
+        isOpen={isDetailModalOpen}
+        onClose={handleDetailClose}
+        job={selectedJob}
+      />
     </div>
   );
 };

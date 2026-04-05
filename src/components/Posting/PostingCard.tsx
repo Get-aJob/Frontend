@@ -1,99 +1,87 @@
-import { MapPin, Briefcase, Calendar } from 'lucide-react';
-import type { ExtendedJobPosting } from '@/store/usePostingStore';
+import type { JobPosting } from '@/types/Posting';
 import Badge from '@/components/common/UI/Badge';
-import PostingActionButtons from './PostingActionButtons'; // ✨ 버튼 컴포넌트 임포트
+import { MessageSquare, Eye } from 'lucide-react';
+import { ddayVariant } from '@/utils/statusUtils';
+import PostingActionButtons from './PostingActionButtons';
 
 interface PostingCardProps {
-  job: ExtendedJobPosting;
-  onDetail: (job: ExtendedJobPosting) => void;
+  posting: JobPosting;
+  isScrapped?: boolean;
+  onScrap: (id: string | number) => void;
+  onDetail: (job: JobPosting) => void;
 }
 
-// ✨ D-Day 계산 로직
-const calculateDday = (deadline: string | undefined) => {
-  if (!deadline) return { text: '기한 미상', color: 'bg-gray-50 text-gray-500 border-gray-100' };
-  if (deadline.includes('상시'))
-    return { text: '상시채용', color: 'bg-green-50 text-green-600 border-green-200' };
+const PostingCard = ({ posting, isScrapped, onScrap, onDetail }: PostingCardProps) => {
+  const dday = posting.deadline || '상시채용';
 
-  const deadlineDate = new Date(deadline);
-  if (isNaN(deadlineDate.getTime()))
-    return { text: deadline, color: 'bg-gray-50 text-gray-600 border-gray-100' };
-
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
-  deadlineDate.setHours(0, 0, 0, 0);
-
-  const diffDays = Math.ceil((deadlineDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
-
-  if (diffDays < 0) return { text: '마감', color: 'bg-gray-100 text-gray-400 border-gray-200' };
-  if (diffDays === 0) return { text: 'D-Day', color: 'bg-red-50 text-red-500 border-red-200' };
-  if (diffDays <= 3)
-    return { text: `D-${diffDays}`, color: 'bg-red-50 text-red-500 border-red-200' };
-  return { text: `D-${diffDays}`, color: 'bg-purple-50 text-btn-point border-purple-100' };
-};
-
-// ✨ 마감일 날짜 포맷 (~ 10.25)
-const formatDeadlineDate = (dateString: string | undefined) => {
-  if (!dateString || dateString.includes('상시')) return null;
-  const d = new Date(dateString);
-  if (isNaN(d.getTime())) return null;
-  const month = String(d.getMonth() + 1).padStart(2, '0');
-  const day = String(d.getDate()).padStart(2, '0');
-  return `~ ${month}.${day}`;
-};
-
-const PostingCard = ({ job, onDetail }: PostingCardProps) => {
-  const ddayInfo = calculateDday(job.deadline);
-  const exactDate = formatDeadlineDate(job.deadline);
+  const handleCardClick = () => {
+    onDetail(posting);
+  };
 
   return (
-    <div className="bg-white border border-gray-100 rounded-3xl p-6 hover:border-btn-point/30 hover:shadow-lg transition-all group relative flex flex-col h-full">
-      {/* 1. 상단: 배지 영역 */}
-      <div className="flex justify-between items-start mb-4">
-        <div className="flex items-center gap-2">
-          <Badge variant="point" className="px-2.5 py-1 text-[11px] font-bold">
-            {job.site}
-          </Badge>
-          <span className="text-[10px] text-gray-300 font-bold uppercase tracking-wider">
-            {job.sourceType === 'auto' ? '자동' : '수동'}
+    <article
+      onClick={handleCardClick}
+      className="group relative bg-white border border-border-light rounded-3xl p-6 transition-all hover:border-btn-point hover:shadow-md cursor-pointer flex flex-col h-full"
+    >
+      <div className="flex justify-between items-start mb-5">
+        <div className="flex items-center gap-4">
+          {/* 💡 로고 영역: 클릭 전파를 차단하여 페이지 이동 방지 */}
+          <div
+            className="w-14 h-14 rounded-2xl bg-gray-50 border border-border-light overflow-hidden flex items-center justify-center shadow-sm cursor-default"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {posting.companyLogo ? (
+              <img
+                src={posting.companyLogo}
+                alt={posting.companyName}
+                className="w-full h-full object-contain p-1.5"
+              />
+            ) : (
+              <span className="text-xl font-black text-gray-300">
+                {posting.companyName.charAt(0)}
+              </span>
+            )}
+          </div>
+          <div>
+            <h3 className="text-xs font-black text-gray-400 tracking-tight mb-1">
+              {posting.companyName}
+            </h3>
+            <Badge variant={ddayVariant(dday)}>{dday}</Badge>
+          </div>
+        </div>
+      </div>
+
+      <div className="flex-1 mb-6">
+        <h4 className="text-subtitle font-black text-gray-900 mb-3 line-clamp-1 group-hover:text-btn-point transition-colors">
+          {posting.title}
+        </h4>
+        <div className="flex flex-wrap gap-1.5">
+          <span className="text-[10px] font-bold text-gray-400 bg-gray-50 px-2 py-0.5 rounded-md border border-gray-100">
+            #{posting.location || '전국'}
+          </span>
+          <span className="text-[10px] font-bold text-gray-400 bg-gray-50 px-2 py-0.5 rounded-md border border-gray-100">
+            #{posting.site || '채용공고'}
           </span>
         </div>
-        <div
-          className={`px-3 py-1 rounded-full border text-[11px] font-black tracking-wide ${ddayInfo.color}`}
-        >
-          {ddayInfo.text}
-        </div>
       </div>
 
-      {/* 2. 본문: 제목 및 회사명 (클릭 시 상세 모달 오픈) */}
-      <div className="flex-1 cursor-pointer" onClick={() => onDetail(job)}>
-        <h3 className="text-[17px] font-black text-gray-900 leading-snug mb-2 group-hover:text-btn-point transition-colors line-clamp-2">
-          {job.title}
-        </h3>
-        <p className="text-[13px] font-bold text-gray-500 mb-5">{job.companyName}</p>
+      <div className="mb-5">
+        <PostingActionButtons
+          job={{ ...posting, isScrapped }}
+          onScrap={onScrap}
+          onDetailClick={() => onDetail(posting)}
+        />
       </div>
 
-      {/* 3. 정보 영역: 지역, 경력 및 남은 기한 날짜 */}
-      <div className="flex items-center gap-4 text-[12px] font-medium text-gray-400 mb-2">
-        <div className="flex items-center gap-1.5">
-          <MapPin size={14} />
-          <span className="truncate max-w-[80px]">{job.location || '지역무관'}</span>
-        </div>
-        <div className="flex items-center gap-1.5">
-          <Briefcase size={14} />
-          <span className="truncate">{job.experienceLevel || '경력무관'}</span>
-        </div>
-        {exactDate && (
-          <div className="flex items-center gap-1.5 ml-auto text-gray-400 font-bold">
-            <Calendar size={13} />
-            <span>{exactDate}</span>
-          </div>
-        )}
+      <div className="flex items-center gap-4 text-gray-300 text-[11px] font-black pt-4 border-t border-gray-50">
+        <span className="flex items-center gap-1.5">
+          <Eye size={14} strokeWidth={3} /> {posting.viewCount || 0}
+        </span>
+        <span className="flex items-center gap-1.5">
+          <MessageSquare size={14} strokeWidth={3} /> {posting.commentCount || 0}
+        </span>
       </div>
-
-      <div className="border-t border-gray-50">
-        <PostingActionButtons job={job} />
-      </div>
-    </div>
+    </article>
   );
 };
 

@@ -39,7 +39,6 @@ const PostingDetailModal = ({ isOpen, onClose, job }: PostingDetailModalProps) =
         className="bg-white rounded-[40px] w-full max-w-2xl max-h-[90vh] overflow-hidden shadow-2xl flex flex-col animate-in slide-in-from-bottom-8 duration-300 relative"
         onClick={(e) => e.stopPropagation()}
       >
-        {/* 닫기 버튼 */}
         <button
           onClick={onClose}
           className="absolute top-8 right-8 z-10 p-2 bg-gray-50 rounded-full text-gray-400 hover:text-gray-600 transition-colors"
@@ -47,7 +46,6 @@ const PostingDetailModal = ({ isOpen, onClose, job }: PostingDetailModalProps) =
           <X size={20} />
         </button>
 
-        {/* 1. 상단 기업 정보 섹션 */}
         <div className="p-10 pb-8 border-b border-gray-50 shrink-0">
           <div className="flex items-start gap-6">
             <div className="w-24 h-24 rounded-3xl border border-gray-100 flex items-center justify-center overflow-hidden bg-white shadow-sm shrink-0">
@@ -80,9 +78,7 @@ const PostingDetailModal = ({ isOpen, onClose, job }: PostingDetailModalProps) =
           </div>
         </div>
 
-        {/* 2. 스크롤 가능한 본문 및 댓글 섹션 */}
         <div className="flex-1 overflow-y-auto p-10 space-y-12 custom-scrollbar bg-gray-50/30">
-          {/* 주요 공고 요약 정보 */}
           <div className="grid grid-cols-2 gap-4">
             {[
               { icon: MapPin, label: '근무 지역', value: job.location || '정보 없음' },
@@ -111,7 +107,6 @@ const PostingDetailModal = ({ isOpen, onClose, job }: PostingDetailModalProps) =
             ))}
           </div>
 
-          {/* 공고 상세 설명 */}
           <div className="space-y-4">
             <h3 className="text-lg font-black text-gray-900 flex items-center gap-2 ml-1">
               <span className="w-1.5 h-5 bg-btn-point rounded-full" />
@@ -124,7 +119,6 @@ const PostingDetailModal = ({ isOpen, onClose, job }: PostingDetailModalProps) =
             </div>
           </div>
 
-          {/* ✨ 신규 댓글 섹션 연결 */}
           <div className="space-y-6 pt-4">
             <h3 className="text-lg font-black text-gray-900 flex items-center gap-2 ml-1">
               <MessageSquare size={20} className="text-btn-point" />
@@ -134,7 +128,6 @@ const PostingDetailModal = ({ isOpen, onClose, job }: PostingDetailModalProps) =
           </div>
         </div>
 
-        {/* 3. 하단 푸터 버튼 */}
         <div className="p-8 bg-white border-t border-gray-50 flex gap-4 shrink-0">
           <Button
             className="w-full py-4 rounded-2xl font-black text-lg shadow-lg shadow-purple-100 transition-transform active:scale-[0.98]"

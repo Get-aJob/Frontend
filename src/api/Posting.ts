@@ -19,7 +19,8 @@ export const getPostings = async (
     offset: String((page - 1) * limit),
   });
 
-  if (site) params.append('site', site);
+  // 💡 백엔드 요청 규격에 맞춰 파라미터 이름을 'source_site'로 수정했습니다.
+  if (site) params.append('source_site', site);
 
   const response = await api.get(`/jobs?${params.toString()}`);
   return response.data;

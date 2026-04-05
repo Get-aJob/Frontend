@@ -1,30 +1,41 @@
-import type { ApplicationRecord } from '@/types/Status';
+import type { ApplicationRecord, JobPostingSummary } from '@/types/Status';
 
-export function toDday(deadline: string | undefined) {
-  if (!deadline) return '-';
-  const target = new Date(deadline);
+export type BadgeVariant = 'error' | 'warning' | 'success' | 'point' | 'default';
+
+export const toDday = (deadline?: string): string => {
+  if (!deadline || deadline === '상시채용') return '상시채용';
   const today = new Date();
   today.setHours(0, 0, 0, 0);
-  const diff = Math.ceil((target.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
-  return diff === 0 ? 'D-Day' : diff > 0 ? `D-${diff}` : '마감';
-}
+  const target = new Date(deadline);
+  if (isNaN(target.getTime())) return deadline;
 
-export function ddayVariant(dday: string): 'error' | 'warning' | 'success' | 'default' {
-  if (dday === '마감' || dday === 'D-Day' || dday.startsWith('D-1') || dday.startsWith('D-2'))
-    return 'error';
-  if (dday.startsWith('D-')) return 'warning';
-  if (dday === '-') return 'default';
-  return 'success';
+  const diffTime = target.getTime() - today.getTime();
+  const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+  if (diffDays === 0) return 'D-Day';
+  if (diffDays > 0) return `D-${diffDays}`;
+  return `마감 (D+${Math.abs(diffDays)})`;
+};
+
+export function ddayVariant(dday: string): BadgeVariant {
+  if (!dday || dday.includes('마감') || dday.includes('+')) return 'error';
+  if (dday === 'D-Day' || dday === '오늘마감') return 'warning';
+  if (dday === '상시채용') return 'success';
+  return 'point';
 }
 
 export function toApplicationItem(app: ApplicationRecord) {
+  const job = app.jobPostings as JobPostingSummary & { deadline?: string };
+
+  const appData = app as ApplicationRecord & { statusName?: string };
+
   return {
     id: app.id,
-    company: app.jobPostings?.companyName || '알 수 없는 회사',
-    role: app.jobPostings?.title || '직무 미지정',
-    statusName: app.statusName || '지원 완료',
-    deadline: app.jobPostings?.deadline?.split('T')[0] || '-',
-    dday: toDday(app.jobPostings?.deadline),
-    appliedAt: app.appliedAt?.split('T')[0] || '-',
+    company: job?.companyName || '회사명 미상',
+    role: job?.title || '공고 제목 없음',
+    statusName: appData.statusName || '지원 완료',
+    deadline: job?.deadline ? job.deadline.split('T')[0] : '-',
+    dday: toDday(job?.deadline),
+    appliedAt: app.appliedAt ? app.appliedAt.split('T')[0] : '-',
   };
 }
