@@ -2,22 +2,25 @@ import SidebarLogo from './SidebarLogo';
 import SidebarNavItem from './SidebarNavItem';
 import SidebarAuth from './SidebarAuth';
 import { NAV_SECTIONS } from './constants';
+import type { NavSectionType, NavItemType } from './constants';
 
 const Sidebar = () => {
   return (
-    <aside className="flex flex-col shrink-0 w-60 h-screen bg-white border-r border-border-light shadow-sm z-20">
+    <aside className="flex flex-col w-64 h-full bg-white border-r border-border-light shrink-0 z-40 transition-all">
       <SidebarLogo />
 
-      <nav className="flex-1 px-3 py-4 overflow-y-auto">
-        {NAV_SECTIONS.map((section, idx) => (
-          <div key={idx} className="mb-6 last:mb-0">
-            <div className="px-3 mb-2 text-[10px] font-bold text-gray-400 tracking-wider uppercase">
+      <nav className="flex-1 px-4 py-6 space-y-8 overflow-y-auto custom-scrollbar">
+        {NAV_SECTIONS.map((section: NavSectionType) => (
+          <div key={section.title} className="space-y-2">
+            <h3 className="px-3 text-[11px] font-bold text-gray-400 uppercase tracking-wider">
               {section.title}
-            </div>
+            </h3>
 
-            {section.items.map((item) => (
-              <SidebarNavItem key={item.id} item={item} />
-            ))}
+            <div className="space-y-1">
+              {section.items.map((item: NavItemType) => (
+                <SidebarNavItem key={item.id} item={item} />
+              ))}
+            </div>
           </div>
         ))}
       </nav>
