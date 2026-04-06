@@ -1,11 +1,12 @@
+import { useEffect, useState } from 'react';
 import { PATH } from '@/router/Path';
 import type { ResumeFormData, ResumeFormInputs, ResumeInfo } from '@/types/ResumeFormType';
 import { useFormContext, type SubmitHandler } from 'react-hook-form';
 import { useNavigate, useParams } from 'react-router-dom';
-import { ChevronLeft, Download, LoaderCircle } from 'lucide-react';
+import { ChevronLeft, Download, Save } from 'lucide-react';
 import ResumeDownloadButton from './ResumeDownloadButton';
 import { useGetResume, useSaveResume, useUploadPortfolio } from '@/hooks/resume';
-import { useEffect, useState } from 'react';
+import Button from '@/components/common/UI/Button';
 
 const ResumeFormTopbar = () => {
   const { resumeId } = useParams<{ resumeId: string }>();
@@ -50,7 +51,7 @@ const ResumeFormTopbar = () => {
         data.portfolio.map(async (p) => {
           if (p.file instanceof File) {
             const response = await uploadPortfolio.mutateAsync(p.file);
-            return { ...p, fileUrl: response };
+            return { ...p, fileUrl: response.fileUrl };
           } else {
             return p;
           }
@@ -90,42 +91,46 @@ const ResumeFormTopbar = () => {
       console.error(`저장 중 에러가 발생했습니다: ${error}`);
     }
   };
+
   return (
-    <aside className="bg-white">
-      <div className="w-full min-h-20 flex justify-between items-center gap-10">
-        <button
-          type="button"
-          onClick={() => {
-            navigate(PATH.RESUME);
-          }}
-          className="flex p-2 mx-5 rounded-xl hover:bg-black/5"
-        >
-          <ChevronLeft size={18} className="mt-0.5" />
-          <p>이전 페이지</p>
-        </button>
+    <aside className="sticky top-0 z-40 bg-[#f3f4f6]/80 backdrop-blur-md border-b border-gray-200 mb-8 py-3 px-4 sm:px-8 flex items-center justify-between shadow-sm transition-all -mx-4 sm:-mx-8">
+      <button
+        type="button"
+        onClick={() => navigate(PATH.RESUME)}
+        className="flex items-center gap-1.5 text-gray-500 hover:text-gray-900 transition-colors font-bold group"
+      >
+        <ChevronLeft size={20} className="group-hover:-translate-x-0.5 transition-transform" />
+        <span className="hidden sm:inline">목록으로</span>
+      </button>
+
+      <div className="flex-1 max-w-md mx-4">
         <input
           {...register('title')}
           type="text"
-          placeholder="제목을 입력하세요."
-          className="p-3 rounded-xl shadow-inner"
+          placeholder="이력서 제목을 입력하세요 (예: 3년차 프론트엔드 이규현)"
+          className="w-full bg-white border border-gray-200 rounded-lg px-4 py-2.5 text-sm font-bold text-gray-900 outline-none focus:border-btn-point focus:ring-1 focus:ring-btn-point transition-all placeholder:font-medium placeholder:text-gray-400 shadow-sm"
         />
-        <div className="h-full flex w-fit">
-          <ResumeDownloadButton
-            data={formData}
-            className="block py-2 px-3 rounded-xl hover:bg-black/10"
-          >
-            <Download />
-          </ResumeDownloadButton>
-          <button
-            type="button"
-            onClick={handleSubmit(onSubmit)}
-            className="py-2 px-3 border mx-5 rounded-xl text-white bg-blue-400 hover:bg-blue-600"
-          >
-            {saveResume.isPending ? <LoaderCircle className="animate-spin" /> : '작성 완료'}
-          </button>
-        </div>
       </div>
-      <div className="w-full h-px bg-black/5" />
+
+      <div className="flex items-center gap-2">
+        <ResumeDownloadButton
+          data={formData}
+          className="inline-flex items-center gap-1.5 px-3 py-2 sm:px-4 text-sm font-bold border border-gray-300 rounded-lg text-gray-700 bg-white hover:bg-gray-50 transition-colors active:scale-95"
+        >
+          <Download size={16} />
+          <span className="hidden sm:inline">PDF 다운로드</span>
+        </ResumeDownloadButton>
+        <Button
+          type="button"
+          onClick={handleSubmit(onSubmit)}
+          variant="primary"
+          className="gap-1.5 px-4 sm:px-6 font-bold"
+          isLoading={saveResume.isPending}
+        >
+          <Save size={16} />
+          <span className="hidden sm:inline">저장하기</span>
+        </Button>
+      </div>
     </aside>
   );
 };

@@ -3,6 +3,7 @@ import { useGetResume } from '@/hooks/resume';
 import type { ResumeFormInputs } from '@/types/ResumeFormType';
 import { LoaderCircle } from 'lucide-react';
 import { useState } from 'react';
+import clsx from 'clsx';
 
 interface ResumeDownloadButtonProps {
   data?: ResumeFormInputs;
@@ -15,10 +16,13 @@ const ResumeDownloadButton = ({ data, id, className, children }: ResumeDownloadB
   const [isGenerating, setIsGenerating] = useState(false);
   const { data: value } = useGetResume(id);
 
-  const handleDownload = async () => {
+  const handleDownload = async (e: React.MouseEvent) => {
+    e.stopPropagation();
+    e.preventDefault();
+
     setIsGenerating(true);
     try {
-      await new Promise((resolve) => setTimeout(resolve, 150)); // UI 업데이트를 위해 150ms 대기
+      await new Promise((resolve) => setTimeout(resolve, 150));
       if (data) {
         await downloadResumePdf(data);
       } else if (id && value) {
@@ -49,9 +53,19 @@ const ResumeDownloadButton = ({ data, id, className, children }: ResumeDownloadB
       setIsGenerating(false);
     }
   };
+
   return (
-    <button onClick={handleDownload} disabled={isGenerating} className={`flex ${className || ''}`}>
-      {isGenerating ? <LoaderCircle className="animate-spin" /> : children}
+    <button
+      type="button"
+      onClick={handleDownload}
+      disabled={isGenerating}
+      className={clsx(
+        'flex items-center justify-center transition-all',
+        isGenerating && 'opacity-60 cursor-not-allowed',
+        className,
+      )}
+    >
+      {isGenerating ? <LoaderCircle size={16} className="animate-spin" /> : children}
     </button>
   );
 };

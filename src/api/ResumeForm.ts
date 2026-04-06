@@ -1,4 +1,9 @@
-import type { GetResumeById, ResumeFormData, ResumeInfo } from '@/types/ResumeFormType';
+import type {
+  GetResumeById,
+  ResumeFormData,
+  ResumeInfo,
+  UploadResult,
+} from '@/types/ResumeFormType';
 import api from './Axios';
 
 export const createResume = async (data: ResumeFormData): Promise<ResumeInfo> => {
@@ -31,7 +36,7 @@ export const duplicateResume = async (resumeId: string) => {
   return response.data;
 };
 
-export const uploadPortfolio = async (file: File): Promise<string> => {
+export const uploadPortfolio = async (file: File): Promise<UploadResult> => {
   const formData = new FormData();
   formData.append('file', file);
   const response = await api.post('/portfolios/upload', formData, {
@@ -39,10 +44,5 @@ export const uploadPortfolio = async (file: File): Promise<string> => {
       'Content-Type': 'multipart/form-data',
     },
   });
-  return response.data;
-};
-
-export const getPortfolioPdf = async (path: string) => {
-  const response = await api.get(path, { responseType: 'blob', withCredentials: true });
   return response.data;
 };

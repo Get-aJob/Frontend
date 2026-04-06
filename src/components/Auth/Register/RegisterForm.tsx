@@ -1,17 +1,27 @@
 import React, { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
+import { Camera } from 'lucide-react';
 import type { JoinField } from '@/types/Auth';
+import Input from '@/components/common/UI/Input';
+import Button from '@/components/common/UI/Button';
 
 interface RegisterFormProps {
   onSwitchLogin: () => void;
   onSubmit: (data: JoinField) => void;
+  isLoading: boolean;
+  errorMsg: string;
 }
 
 interface RegisterFormData extends JoinField {
   passwordConfirm: string;
 }
 
-const RegisterForm: React.FC<RegisterFormProps> = ({ onSwitchLogin, onSubmit }) => {
+const RegisterForm: React.FC<RegisterFormProps> = ({
+  onSwitchLogin,
+  onSubmit,
+  isLoading,
+  errorMsg,
+}) => {
   const [previewImage, setPreviewImage] = useState<string | null>(null);
 
   const {
@@ -48,11 +58,16 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ onSwitchLogin, onSubmit }) 
   }, [previewImage]);
 
   return (
-    <form onSubmit={handleSubmit(handleFormSubmit)} className="flex flex-col gap-4">
-      {/* 프로필 이미지 업로드 영역 */}
+    <form onSubmit={handleSubmit(handleFormSubmit)} className="flex flex-col gap-4 w-85 mx-auto">
+      {errorMsg && (
+        <div className="p-3 mb-1 rounded-lg bg-red-50 text-status-error text-sm font-bold text-center border border-red-100">
+          {errorMsg}
+        </div>
+      )}
+
       <div className="flex flex-col items-center gap-2 mb-2">
         <label className="cursor-pointer relative group">
-          <div className="w-20 h-20 rounded-full bg-[#f9fafb] border border-[#e8eaf0] flex items-center justify-center overflow-hidden transition-all group-hover:border-[#4f46e5]">
+          <div className="w-20 h-20 rounded-full bg-bg-view border border-border-light flex flex-col items-center justify-center overflow-hidden transition-all group-hover:border-btn-point">
             {previewImage ? (
               <img
                 src={previewImage}
@@ -60,7 +75,10 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ onSwitchLogin, onSubmit }) 
                 className="w-full h-full object-cover"
               />
             ) : (
-              <span className="text-[12px] text-[#9ca3af]">사진 추가</span>
+              <>
+                <Camera size={20} className="text-gray-400 mb-1" />
+                <span className="text-body text-gray-400">사진 추가</span>
+              </>
             )}
           </div>
           <input type="file" accept="image/*" className="hidden" onChange={handleImageChange} />
@@ -68,24 +86,24 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ onSwitchLogin, onSubmit }) 
       </div>
 
       <div className="flex flex-col gap-1.5">
-        <label className="text-[13px] font-medium text-[#4b5563] ml-1">이름</label>
-        <input
+        <label className="text-sm font-semibold text-gray-700 ml-1">이름</label>
+        <Input
           type="text"
           placeholder="홍길동"
-          className={`w-full p-3 rounded-xl border ${errors.name ? 'border-red-500' : 'border-[#e8eaf0]'} bg-[#f9fafb] text-[14px] focus:outline-none focus:ring-2 focus:ring-[#4f46e5]/20 focus:border-[#4f46e5] transition-all`}
+          className={errors.name ? 'border-status-error focus:ring-red-100' : ''}
           {...register('name', { required: '이름을 입력해주세요.' })}
         />
         {errors.name && (
-          <span className="text-red-500 text-[11px] ml-1">{errors.name.message}</span>
+          <span className="text-status-error text-body ml-1">{errors.name.message}</span>
         )}
       </div>
 
       <div className="flex flex-col gap-1.5">
-        <label className="text-[13px] font-medium text-[#4b5563] ml-1">이메일</label>
-        <input
+        <label className="text-sm font-semibold text-gray-700 ml-1">이메일</label>
+        <Input
           type="email"
           placeholder="example@email.com"
-          className={`w-full p-3 rounded-xl border ${errors.email ? 'border-red-500' : 'border-[#e8eaf0]'} bg-[#f9fafb] text-[14px] focus:outline-none focus:ring-2 focus:ring-[#4f46e5]/20 focus:border-[#4f46e5] transition-all`}
+          className={errors.email ? 'border-status-error focus:ring-red-100' : ''}
           {...register('email', {
             required: '이메일을 입력해주세요.',
             pattern: {
@@ -95,32 +113,32 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ onSwitchLogin, onSubmit }) 
           })}
         />
         {errors.email && (
-          <span className="text-red-500 text-[11px] ml-1">{errors.email.message}</span>
+          <span className="text-status-error text-body ml-1">{errors.email.message}</span>
         )}
       </div>
 
       <div className="flex flex-col gap-1.5">
-        <label className="text-[13px] font-medium text-[#4b5563] ml-1">비밀번호</label>
-        <input
+        <label className="text-sm font-semibold text-gray-700 ml-1">비밀번호</label>
+        <Input
           type="password"
           placeholder="8자 이상 입력해주세요"
-          className={`w-full p-3 rounded-xl border ${errors.password ? 'border-red-500' : 'border-[#e8eaf0]'} bg-[#f9fafb] text-[14px] focus:outline-none focus:ring-2 focus:ring-[#4f46e5]/20 focus:border-[#4f46e5] transition-all`}
+          className={errors.password ? 'border-status-error focus:ring-red-100' : ''}
           {...register('password', {
             required: '비밀번호를 입력해주세요.',
             minLength: { value: 8, message: '비밀번호는 8자 이상이어야 합니다.' },
           })}
         />
         {errors.password && (
-          <span className="text-red-500 text-[11px] ml-1">{errors.password.message}</span>
+          <span className="text-status-error text-body ml-1">{errors.password.message}</span>
         )}
       </div>
 
       <div className="flex flex-col gap-1.5">
-        <label className="text-[13px] font-medium text-[#4b5563] ml-1">비밀번호 확인</label>
-        <input
+        <label className="text-sm font-semibold text-gray-700 ml-1">비밀번호 확인</label>
+        <Input
           type="password"
           placeholder="비밀번호를 한 번 더 입력해주세요"
-          className={`w-full p-3 rounded-xl border ${errors.passwordConfirm ? 'border-red-500' : 'border-[#e8eaf0]'} bg-[#f9fafb] text-[14px] focus:outline-none focus:ring-2 focus:ring-[#4f46e5]/20 focus:border-[#4f46e5] transition-all`}
+          className={errors.passwordConfirm ? 'border-status-error focus:ring-red-100' : ''}
           {...register('passwordConfirm', {
             required: '비밀번호 확인이 필요합니다.',
             deps: ['password'],
@@ -128,23 +146,20 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ onSwitchLogin, onSubmit }) 
           })}
         />
         {errors.passwordConfirm && (
-          <span className="text-red-500 text-[11px] ml-1">{errors.passwordConfirm.message}</span>
+          <span className="text-status-error text-body ml-1">{errors.passwordConfirm.message}</span>
         )}
       </div>
 
-      <button
-        type="submit"
-        className="mt-2 w-full p-3.5 rounded-xl bg-linear-to-br from-[#4f46e5] to-[#8b5cf6] text-white text-[14px] font-bold shadow-[0_4px_12px_rgba(79,70,229,0.2)] hover:opacity-95 transition-opacity active:scale-[0.98] cursor-pointer"
-      >
-        회원가입 시작하기
-      </button>
+      <Button type="submit" className="w-full mt-2 py-3" isLoading={isLoading}>
+        {isLoading ? '회원가입 진행 중...' : '회원가입 시작하기'}
+      </Button>
 
-      <div className="mt-4 text-center text-[13px] text-[#9ca3af]">
+      <div className="mt-4 text-center text-sm text-gray-500">
         이미 계정이 있으신가요?
         <button
           type="button"
           onClick={onSwitchLogin}
-          className="font-bold text-[#4f46e5] ml-1.5 hover:underline cursor-pointer"
+          className="font-bold text-btn-point ml-1.5 hover:underline cursor-pointer"
         >
           로그인
         </button>

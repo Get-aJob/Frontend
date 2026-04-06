@@ -1,7 +1,8 @@
+import React from 'react';
 import { Link } from 'react-router-dom';
 
 interface CreateButtonProps {
-  icon: string;
+  icon: React.ReactNode;
   title: string;
   sub: string;
   path: string;
@@ -9,18 +10,15 @@ interface CreateButtonProps {
 
 const CreateButton = ({ icon, title, sub, path }: CreateButtonProps) => {
   return (
-    <Link to={path}>
-      <div className="w-full h-75 relative">
-        <div className="flex w-full h-full items-center justify-center relative">
-          <div className="text-center">
-            <h1 className="text-6xl text-gray-400">{icon}</h1>
-            <h1 className="text-gray-400">{title}</h1>
-          </div>
-          <div className="absolute flex items-center justify-center left-0 bottom-0 w-full h-1/4">
-            <p className="text-sm text-gray-400">{sub}</p>
-          </div>
+    <Link to={path} className="block w-full h-full">
+      <div className="group w-full h-full min-h-48 flex flex-col items-center justify-center bg-gray-50 border-2 border-dashed border-gray-300 rounded-xl hover:border-btn-point hover:bg-indigo-50 transition-all duration-300 cursor-pointer active:scale-[0.98]">
+        <div className="w-14 h-14 bg-white rounded-full flex items-center justify-center shadow-sm text-gray-400 group-hover:text-btn-point group-hover:scale-110 transition-transform duration-300 mb-4">
+          {icon}
         </div>
-        <div className="absolute top-0 left-0 w-full h-full bg-black/5 border-2 border-black/5 rounded-2xl hover:scale-[101%] hover:bg-black/10"></div>
+        <h3 className="text-subtitle font-bold text-gray-700 group-hover:text-btn-point transition-colors">
+          {title}
+        </h3>
+        <p className="text-xs text-gray-500 mt-2 font-medium">{sub}</p>
       </div>
     </Link>
   );

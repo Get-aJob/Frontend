@@ -1,127 +1,61 @@
-import React, { useRef, useState } from 'react';
+import React, { useRef } from 'react';
 import { Camera, X } from 'lucide-react';
-import { clsx } from 'clsx';
 
 interface LogoUploadProps {
   value: string | null;
   onChange: (value: string | null) => void;
 }
 
-const STYLES = {
-  container:
-    'w-[160px] h-[160px] border-[2px] border-solid rounded-[12px] flex flex-col items-center justify-center cursor-pointer transition-all duration-200 relative overflow-hidden group',
-  containerDragging: 'border-[#4f46e5] bg-[#f5f3ff]',
-  containerDefault: 'bg-[#f8f9fc] border-[#e8eaf0] hover:border-[#4f46e5] hover:bg-[#f5f3ff]',
-  iconWrapper: 'mb-[8px] transition-colors duration-200',
-  textWrapper: 'text-[11px] text-[#6b7280] text-center px-[10px] leading-[1.4]',
-  subText: 'text-[10px] transition-colors duration-200',
-  previewImg: 'absolute inset-0 w-full h-full object-contain bg-white block',
-  removeBtn:
-    'absolute top-[6px] right-[6px] w-[20px] h-[20px] bg-black/50 text-white rounded-full hidden items-center justify-center cursor-pointer z-10 group-hover:flex hover:bg-black/70',
-};
-
 const LogoUpload: React.FC<LogoUploadProps> = ({ value, onChange }) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const [isDragging, setIsDragging] = useState(false);
-  const MAX_FILE_SIZE = 2 * 1024 * 1024; // 2MB 제한
-
   const processFile = (file: File) => {
     if (!file.type.startsWith('image/')) return;
-    if (file.size > MAX_FILE_SIZE) {
-      alert('파일 크기는 2MB를 초과할 수 없습니다.');
-      return;
-    }
-
     const reader = new FileReader();
     reader.onload = () => {
       if (typeof reader.result === 'string') onChange(reader.result);
     };
-    reader.onerror = () => onChange(null);
     reader.readAsDataURL(file);
-  };
-
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) processFile(file);
-  };
-
-  const handleDragOver = (e: React.DragEvent) => {
-    e.preventDefault();
-    setIsDragging(true);
-  };
-
-  const handleDragLeave = (e: React.DragEvent) => {
-    e.preventDefault();
-    setIsDragging(false);
-  };
-
-  const handleDrop = (e: React.DragEvent) => {
-    e.preventDefault();
-    setIsDragging(false);
-    const file = e.dataTransfer.files?.[0];
-    if (file) processFile(file);
-  };
-
-  const handleClick = () => {
-    fileInputRef.current?.click();
-  };
-
-  const handleRemove = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    onChange(null);
-    if (fileInputRef.current) {
-      fileInputRef.current.value = '';
-    }
   };
 
   return (
     <div
-      onClick={handleClick}
-      onDragOver={handleDragOver}
-      onDragLeave={handleDragLeave}
-      onDrop={handleDrop}
-      onKeyDown={(e) => {
-        if (e.key === 'Enter' || e.key === ' ') {
-          e.preventDefault();
-          handleClick();
-        }
-      }}
-      role="button"
-      tabIndex={0}
-      title="회사 로고 업로드 (이미지 파일만 가능)"
-      className={clsx(
-        STYLES.container,
-        isDragging ? STYLES.containerDragging : STYLES.containerDefault,
-      )}
+      onClick={() => fileInputRef.current?.click()}
+      className="w-40 h-40 border-2 border-dashed rounded-2xl flex flex-col items-center justify-center cursor-pointer transition-all duration-200 relative overflow-hidden group bg-gray-50 border-gray-200 hover:border-btn-point hover:bg-purple-50/30"
     >
-      <input type="file" ref={fileInputRef} onChange={handleFileChange} hidden accept="image/*" />
-      <div className={clsx(STYLES.iconWrapper, isDragging ? 'text-[#4f46e5]' : 'text-[#9ca3af]')}>
-        <Camera size={24} />
-      </div>
-      <div className={STYLES.textWrapper}>
-        회사 로고 업로드
-        <br />
-        <span
-          className={clsx(
-            STYLES.subText,
-            isDragging ? 'text-[#4f46e5] font-medium' : 'text-[#9ca3af]',
-          )}
-        >
-          드래그 앤 드롭 또는 클릭
-        </span>
-      </div>
-      {value && (
+      <input
+        type="file"
+        ref={fileInputRef}
+        onChange={(e) => e.target.files?.[0] && processFile(e.target.files[0])}
+        hidden
+        accept="image/*"
+      />
+
+      {!value ? (
         <>
-          <img src={value} className={STYLES.previewImg} alt="로고 미리보기" />
+          <div className="mb-2 text-gray-400 group-hover:text-btn-point transition-colors">
+            <Camera size={28} />
+          </div>
+          <div className="text-[11px] text-gray-500 font-bold text-center px-4 leading-relaxed">
+            로고 업로드
+          </div>
+        </>
+      ) : (
+        <>
+          <img
+            src={value}
+            className="absolute inset-0 w-full h-full object-contain bg-white p-2"
+            alt="Preview"
+          />
           <button
             type="button"
-            aria-label="로고 삭제"
-            onClick={handleRemove}
-            title="삭제"
-            className={STYLES.removeBtn}
+            onClick={(e) => {
+              e.stopPropagation();
+              onChange(null);
+            }}
+            className="absolute top-2 right-2 w-6 h-6 bg-red-500/80 text-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-600 shadow-sm"
           >
-            <X size={12} />
+            <X size={14} />
           </button>
         </>
       )}

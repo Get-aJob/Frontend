@@ -1,32 +1,48 @@
+// src/types/Comment.ts
+
+export interface JobCommentApiItem {
+  id: string | number;
+  content: string;
+  userId?: string | number;
+  userNickname?: string;
+  createdAt?: string;
+  created_at?: string;
+  jobId?: string;
+  author?: {
+    id?: string | number;
+    name?: string;
+    nickname?: string;
+    email?: string;
+    profile_image_url?: string | null;
+  };
+  user?: {
+    id?: string | number;
+    name?: string;
+    nickname?: string;
+    email?: string;
+    profile_image_url?: string | null;
+  };
+}
+
+export interface JobCommentsListResponse {
+  comments: JobCommentApiItem[];
+}
+
 export interface CreateCommentRequest {
   content: string;
 }
 
 export interface CommentResponse {
-  id: string;
-  content: string;
-  createdAt?: string;
-  created_at?: string;
-  author?: {
-    id?: string;
-    email?: string;
-    name?: string;
-    profile_image_url?: string | null;
-  };
+  comment: JobCommentApiItem;
 }
 
-export interface JobCommentApiItem {
-  id: string;
-  jobId: string;
+// ✨ 모든 컴포넌트에서 공통으로 사용할 유일한 FeedComment 타입
+export interface FeedComment {
+  id: string | number;
   content: string;
+  userId: string | number;
+  userNickname: string;
+  userImage: string | null;
   createdAt: string;
-  updatedAt: string;
-  author: {
-    id: string;
-    name: string | null;
-    profileImageUrl: string | null;
-  };
-}
-export interface JobCommentsListResponse {
-  comments: JobCommentApiItem[];
+  feedId?: string | number;
 }

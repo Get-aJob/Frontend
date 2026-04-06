@@ -88,6 +88,7 @@ export interface ResumeInfo {
   id: string;
   title: string;
   createdAt: string;
+  content?: ResumeFormPayload;
 }
 
 export interface GetResumeById {
@@ -95,6 +96,11 @@ export interface GetResumeById {
   title: string;
   content: ResumeFormPayload;
   createdAt: string;
+}
+
+export interface UploadResult {
+  message: string;
+  fileUrl: string;
 }
 
 export type pdfType = File | string | null | undefined;

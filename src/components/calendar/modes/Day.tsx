@@ -1,4 +1,5 @@
 import type { ScheduleEvent } from '@/types/Calendar';
+import Badge from '@/components/common/UI/Badge';
 
 interface Props {
   currentDate: Date;
@@ -20,8 +21,8 @@ const Day = ({ currentDate, events, onEventClick }: Props) => {
           <span className="text-3xl font-black">{currentDate.getDate()}</span>
         </div>
         <div>
-          <h2 className="text-3xl font-black text-gray-900">오늘의 채용 일정</h2>
-          <p className="text-gray-400 font-bold tracking-widest mt-1">{dayStr}</p>
+          <h2 className="text-title font-black text-gray-900">오늘의 채용 일정</h2>
+          <p className="text-body text-gray-400 font-bold tracking-widest mt-1">{dayStr}</p>
         </div>
       </div>
 
@@ -30,34 +31,23 @@ const Day = ({ currentDate, events, onEventClick }: Props) => {
           <div
             key={idx}
             onClick={() => onEventClick(e)}
-            className="bg-white p-8 rounded-4xl border border-gray-100 shadow-sm hover:shadow-md transition-all cursor-pointer flex items-center justify-between"
+            className="bg-white p-8 rounded-4xl border border-border-light shadow-sm hover:shadow-md transition-all cursor-pointer flex items-center justify-between"
           >
             <div className="flex items-center gap-6">
               <div
                 className={`w-14 h-14 rounded-2xl flex items-center justify-center text-white text-xl font-black shrink-0 overflow-hidden ${
                   e.companyLogo
-                    ? 'bg-white border border-gray-100'
+                    ? 'bg-white border border-border-light'
                     : e.eventType === 'deadline'
-                      ? 'bg-rose-500'
-                      : 'bg-emerald-500'
+                      ? 'bg-status-error'
+                      : 'bg-status-success'
                 }`}
               >
                 {e.companyLogo ? (
                   <img
                     src={e.companyLogo}
-                    alt={`${e.companyName} 로고`}
+                    alt={e.companyName}
                     className="w-full h-full object-contain p-1"
-                    onError={(ev) => {
-                      ev.currentTarget.style.display = 'none';
-                      const parent = ev.currentTarget.parentElement;
-                      if (parent) {
-                        parent.classList.remove('bg-white', 'border', 'border-gray-100');
-                        parent.classList.add(
-                          e.eventType === 'deadline' ? 'bg-rose-500' : 'bg-emerald-500',
-                        );
-                        parent.innerText = e.companyName[0];
-                      }
-                    }}
                   />
                 ) : (
                   e.companyName[0]
@@ -65,15 +55,14 @@ const Day = ({ currentDate, events, onEventClick }: Props) => {
               </div>
 
               <div>
-                <h4 className="text-xl font-black text-gray-900">{e.companyName}</h4>
-                <p className="text-gray-400 font-bold">{e.title}</p>
+                <h4 className="text-subtitle font-black text-gray-900">{e.companyName}</h4>
+                <p className="text-body text-gray-400 font-bold">{e.title}</p>
               </div>
             </div>
-            <span
-              className={`px-5 py-2 rounded-full text-[11px] font-black tracking-widest ${e.eventType === 'deadline' ? 'bg-rose-50 text-rose-600' : 'bg-emerald-50 text-emerald-600'}`}
-            >
+
+            <Badge variant={e.eventType === 'deadline' ? 'error' : 'success'}>
               {e.eventType.toUpperCase()}
-            </span>
+            </Badge>
           </div>
         ))
       ) : (

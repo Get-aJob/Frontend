@@ -1,210 +1,135 @@
-import React from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import type { JobPosting } from '@/types/Posting';
+import Badge from '@/components/common/UI/Badge';
+import { MessageSquare, Eye } from 'lucide-react';
+import { ddayVariant } from '@/utils/statusUtils';
 import PostingActionButtons from './PostingActionButtons';
+import { getJobComments } from '@/api/Comment';
+import type { RawCommentData } from './Comment/useJobComment';
+import { usePostingStore } from '@/store/usePostingStore';
 
 interface PostingCardProps {
-  job: JobPosting & { isScrapped?: boolean };
+  posting: JobPosting;
+  isScrapped?: boolean;
+  onScrap: (id: string | number) => void;
+  onDetail: (job: JobPosting) => void;
 }
 
-const styles = {
-  card: {
-    background: '#ffffff',
-    border: '1.5px solid #e8eaf0',
-    borderRadius: '16px',
-    padding: '24px',
-    boxShadow: '0 2px 8px rgba(0, 0, 0, 0.04)',
-    display: 'flex',
-    flexDirection: 'column' as const,
-    justifyContent: 'space-between',
-    minHeight: '180px',
-    transition: 'all 0.15s ease',
-    cursor: 'pointer',
-    fontFamily: '"Noto Sans KR", sans-serif',
-  },
-  topSection: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: '16px',
-    position: 'relative' as const,
-  },
-  logoBoxInfo: {
-    width: '54px',
-    height: '54px',
-    borderRadius: '14px',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    fontSize: '22px',
-    fontWeight: 800,
-    color: '#fff',
-    backgroundColor: '#4ade80',
-    flexShrink: 0,
-  },
-  logoImg: {
-    width: '54px',
-    height: '54px',
-    borderRadius: '14px',
-    objectFit: 'contain' as const,
-    backgroundColor: '#fff',
-    border: '1px solid #f3f4f6',
-    flexShrink: 0,
-  },
-  textContainer: {
-    display: 'flex',
-    flexDirection: 'column' as const,
-    flex: 1,
-    paddingRight: '60px',
-  },
-  title: {
-    fontSize: '18px',
-    fontWeight: 700,
-    color: '#1f2937',
-    marginBottom: '6px',
-    letterSpacing: '-0.3px',
-    lineHeight: '1.3',
-    display: '-webkit-box',
-    WebkitLineClamp: 1,
-    WebkitBoxOrient: 'vertical' as const,
-    overflow: 'hidden',
-  },
-  company: {
-    fontSize: '14px',
-    fontWeight: 600,
-    color: '#6b7280',
-    letterSpacing: '-0.2px',
-  },
-  deadline: {
-    position: 'absolute' as const,
-    top: '4px',
-    right: '0',
-    fontSize: '14px',
-    fontWeight: 800,
-  },
-  bottomSection: {
-    display: 'flex',
-    justifyContent: 'space-between',
-    alignItems: 'flex-end',
-    marginTop: '28px',
-  },
-  tagsLeft: {
-    display: 'flex',
-    flexDirection: 'column' as const,
-    gap: '10px',
-  },
-  tagRow: {
-    display: 'flex',
-    gap: '8px',
-  },
-  expTag: {
-    background: '#f3f0ff',
-    color: '#7c3aed',
-    fontSize: '12px',
-    fontWeight: 700,
-    padding: '4px 10px',
-    borderRadius: '6px',
-  },
-  locTag: {
-    background: '#f3f0ff',
-    color: '#7c3aed',
-    fontSize: '12px',
-    fontWeight: 700,
-    padding: '4px 10px',
-    borderRadius: '6px',
-  },
-  sourceTag: {
-    background: '#f0f9ff',
-    color: '#0284c7',
-    fontSize: '12px',
-    fontWeight: 700,
-    padding: '4px 10px',
-    borderRadius: '6px',
-    width: 'max-content',
-  },
-};
+const PostingCard = ({ posting, isScrapped, onScrap, onDetail }: PostingCardProps) => {
+  const dday = posting.deadline || '상시채용';
 
-const PostingCard: React.FC<PostingCardProps> = ({ job }) => {
-  const getDdayColor = (dday: string) => {
-    if (dday === 'D-Day' || dday.includes('마감')) return '#f43f5e';
+  // 💡 1. 전역 스토어 구독 및 업데이트 함수 가져오기
+  const storePostings = usePostingStore((state) => state.postings);
+  const updateCommentCount = usePostingStore((state) => state.updateCommentCount);
+  const currentStoreJob = storePostings.find((p) => String(p.id) === String(posting.id));
 
-    const match = dday.match(/^D-(\d+)$/);
-    if (match) {
-      const days = parseInt(match[1], 10);
-      if (days <= 3) return '#f43f5e';
-      if (days <= 7) return '#f59e0b';
-      return '#10b981';
+  // 💡 2. API 호출 결과를 저장할 상태
+  const [apiCommentCount, setApiCommentCount] = useState<number | null>(null);
+
+  // 💡 3. 표시될 댓글 수 결정
+  const displayCommentCount =
+    currentStoreJob?.commentCount ?? apiCommentCount ?? posting.commentCount ?? 0;
+
+  const fetchCount = useCallback(async () => {
+    try {
+      const response = await getJobComments(String(posting.id));
+      const list: RawCommentData[] = Array.isArray(response)
+        ? response
+        : (response as { comments?: RawCommentData[] }).comments || [];
+
+      const count = list.length;
+      setApiCommentCount(count);
+
+      // 💡 [중요] 가져온 개수를 전역 스토어에도 반영합니다.
+      // 이렇게 하면 새로고침 후에도 스토어가 최신 값을 유지하려 노력합니다.
+      if (currentStoreJob && currentStoreJob.commentCount !== count) {
+        updateCommentCount(posting.id, count - (currentStoreJob.commentCount || 0));
+      }
+    } catch (error) {
+      console.error('댓글수 조회 실패:', error);
     }
-    return '#6b7280';
-  };
+  }, [posting.id, currentStoreJob, updateCommentCount]);
 
-  const handleClick = () => {
-    if (job.url) {
-      window.open(job.url, '_blank', 'noopener,noreferrer');
-    }
-  };
+  // 💡 4. [ESLint 해결] useEffect 내 비동기 호출
+  useEffect(() => {
+    let isMounted = true;
 
-  const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter' || e.key === ' ') {
-      if (e.key === ' ') e.preventDefault();
-      handleClick();
-    }
-  };
+    const getCount = async () => {
+      if (isMounted) {
+        await fetchCount();
+      }
+    };
+
+    getCount();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [fetchCount]);
 
   return (
-    <div
-      style={styles.card}
-      onClick={handleClick}
-      onKeyDown={handleKeyDown}
-      role="button"
-      tabIndex={0}
+    <article
+      className="group relative bg-white border border-border-light rounded-3xl p-6 transition-all hover:border-btn-point hover:shadow-md cursor-pointer flex flex-col h-full"
+      onClick={() => onDetail(posting)}
     >
-      <div style={styles.topSection}>
-        {job.companyLogo ? (
-          <img src={job.companyLogo} alt={job.companyName} style={styles.logoImg} />
-        ) : (
-          <div style={styles.logoBoxInfo}>
-            {job.companyName ? job.companyName.charAt(0).toUpperCase() : 'C'}
+      <div className="flex justify-between items-start mb-5">
+        <div className="flex items-center gap-4">
+          <div
+            className="w-14 h-14 rounded-2xl bg-gray-50 border border-border-light overflow-hidden flex items-center justify-center shadow-sm cursor-default"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {posting.companyLogo ? (
+              <img
+                src={posting.companyLogo}
+                alt={posting.companyName}
+                className="w-full h-full object-contain p-1.5"
+              />
+            ) : (
+              <span className="text-xl font-black text-gray-300">
+                {posting.companyName.charAt(0)}
+              </span>
+            )}
           </div>
-        )}
-
-        <div style={styles.textContainer}>
-          <div style={styles.title}>{job.title}</div>
-          <div style={styles.company}>{job.companyName}</div>
-        </div>
-
-        <div
-          style={{
-            ...styles.deadline,
-            color: job.deadline.includes('상시') ? '#059669' : getDdayColor(job.deadline),
-            ...(job.deadline.includes('상시') || job.deadline.includes('채용시')
-              ? {
-                  background: '#ecfdf5',
-                  padding: '3px 8px',
-                  borderRadius: '6px',
-                  border: '1px solid #a7f3d0',
-                  fontSize: '11px',
-                  top: '0px',
-                }
-              : {}),
-          }}
-        >
-          {job.deadline}
+          <div>
+            <h3 className="text-xs font-black text-gray-400 tracking-tight mb-1">
+              {posting.companyName}
+            </h3>
+            <Badge variant={ddayVariant(dday)}>{dday}</Badge>
+          </div>
         </div>
       </div>
 
-      <div style={styles.bottomSection}>
-        <div style={styles.tagsLeft}>
-          <div style={styles.tagRow}>
-            {job.experienceLevel && <span style={styles.expTag}>{job.experienceLevel}</span>}
-            <span style={styles.locTag}>{job.location || '전국'}</span>
-          </div>
-          <div style={styles.tagRow}>
-            <span style={styles.sourceTag}>{job.site}</span>
-          </div>
+      <div className="flex-1 mb-6">
+        <h4 className="text-subtitle font-black text-gray-900 mb-3 line-clamp-1 group-hover:text-btn-point transition-colors">
+          {posting.title}
+        </h4>
+        <div className="flex flex-wrap gap-1.5">
+          <span className="text-[10px] font-bold text-gray-400 bg-gray-50 px-2 py-0.5 rounded-md border border-gray-100">
+            #{posting.location || '전국'}
+          </span>
+          <span className="text-[10px] font-bold text-gray-400 bg-gray-50 px-2 py-0.5 rounded-md border border-gray-100">
+            #{posting.site || '채용공고'}
+          </span>
         </div>
-
-        <PostingActionButtons url={job.url} jobId={job.id} isScrapped={job.isScrapped} />
       </div>
-    </div>
+
+      <div className="mb-5">
+        <PostingActionButtons
+          job={{ ...posting, isScrapped }}
+          onScrap={onScrap}
+          onDetailClick={() => onDetail(posting)}
+        />
+      </div>
+
+      <div className="flex items-center gap-4 text-gray-300 text-[11px] font-black pt-4 border-t border-gray-50">
+        <span className="flex items-center gap-1.5">
+          <Eye size={14} strokeWidth={3} /> {posting.viewCount || 0}
+        </span>
+        <span className="flex items-center gap-1.5">
+          <MessageSquare size={14} strokeWidth={3} /> {displayCommentCount}
+        </span>
+      </div>
+    </article>
   );
 };
 

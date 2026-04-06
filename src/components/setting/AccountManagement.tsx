@@ -108,11 +108,12 @@ const AccountManagement = () => {
   };
 
   return (
-    <div className="bg-white p-8 rounded-3xl border border-[#e8eaf0] shadow-sm animate-[fadeUp_0.3s_ease]">
+    <div className="bg-white p-10 rounded-[32px] border border-gray-100 shadow-[0_8px_30px_rgb(0,0,0,0.04)] animate-[fadeUp_0.3s_ease]">
       <UserInfo
         name={userInfo?.name || ''}
         email={userInfo?.email || ''}
         profileImageUrl={userInfo?.profile_image_url}
+        provider={userInfo?.provider} // ✨ 스토어의 provider 정보 전달
         onUploadImage={handleUploadImage}
         onDeleteImage={handleDeleteImage}
       />
