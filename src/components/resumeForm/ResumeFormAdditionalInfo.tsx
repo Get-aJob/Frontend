@@ -19,7 +19,7 @@ const ResumeFormAdditionalInfo = () => {
   ];
 
   return (
-    <div className="w-full mt-20">
+    <div className="flex-1 mt-20">
       <label className="text-xl ml-2">수상/자격증/기타</label>
       <div className="w-full mt-3 ml-2 h-px bg-black/40" />
       {fields.map((field, index) => (

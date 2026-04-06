@@ -70,7 +70,7 @@ const ResumeForm = () => {
             <ResumeFormExperience />
             <ResumeFormSkill />
             <ResumeFormEducation />
-            <div className="flex gap-6">
+            <div className="flex gap-6 w-full">
               <ResumeFormAdditionalInfo />
               <ResumeFormLanguage />
             </div>

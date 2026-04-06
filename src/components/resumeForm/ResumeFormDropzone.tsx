@@ -10,6 +10,7 @@ import { Download, Eye, Trash2, Upload } from 'lucide-react';
 import type { pdfType, ResumeFormInputs } from '@/types/ResumeFormType';
 import ResumeFormPortfolioItem from './ResumeFormPortfolioItem';
 import { usePreviewStore } from '@/store/usePdfPreviewStore';
+import { downloadPortfolio } from '@/features/pdf/utiles/generatePdf';
 
 interface ResumeFormDropzoneProps<T extends FieldValues> {
   name: FieldPath<T>;
@@ -59,7 +60,12 @@ const DropzoneBox = ({ value, onChange, index }: DropzoneBoxProps) => {
       />
       <button
         type="button"
-        onClick={() => {}}
+        onClick={async () => {
+          await downloadPortfolio(
+            portfolio.file ? portfolio.file : portfolio.fileUrl,
+            portfolio.name,
+          );
+        }}
         className="absolute top-4 right-28 w-8 h-8 p-1.5 hidden group-hover:flex items-center shadow-sm justify-center bg-white rounded-sm hover:bg-gray-200"
       >
         <Download />

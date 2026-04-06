@@ -13,7 +13,19 @@ export const downloadResumePdf = async (data: ResumeFormInputs) => {
     saveAs(blob, `${data.title}.pdf`);
   } catch (error) {
     console.log(error);
-  } finally {
-    blob = null;
+  }
+};
+
+export const downloadPortfolio = async (file: File | string | undefined, title: string) => {
+  try {
+    if (file instanceof File) {
+      saveAs(file, file.name);
+    } else if (typeof file === 'string') {
+      const arrayBuffer = await fetch(file).then((r) => r.arrayBuffer());
+      const blob = new Blob([arrayBuffer], { type: 'application/pdf' });
+      saveAs(blob, title);
+    }
+  } catch (error) {
+    console.log(error);
   }
 };

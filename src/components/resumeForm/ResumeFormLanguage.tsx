@@ -18,7 +18,7 @@ const ResumeFormLanguage = () => {
   ];
 
   return (
-    <div className="w-full mt-20">
+    <div className="flex-1 min-w-0 mt-20">
       <label className="text-xl ml-2">언어</label>
       <div className="w-full mt-3 ml-2 h-px bg-black/40" />
       {fields.map((field, index) => (
