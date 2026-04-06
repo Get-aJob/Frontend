@@ -18,8 +18,8 @@ const StatusDetailSlide: React.FC<StatusDetailSlideProps> = ({ application, isOp
   const [notes, setNotes] = useState('');
   const [isSaving, setIsSaving] = useState(false);
 
-  // 성공 시 보드를 새로고침하기 위해 스토어에서 fetchData를 가져옵니다.
-  const { fetchData, statuses } = useStatusStore();
+  // 데이터 갱신 및 현재 선택된 애플리케이션 상태 업데이트를 위해 스토어에서 함수를 가져옵니다.
+  const { fetchData, statuses, setSelectedApplication } = useStatusStore();
 
   useEffect(() => {
     if (application) {
@@ -33,7 +33,7 @@ const StatusDetailSlide: React.FC<StatusDetailSlideProps> = ({ application, isOp
   // 현재 상태의 이름을 찾습니다.
   const currentStatus = statuses.find((s) => String(s.id) === String(application.statusId));
 
-  // ✨ [해결 핵심] 타임라인용 상태 목록 생성 ('미지원' 제외)
+  // 타임라인용 상태 목록 생성 ('미지원' 제외)
   const timelineStatuses = statuses.filter((s) => s.displayName !== '미지원');
   // 현재 상태의 타임라인 인덱스
   const currentIndex = timelineStatuses.findIndex(
@@ -43,9 +43,15 @@ const StatusDetailSlide: React.FC<StatusDetailSlideProps> = ({ application, isOp
   const handleSave = async () => {
     setIsSaving(true);
     try {
-      // 메모 내용만 서버에 업데이트
-      await updateApplication(application.id, { notes });
-      await fetchData(); // 화면 새로고침
+      // 1. 메모 내용 서버 업데이트
+      const updatedApp = await updateApplication(application.id, { notes });
+
+      // 2. 전체 보드 데이터 새로고침
+      await fetchData();
+
+      // 3. ✨ 중요: 현재 열려있는 슬라이드 데이터(selectedApplication)를 서버에서 받은 데이터로 동기화
+      setSelectedApplication(updatedApp);
+
       setIsEditing(false);
     } catch (error) {
       console.error('메모 저장 실패:', error);
@@ -61,7 +67,7 @@ const StatusDetailSlide: React.FC<StatusDetailSlideProps> = ({ application, isOp
     try {
       await deleteApplication(application.id);
       await fetchData();
-      onClose(); // 삭제 후 슬라이드 닫기
+      onClose();
     } catch (error) {
       console.error('지원 기록 삭제 실패:', error);
       alert('삭제에 실패했습니다.');
@@ -96,9 +102,7 @@ const StatusDetailSlide: React.FC<StatusDetailSlideProps> = ({ application, isOp
           </button>
         </div>
 
-        {/* 본문 (스크롤 영역) */}
         <div className="flex-1 overflow-y-auto p-6 space-y-8 bg-slate-50/50">
-          {/* 기업 및 공고 정보 */}
           <div className="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm space-y-4">
             <div>
               <div className="flex items-center gap-2 text-blue-600 mb-1">
@@ -125,7 +129,6 @@ const StatusDetailSlide: React.FC<StatusDetailSlideProps> = ({ application, isOp
             </div>
           </div>
 
-          {/* ✨ 타임라인 영역 추가 */}
           <div className="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm">
             <div className="flex justify-between items-center mb-6">
               <h3 className="text-base font-extrabold text-slate-900 flex items-center gap-2">
@@ -142,7 +145,6 @@ const StatusDetailSlide: React.FC<StatusDetailSlideProps> = ({ application, isOp
 
                 return (
                   <div key={status.id} className="relative pb-10">
-                    {/* 타임라인 세로선 (연결선) */}
                     {!isLast && (
                       <div
                         className={`absolute left-2.5 top-4 -ml-px h-full w-0.5 ${
@@ -151,7 +153,6 @@ const StatusDetailSlide: React.FC<StatusDetailSlideProps> = ({ application, isOp
                         aria-hidden="true"
                       />
                     )}
-                    {/* 타임라인 노드(동그라미) 및 텍스트 */}
                     <div className="relative flex space-x-4 items-center">
                       <div>
                         {isPast ? (
@@ -160,7 +161,6 @@ const StatusDetailSlide: React.FC<StatusDetailSlideProps> = ({ application, isOp
                           </div>
                         ) : isCurrent ? (
                           <div className="relative w-5 h-5 flex items-center justify-center">
-                            {/* 현재 단계 Pulsing 효과 */}
                             <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-100 opacity-75"></span>
                             <div className="relative w-5 h-5 rounded-full border-2 border-blue-500 bg-white flex items-center justify-center">
                               <div className="w-2.5 h-2.5 rounded-full bg-blue-500" />
@@ -176,15 +176,6 @@ const StatusDetailSlide: React.FC<StatusDetailSlideProps> = ({ application, isOp
                         >
                           {status.displayName}
                         </p>
-                        {/* 날짜 표시: 현재 단계일 때만 application.appliedAt 표시 */}
-                        {isCurrent && (
-                          <span className="text-xs font-semibold text-slate-500">
-                            {new Date(application.appliedAt).toLocaleDateString('ko-KR', {
-                              month: 'long',
-                              day: 'numeric',
-                            })}
-                          </span>
-                        )}
                       </div>
                     </div>
                   </div>
@@ -193,7 +184,6 @@ const StatusDetailSlide: React.FC<StatusDetailSlideProps> = ({ application, isOp
             </div>
           </div>
 
-          {/* 메모 영역 */}
           <div className="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm">
             <div className="flex justify-between items-center mb-4">
               <h3 className="text-base font-extrabold text-slate-900 flex items-center gap-2">
@@ -260,8 +250,6 @@ const StatusDetailSlide: React.FC<StatusDetailSlideProps> = ({ application, isOp
             )}
           </div>
         </div>
-
-        {/* 푸터 (삭제 버튼) */}
         <div className="p-6 border-t border-gray-100 bg-white">
           <Button
             variant="outline"
