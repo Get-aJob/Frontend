@@ -1,3 +1,4 @@
+// src/components/setting/UserInfo.tsx
 import React, { useRef } from 'react';
 import Badge from '@/components/common/UI/Badge';
 
@@ -5,7 +6,7 @@ interface UserInfoProps {
   name: string;
   email: string;
   profileImageUrl?: string | null;
-  provider?: string; // ✨ 로그인 제공자 정보 추가
+  provider?: string;
   onUploadImage: (file: File) => void;
   onDeleteImage: () => void;
 }
@@ -27,7 +28,8 @@ const UserInfo: React.FC<UserInfoProps> = ({
     e.target.value = '';
   };
 
-  const isGoogle = provider === 'google';
+  // ✨ 대소문자 무관하게 안전하게 구글 계정 판별
+  const isGoogle = provider?.toLowerCase() === 'google';
 
   return (
     <div className="flex flex-col sm:flex-row items-center sm:items-start gap-8 pb-10 mb-10 border-b border-gray-100">
@@ -73,7 +75,6 @@ const UserInfo: React.FC<UserInfoProps> = ({
           {email || '이메일 정보가 없습니다.'}
         </p>
 
-        {/* ✨ 로그인 수단에 따른 배지 구분 */}
         <div className="mt-4 flex gap-2 justify-center sm:justify-start">
           {isGoogle ? (
             <Badge
