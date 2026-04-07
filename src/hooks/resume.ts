@@ -14,7 +14,6 @@ export const useSaveResume = (resumeId: string | undefined) => {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async (formData: ResumeFormData) => {
-      console.log(formData);
       if (!resumeId) {
         const response = await createResume(formData);
         return response;

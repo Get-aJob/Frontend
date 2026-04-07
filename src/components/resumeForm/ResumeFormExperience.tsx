@@ -21,7 +21,7 @@ const ResumeFormExperience = () => {
         return (
           <div
             key={field.id}
-            className="w-full relative flex mt-5 group has-focus:outline-2 outline-blue-200 rounded-lg p-3 hover:outline-2"
+            className="w-full relative flex mt-5 group has-focus:outline-2 outline-btn-point rounded-lg p-3 hover:outline-2"
           >
             <div className="flex-1">
               <input
@@ -30,40 +30,43 @@ const ResumeFormExperience = () => {
                 placeholder="경험 / 회사 명"
                 className="w-full outline-none resize-none"
               />
-              <div className="w-full flex gap-3">
-                <ResumeFormDatePicker
-                  name={`experience.${index}.period.startDate`}
-                  control={control}
-                  disabled={false}
-                />
-                <p>-</p>
-                <ResumeFormDatePicker
-                  name={`experience.${index}.period.endDate`}
-                  control={control}
-                  disabled={isCurrent}
-                />
-                <label className="flex items-center justify-center gap-1">
-                  <span className={clsx(!isCurrent ? 'text-black/40' : 'text-black')}>
-                    현재 진행 중
-                  </span>
-                  <input
-                    {...register(`experience.${index}.isCurrent`)}
-                    type="checkbox"
-                    onChange={(e) => {
-                      e.stopPropagation();
-                      const checked = e.target.checked;
-                      setValue(`experience.${index}.isCurrent`, checked);
-                      if (checked) {
-                        setValue(`experience.${index}.period.endDate`, null);
-                      }
-                    }}
+              <div className="w-full flex gap-3 max-md:flex-col">
+                <div className="w-fit flex gap-1">
+                  <ResumeFormDatePicker
+                    name={`experience.${index}.period.startDate`}
+                    control={control}
+                    disabled={false}
                   />
-                </label>
-                <p>|</p>
+                  <p>-</p>
+                  <ResumeFormDatePicker
+                    name={`experience.${index}.period.endDate`}
+                    control={control}
+                    disabled={isCurrent}
+                  />
+                  <label className="flex items-center justify-center gap-1">
+                    <span className={clsx(!isCurrent ? 'text-black/40' : 'text-black')}>
+                      현재 진행 중
+                    </span>
+                    <input
+                      {...register(`experience.${index}.isCurrent`)}
+                      type="checkbox"
+                      onChange={(e) => {
+                        e.stopPropagation();
+                        const checked = e.target.checked;
+                        setValue(`experience.${index}.isCurrent`, checked);
+                        if (checked) {
+                          setValue(`experience.${index}.period.endDate`, null);
+                        }
+                      }}
+                    />
+                  </label>
+                </div>
+                <p className="max-md:hidden">|</p>
                 <input
                   {...register(`experience.${index}.position`)}
                   type="text"
                   placeholder="포지션"
+                  className="w-40"
                 />
               </div>
               <TextAreaAutosize
@@ -90,7 +93,7 @@ const ResumeFormExperience = () => {
                     isCurrent: false,
                   });
                 }}
-                className="w-full h-full rounded-full bg-blue-100 text-blue-500 text-3xl text-center justify-center hidden group-hover:flex hover:bg-blue-200"
+                className="w-full h-full rounded-full bg-purple-50 text-outline-point text-3xl text-center justify-center hidden group-hover:flex hover:bg-purple-100 cursor-pointer"
               >
                 +
               </button>
@@ -109,9 +112,9 @@ const ResumeFormExperience = () => {
                   });
                 }
               }}
-              className="absolute top-4 right-4 w-8 h-8 p-1.5 hidden group-hover:flex items-center justify-center bg-blue-100 rounded-sm hover:bg-blue-200"
+              className="absolute top-4 right-4 w-8 h-8 p-1.5 hidden group-hover:flex items-center justify-center bg-purple-50 rounded-sm hover:bg-purple-100 cursor-pointer"
             >
-              <Trash2 className="text-blue-600" />
+              <Trash2 className="text-outline-point" />
             </button>
           </div>
         );

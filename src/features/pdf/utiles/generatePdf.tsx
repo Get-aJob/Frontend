@@ -3,10 +3,10 @@ import { saveAs } from 'file-saver';
 import ResumeDocument from '../templates/ResumeDocument';
 import type { ResumeFormInputs } from '@/types/ResumeFormType';
 
-export const downloadResumePdf = async (data: ResumeFormInputs) => {
+export const downloadResumePdf = async (data: ResumeFormInputs, userName?: string) => {
   let blob: Blob | null = null;
   try {
-    const doc = <ResumeDocument data={data} />;
+    const doc = <ResumeDocument data={data} userName={userName} />;
     blob = await pdf(doc).toBlob();
 
     // 2. 파일 다운로드 실행

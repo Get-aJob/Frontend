@@ -41,7 +41,9 @@ const ResumeFormDropzone = <T extends FieldValues>({
 };
 
 const DropzoneBox = ({ value, onChange, index }: DropzoneBoxProps) => {
+  const MAX_SIZE = 50 * 1024 * 1024;
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
+    maxSize: MAX_SIZE,
     onDrop: (files) => onChange(files[0]),
     accept: { 'application/pdf': ['.pdf'] },
     multiple: false,
@@ -74,7 +76,7 @@ const DropzoneBox = ({ value, onChange, index }: DropzoneBoxProps) => {
         type="button"
         onClick={(e) => {
           e.stopPropagation();
-          openPreview(value || portfolio.fileUrl);
+          openPreview(value || portfolio.fileUrl, portfolio.name);
         }}
         className="absolute top-4 right-16 w-8 h-8 p-1.5 hidden group-hover:flex items-center shadow-sm justify-center bg-white rounded-sm hover:bg-gray-200"
       >
@@ -96,7 +98,11 @@ const DropzoneBox = ({ value, onChange, index }: DropzoneBoxProps) => {
       <input {...getInputProps()} />
       <div className="flex flex-col items-center w-full h-85 my-5 text-center justify-center border rounded-2xl hover:bg-black/10 border-black/20">
         <Upload size={50} />
-        <p>{isDragActive ? '여기에 놓으세요!' : 'PDF 파일을 여기다 드래그 하거나 클릭하세요!'}</p>
+        <p>
+          {isDragActive
+            ? '여기에 놓으세요!'
+            : 'PDF 파일(최대 50MB)을 여기다 드래그 하거나 클릭하세요!'}
+        </p>
       </div>
     </div>
   );

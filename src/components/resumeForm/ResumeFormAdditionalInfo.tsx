@@ -25,7 +25,7 @@ const ResumeFormAdditionalInfo = () => {
       {fields.map((field, index) => (
         <div
           key={field.id}
-          className="w-full relative flex mt-5 group has-focus:outline-2 outline-blue-200 rounded-lg p-3 hover:outline-2"
+          className="w-full relative flex mt-5 group has-focus:outline-2 outline-btn-point rounded-lg p-3 hover:outline-2"
         >
           <div className="flex-1">
             <input
@@ -78,7 +78,7 @@ const ResumeFormAdditionalInfo = () => {
                   description: '',
                 });
               }}
-              className="w-full h-full rounded-full bg-blue-100 text-blue-500 text-3xl text-center justify-center hidden group-hover:flex hover:bg-blue-200"
+              className="w-full h-full rounded-full bg-purple-50 text-outline-point text-3xl text-center justify-center hidden group-hover:flex hover:bg-purple-100 cursor-pointer"
             >
               +
             </button>
@@ -96,9 +96,9 @@ const ResumeFormAdditionalInfo = () => {
               }
               remove(index);
             }}
-            className="absolute top-4 right-4 w-8 h-8 p-1.5 hidden group-hover:flex items-center justify-center bg-blue-100 rounded-sm hover:bg-blue-200"
+            className="absolute top-4 right-4 w-8 h-8 p-1.5 hidden group-hover:flex items-center justify-center bg-purple-50 rounded-sm hover:bg-purple-100 cursor-pointer"
           >
-            <Trash2 className="text-blue-600" />
+            <Trash2 className="text-outline-point" />
           </button>
         </div>
       ))}

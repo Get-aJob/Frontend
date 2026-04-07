@@ -3,7 +3,7 @@ import { Trash2 } from 'lucide-react';
 import { useFieldArray, useFormContext } from 'react-hook-form';
 import ResumeFormDropzone from './ResumeFormDropzone';
 
-const ResumeFormWorkPortfolio = () => {
+const ResumeFormPortfolio = () => {
   const { register, control, setValue, watch } = useFormContext<ResumeFormInputs>();
   const { fields, append, remove } = useFieldArray({
     control: control,
@@ -11,14 +11,14 @@ const ResumeFormWorkPortfolio = () => {
   });
 
   return (
-    <div className="w-full mt-20">
+    <div className="w-full my-20 max-lg:mb-45">
       <label className="text-xl ml-2">포트폴리오</label>
       {fields.map((field, index) => {
         const uploadType = watch(`portfolio.${index}.type`);
         return (
           <div
             key={field.id}
-            className="w-full relative flex mt-10 group has-focus:outline-2 outline-blue-200 rounded-lg p-3 hover:outline-2"
+            className="w-full relative flex mt-10 group has-focus:outline-2 outline-btn-point rounded-lg p-3 hover:outline-2"
           >
             <div className="flex-1">
               <input
@@ -81,7 +81,7 @@ const ResumeFormWorkPortfolio = () => {
                     type: 'file',
                   });
                 }}
-                className="w-full h-full rounded-full bg-blue-100 text-blue-500 text-3xl text-center justify-center hidden group-hover:flex hover:bg-blue-200"
+                className="w-full h-full rounded-full bg-purple-50 text-outline-point text-3xl text-center justify-center hidden group-hover:flex hover:bg-purple-100 cursor-pointer"
               >
                 +
               </button>
@@ -99,9 +99,9 @@ const ResumeFormWorkPortfolio = () => {
                 }
                 remove(index);
               }}
-              className="absolute top-4 right-4 w-8 h-8 p-1.5 hidden group-hover:flex items-center justify-center bg-blue-100 rounded-sm hover:bg-blue-200"
+              className="absolute top-4 right-4 w-8 h-8 p-1.5 hidden group-hover:flex items-center justify-center bg-purple-50 rounded-sm hover:bg-purple-100 cursor-pointer"
             >
-              <Trash2 className="text-blue-600" />
+              <Trash2 className="text-outline-point" />
             </button>
           </div>
         );
@@ -110,4 +110,4 @@ const ResumeFormWorkPortfolio = () => {
   );
 };
 
-export default ResumeFormWorkPortfolio;
+export default ResumeFormPortfolio;

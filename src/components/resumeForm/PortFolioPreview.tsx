@@ -1,7 +1,11 @@
 import { usePreviewStore } from '@/store/usePdfPreviewStore';
 import { useEffect, useRef } from 'react';
 
-const PortFolioPreview = () => {
+interface PortFolioPreviewProps {
+  name: string;
+}
+
+const PortFolioPreview = ({ name }: PortFolioPreviewProps) => {
   const { isOpen, previewUrl, closePreview } = usePreviewStore();
   const previewRef = useRef<HTMLDivElement | null>(null);
 
@@ -26,11 +30,12 @@ const PortFolioPreview = () => {
         onClick={(e) => e.stopPropagation()}
         className="bg-white p-10 w-fit h-fit rounded-2xl"
       >
+        <h1 className="text-title">{name}</h1>
         <embed
           key={previewUrl}
           src={`${previewUrl}#toolbar=0&navpanes=0&scrollbar=0`}
           type="application/pdf"
-          className="border h-140 w-190"
+          className="border h-70 w-95 lg:h-140 lg:w-190"
         />
       </div>
     </div>

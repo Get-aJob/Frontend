@@ -2,10 +2,11 @@ import { PATH } from '@/router/Path';
 import type { ResumeFormData, ResumeFormInputs, ResumeInfo } from '@/types/ResumeFormType';
 import { useFormContext, type SubmitHandler } from 'react-hook-form';
 import { useNavigate, useParams } from 'react-router-dom';
-import { ChevronLeft, Download, LoaderCircle } from 'lucide-react';
+import { ChevronLeft, Download, LoaderCircle, Save } from 'lucide-react';
 import ResumeDownloadButton from './ResumeDownloadButton';
 import { useGetResume, useSaveResume, useUploadPortfolio } from '@/hooks/resume';
 import { useEffect, useState } from 'react';
+import { dataToResume } from '@/utils/resumeUtils';
 
 const ResumeFormTopbar = () => {
   const { resumeId } = useParams<{ resumeId: string }>();
@@ -20,22 +21,7 @@ const ResumeFormTopbar = () => {
 
   useEffect(() => {
     if (resumeId && data) {
-      const resume: ResumeFormInputs = {
-        title: data.title,
-        profile: data.content.profile,
-        experience: data.content.experience.map((e) => ({ ...e, isCurrent: !e.period.endDate })),
-        education: data.content.education.map((e) => ({ ...e, isCurrent: !e.period.endDate })),
-        skill: data.content.skill,
-        additionalInfo: data.content.additionalInfo,
-        language: data.content.language,
-        portfolio: data.content.portfolio.map((p) => ({
-          name: p.name,
-          url: p.url,
-          fileUrl: p.fileUrl,
-          file: null,
-          type: p.fileUrl ? 'file' : 'url',
-        })),
-      };
+      const resume = dataToResume(data);
       reset(resume);
     }
   }, [data, reset, resumeId]);
@@ -91,7 +77,7 @@ const ResumeFormTopbar = () => {
     }
   };
   return (
-    <aside className="bg-white">
+    <aside className="bg-white fixed w-full z-50">
       <div className="w-full min-h-20 flex justify-between items-center gap-10">
         <button
           type="button"
@@ -101,7 +87,7 @@ const ResumeFormTopbar = () => {
           className="flex p-2 mx-5 rounded-xl hover:bg-black/5"
         >
           <ChevronLeft size={18} className="mt-0.5" />
-          <p>이전 페이지</p>
+          <p className="max-md:hidden">이전 페이지</p>
         </button>
         <input
           {...register('title')}
@@ -119,9 +105,16 @@ const ResumeFormTopbar = () => {
           <button
             type="button"
             onClick={handleSubmit(onSubmit)}
-            className="py-2 px-3 border mx-5 rounded-xl text-white bg-[#4f46e5] hover:bg-[#4338ca]"
+            className="py-2 px-3 border mx-5 rounded-xl text-white bg-btn-point hover:bg-[#4338ca]"
           >
-            {saveResume.isPending ? <LoaderCircle className="animate-spin" /> : '작성 완료'}
+            {saveResume.isPending ? (
+              <LoaderCircle className="animate-spin" />
+            ) : (
+              <div>
+                <p className="hidden lg:block">작성 완료</p>
+                <Save className="lg:hidden" />
+              </div>
+            )}
           </button>
         </div>
       </div>

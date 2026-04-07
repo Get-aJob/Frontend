@@ -6,7 +6,7 @@ import CharacterCounter from './CharacterCounter';
 const ResumeFormSkill = () => {
   const { register, control } = useFormContext<ResumeFormInputs>();
   return (
-    <div className="w-full mt-20 group has-focus:outline-2 outline-blue-200 rounded-lg p-3 hover:outline-2">
+    <div className="w-full mt-20 group has-focus:outline-2 outline-btn-point rounded-lg p-3 hover:outline-2">
       <label htmlFor="skill" className="text-xl">
         스킬
       </label>
