@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
 import { requestPasswordResetApi, confirmPasswordResetApi } from '@/api/Auth';
+import Input from '@/components/common/UI/Input';
+import Button from '@/components/common/UI/Button';
 
 interface PasswordResetFormProps {
   onBackToLogin: () => void;
@@ -49,10 +51,10 @@ const PasswordResetForm: React.FC<PasswordResetFormProps> = ({ onBackToLogin }) 
   };
 
   return (
-    <div className="animate-[fadeUp_0.3s_ease]">
-      <div className="mb-6">
-        <h2 className="text-xl font-bold text-[#111827]">비밀번호 재설정</h2>
-        <p className="text-sm text-[#9ca3af] mt-1">
+    <div className="animate-[fadeUp_0.3s_ease] w-85 mx-auto">
+      <div className="mb-6 text-center">
+        <h2 className="text-title font-bold text-gray-900">비밀번호 재설정</h2>
+        <p className="text-sm text-gray-500 mt-1">
           {step === 1
             ? '가입하신 이름과 이메일을 입력해주세요.'
             : '새로운 비밀번호를 설정해주세요.'}
@@ -61,76 +63,79 @@ const PasswordResetForm: React.FC<PasswordResetFormProps> = ({ onBackToLogin }) 
 
       {step === 1 ? (
         <form onSubmit={handleRequestToken} className="flex flex-col gap-4">
-          <input
+          <Input
             type="text"
             placeholder="이름"
             required
-            className="w-full p-3.5 rounded-xl border border-[#e8eaf0] bg-[#f9fafb] text-[14px] focus:outline-none focus:border-[#4f46e5] transition-all"
             value={formData.name}
             onChange={(e) => setFormData({ ...formData, name: e.target.value })}
           />
-          <input
+          <Input
             type="email"
             placeholder="이메일"
             required
-            className="w-full p-3.5 rounded-xl border border-[#e8eaf0] bg-[#f9fafb] text-[14px] focus:outline-none focus:border-[#4f46e5] transition-all"
             value={formData.email}
             onChange={(e) => setFormData({ ...formData, email: e.target.value })}
           />
-          <button
-            type="submit"
-            className="w-full p-4 rounded-xl bg-[#4f46e5] text-white font-bold shadow-sm hover:bg-[#4338ca] transition-all cursor-pointer"
-          >
+          <Button type="submit" className="w-full mt-2 py-3">
             본인 확인
-          </button>
+          </Button>
         </form>
       ) : (
         <form onSubmit={handleConfirmReset} className="flex flex-col gap-4">
           <div className="flex flex-col gap-1.5">
-            <input
+            <Input
               type="password"
               placeholder="새 비밀번호"
               required
-              className={`w-full p-3.5 rounded-xl border ${isLengthValid ? 'border-[#e8eaf0]' : 'border-red-400'} bg-[#f9fafb] text-[14px] focus:outline-none focus:border-[#4f46e5] transition-all`}
+              className={
+                !isLengthValid && formData.password.length > 0
+                  ? 'border-status-error focus:ring-red-100'
+                  : ''
+              }
               value={formData.password}
               onChange={(e) => setFormData({ ...formData, password: e.target.value })}
             />
             <div
-              className={`text-[11px] ml-1 ${isLengthValid ? 'text-green-500' : 'text-[#9ca3af]'}`}
+              className={`text-body ml-1 ${isLengthValid ? 'text-status-success' : 'text-gray-400'}`}
             >
               {isLengthValid ? '✓ 8자 이상 입력됨' : '• 8자 이상 입력해주세요'}
             </div>
           </div>
 
           <div className="flex flex-col gap-1.5">
-            <input
+            <Input
               type="password"
               placeholder="새 비밀번호 확인"
               required
-              className={`w-full p-3.5 rounded-xl border ${isMatchValid ? 'border-[#e8eaf0]' : 'border-red-400'} bg-[#f9fafb] text-[14px] focus:outline-none focus:border-[#4f46e5] transition-all`}
+              className={
+                !isMatchValid && formData.confirmPassword.length > 0
+                  ? 'border-status-error focus:ring-red-100'
+                  : ''
+              }
               value={formData.confirmPassword}
               onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
             />
             <div
-              className={`text-[11px] ml-1 ${isMatchValid ? 'text-green-500' : 'text-[#9ca3af]'}`}
+              className={`text-body ml-1 ${isMatchValid ? 'text-status-success' : 'text-gray-400'}`}
             >
               {isMatchValid ? '✓ 비밀번호 일치' : '• 비밀번호가 일치하지 않습니다'}
             </div>
           </div>
 
-          <button
+          <Button
             type="submit"
             disabled={!isLengthValid || !isMatchValid}
-            className={`w-full p-4 rounded-xl font-bold text-white transition-all shadow-sm ${!isLengthValid || !isMatchValid ? 'bg-[#cbd5e1] cursor-not-allowed' : 'bg-[#4f46e5] hover:bg-[#4338ca] cursor-pointer'}`}
+            className="w-full mt-2 py-3"
           >
             비밀번호 변경 완료
-          </button>
+          </Button>
         </form>
       )}
 
       <button
         onClick={onBackToLogin}
-        className="mt-6 w-full text-center text-[13px] text-[#9ca3af] hover:text-[#6b7280] hover:underline cursor-pointer"
+        className="mt-6 w-full text-center text-sm text-gray-400 hover:text-gray-600 hover:underline cursor-pointer"
       >
         로그인으로 돌아가기
       </button>

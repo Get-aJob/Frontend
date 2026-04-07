@@ -56,7 +56,7 @@ const ResumeItem = ({ title, id, updatedAt }: ResumeItemProps) => {
   const date = new Date(updatedAt);
 
   return (
-    <div className="w-full h-64 xl:h-75 relative hover:scale-[101%]">
+    <div className="w-full h-64 xl:h-75 relative">
       <div
         ref={itemRef}
         className="w-full h-full rounded-2xl p-7 bg-white border-2 border-black/10 z-0"

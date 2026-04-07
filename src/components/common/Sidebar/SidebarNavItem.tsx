@@ -1,5 +1,6 @@
 import { NavLink } from 'react-router-dom';
-import type { NavItemType } from './constants.ts';
+import type { NavItemType } from './constants';
+import Badge from '@/components/common/UI/Badge';
 
 interface SidebarNavItemProps {
   item: NavItemType;
@@ -10,22 +11,20 @@ const SidebarNavItem = ({ item }: SidebarNavItemProps) => {
     <NavLink
       to={item.path}
       className={({ isActive }) =>
-        `flex items-center gap-2.5 px-2.5 py-2.25 mb-px rounded-[9px] text-[13.5px] transition-all duration-150 cursor-pointer ${
+        `flex items-center gap-3 px-3 py-2.5 mb-1 rounded-lg text-sm transition-all duration-150 cursor-pointer ${
           isActive
-            ? 'bg-[#eef2ff] text-[#4f46e5] font-bold'
-            : 'text-[#6b7280] font-medium hover:bg-gray-50'
+            ? 'bg-purple-50 text-btn-point font-bold'
+            : 'text-gray-500 font-medium hover:bg-gray-50 hover:text-gray-900'
         }`
       }
     >
-      <span className="w-5 text-[16px] text-center shrink-0">{item.icon}</span>
+      <span className="w-5 flex justify-center shrink-0">{item.icon}</span>
       {item.label}
 
       {item.badge && (
-        <span
-          className={`ml-auto text-[10px] font-bold px-1.75 py-px rounded-full text-white ${item.badgeColor}`}
-        >
+        <Badge variant={item.badgeVariant || 'default'} className="ml-auto">
           {item.badge}
-        </span>
+        </Badge>
       )}
     </NavLink>
   );

@@ -88,6 +88,7 @@ export interface ResumeInfo {
   id: string;
   title: string;
   createdAt: string;
+  content?: ResumeFormPayload;
 }
 
 export interface GetResumeById {

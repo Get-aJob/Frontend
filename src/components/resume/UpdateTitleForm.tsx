@@ -43,7 +43,7 @@ const UpdateTitleForm = ({ id, title, setIsFormOpen }: UpdateTitleFormProps) => 
       />
       <button
         type="submit"
-        className="mt-2 w-fit rounded-lg px-2 py-1 text-white bg-[#4f46e5] hover:bg-[#4338ca]"
+        className="mt-2 w-fit rounded-lg px-2 py-1 text-white bg-btn-point hover:bg-[#4338ca]"
       >
         제목 변경
       </button>
