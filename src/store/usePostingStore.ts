@@ -64,6 +64,7 @@ interface PostingState {
   postings: ExtendedJobPosting[];
   currentPage: number;
   totalPages: number;
+  totalCount: number;
   isLoading: boolean;
   sourceSites: string[];
   selectedSite: string;
@@ -88,6 +89,7 @@ export const usePostingStore = create<PostingState>()(
       postings: [],
       currentPage: 1,
       totalPages: 1,
+      totalCount: 0,
       isLoading: false,
       sourceSites: [],
       selectedSite: '',
@@ -115,7 +117,7 @@ export const usePostingStore = create<PostingState>()(
           let data: PostingResponse = { jobs: [], totalCount: 0 };
 
           if (currentSourceType === 'auto') {
-            data = await getPostings(page, PAGE_SIZE, 'auto'); // 전체 데이터 요청
+            data = await getPostings(page, PAGE_SIZE, 'auto', currentSite); // 사이트 필터 추가
           } else if (!isLoggedIn) {
             set({ postings: [], totalPages: 1, isLoading: false, sourceSites: [] });
             return;
@@ -144,22 +146,9 @@ export const usePostingStore = create<PostingState>()(
           const scrappedIds = new Set(scrapData.map((s: ScrapItem) => String(s.jobPostingId)));
 
           const rawJobs = data.jobs || [];
+          const totalCount = data.totalCount || rawJobs.length;
 
-          // 💡 프론트엔드 강제 필터링 로직 (any 없이 ExtendedBackendJob 인터페이스 활용)
-          let filteredJobs = rawJobs;
-          if (currentSourceType === 'auto' && currentSite) {
-            filteredJobs = rawJobs.filter((j: BackendJob) => {
-              const jobData = j as ExtendedBackendJob;
-              const siteName = jobData.source_site_name || jobData.sourceSiteName || '';
-              return siteName === currentSite;
-            });
-          }
-
-          const totalCount = currentSite
-            ? filteredJobs.length
-            : data.totalCount || filteredJobs.length;
-
-          const sortedJobs = [...filteredJobs].sort((a: BackendJob, b: BackendJob) => {
+          const sortedJobs = [...rawJobs].sort((a: BackendJob, b: BackendJob) => {
             const extA = a as ExtendedBackendJob;
             const extB = b as ExtendedBackendJob;
             const dateA = new Date(extA.created_at || extA.createdAt || 0).getTime();
@@ -220,6 +209,7 @@ export const usePostingStore = create<PostingState>()(
             postings: mappedJobs,
             currentPage: page,
             totalPages: Math.ceil(totalCount / PAGE_SIZE) || 1,
+            totalCount: totalCount,
             isLoading: false,
             sourceSites: currentSite ? get().sourceSites : data.sourceSites || get().sourceSites,
           });

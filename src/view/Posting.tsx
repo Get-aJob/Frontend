@@ -15,6 +15,7 @@ const Posting = () => {
     isLoading,
     fetchPostings,
     totalPages,
+    totalCount,
     currentPage,
     selectedSite,
     toggleScrapStatus,
@@ -62,7 +63,7 @@ const Posting = () => {
 
   return (
     <div className="flex flex-col gap-8">
-      <PostingFilter totalCount={postings.length} />
+      <PostingFilter totalCount={totalCount} />
 
       <div className="w-full">
         {isLoading ? (
