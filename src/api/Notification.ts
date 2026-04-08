@@ -25,7 +25,7 @@ export const fetchUnreadCount = async (): Promise<IGetUnreadCountResponse> => {
   return data;
 };
 
-export const fetchNotificationOnlyOne = async (
+export const markNotificationOnlyOne = async (
   notificationId: string,
 ): Promise<INotificationOnlyOneResponse> => {
   const { data } = await api.patch<INotificationOnlyOneResponse>(
@@ -34,7 +34,7 @@ export const fetchNotificationOnlyOne = async (
   return data;
 };
 
-export const fetchAllNotification = async (): Promise<INotificationAllResponse> => {
-  const { data } = await api.post<INotificationAllResponse>('/notifications/read-all');
+export const markAllNotifications = async (): Promise<INotificationAllResponse> => {
+  const { data } = await api.patch<INotificationAllResponse>('/notifications/read-all');
   return data;
 };

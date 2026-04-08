@@ -7,8 +7,8 @@ import NotificationHeader from '@/components/notification/NotificationHeader';
 import NotificationList from '@/components/notification/NotificationList';
 import {
   fetchNotifications,
-  fetchNotificationOnlyOne,
-  fetchAllNotification,
+  markNotificationOnlyOne,
+  markAllNotifications,
 } from '@/api/Notification';
 import { mapNotificationToItem, type INotificationItem } from '@/types/Notification';
 import { useNotificationSocket } from '@/hooks/useSocket';
@@ -76,7 +76,7 @@ function Notification() {
   const markRead = useCallback(
     async (id: string) => {
       try {
-        const res = await fetchNotificationOnlyOne(id);
+        const res = await markNotificationOnlyOne(id);
         if (res.success && res.notification) {
           const updated = mapNotificationToItem(res.notification);
           setItems((prev) => prev.map((n) => (n.id === id ? updated : n)));
@@ -94,7 +94,7 @@ function Notification() {
 
   const markAllRead = useCallback(async () => {
     try {
-      const res = await fetchAllNotification();
+      const res = await markAllNotifications();
       if (!res.success) {
         alert('모두 읽음 처리에 실패했습니다.');
         return;
