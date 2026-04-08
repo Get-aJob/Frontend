@@ -13,6 +13,17 @@ import {
 import { mapNotificationToItem, type INotificationItem } from '@/types/Notification';
 import { useNotificationStore } from '@/store/useNotificationStore';
 
+const mergeItemsById = (prev: INotificationItem[], next: INotificationItem[]) => {
+  const byId = new Map(prev.map((item) => [item.id, item]));
+
+  next.forEach((item) => {
+    const prevItem = byId.get(item.id);
+    byId.set(item.id, prevItem ? { ...prevItem, ...item } : item);
+  });
+
+  return Array.from(byId.values());
+};
+
 function Notification() {
   const navigate = useNavigate();
 
@@ -43,7 +54,7 @@ function Notification() {
         unreadOnly: false,
       });
 
-      setItems(res.notifications.map(mapNotificationToItem));
+      setItems((prev) => mergeItemsById(prev, res.notifications.map(mapNotificationToItem)));
     } catch (error) {
       console.error('알림 목록 초기 로드 실패:', error);
       setInitialLoadError('알림 목록을 불러오지 못했습니다.');
@@ -72,7 +83,7 @@ function Notification() {
           return;
         }
         const list = await fetchNotifications({ limit: 20, unreadOnly: false });
-        setItems(list.notifications.map(mapNotificationToItem));
+        setItems((prev) => mergeItemsById(prev, list.notifications.map(mapNotificationToItem)));
       } catch (e) {
         console.error('읽음 처리 실패:', e);
         alert('읽음 처리에 실패했습니다.');
@@ -89,7 +100,7 @@ function Notification() {
         return;
       }
       const list = await fetchNotifications({ limit: 20, unreadOnly: false });
-      setItems(list.notifications.map(mapNotificationToItem));
+      setItems((prev) => mergeItemsById(prev, list.notifications.map(mapNotificationToItem)));
     } catch (e) {
       console.error('모두 읽음 실패:', e);
       alert('모두 읽음 처리에 실패했습니다.');
