@@ -4,19 +4,23 @@ import { create } from 'zustand';
 interface PreviewStore {
   previewUrl: string | null;
   isOpen: boolean;
-  openPreview: (value: pdfType, path?: string) => void;
+  name: string;
+  openPreview: (value: pdfType, name: string) => void;
   closePreview: () => void;
 }
 
 export const usePreviewStore = create<PreviewStore>((set, get) => ({
   previewUrl: null,
   isOpen: false,
+  name: '',
 
   // 비동기 액션으로 만들기
-  openPreview: async (value: pdfType) => {
+  openPreview: async (value: pdfType, name: string) => {
     if (!value) {
       return;
     }
+
+    set((state) => ({ ...state, isOpen: true, name: name }));
 
     const currentUrl = get().previewUrl;
     if (currentUrl) {
@@ -27,11 +31,10 @@ export const usePreviewStore = create<PreviewStore>((set, get) => ({
     if (value instanceof File) {
       url = URL.createObjectURL(value);
     } else if (typeof value === 'string') {
-      console.log(value);
       url = value;
     }
 
-    set({ previewUrl: url, isOpen: true });
+    set((state) => ({ ...state, previewUrl: url }));
   },
 
   closePreview: () => {
@@ -39,6 +42,6 @@ export const usePreviewStore = create<PreviewStore>((set, get) => ({
     if (currentUrl) {
       URL.revokeObjectURL(currentUrl);
     }
-    set({ previewUrl: null, isOpen: false });
+    set({ previewUrl: null, isOpen: false, name: '' });
   },
 }));

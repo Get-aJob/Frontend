@@ -24,9 +24,9 @@ const CharacterCounter = <T extends FieldValues>({
   });
 
   return (
-    <p className="hidden group-has-[textarea:focus]:block mt-2 text-[12px] font-medium text-end">
-      <span className="text-btn-point">{value.length}</span>
-      <span className="text-gray-400"> / {limit} 자</span>
+    <p className="hidden group-has-[textarea:focus]:block mt-10 w-full text-end">
+      {value.length}
+      <span className="text-black/40"> / {limit}</span>
     </p>
   );
 };

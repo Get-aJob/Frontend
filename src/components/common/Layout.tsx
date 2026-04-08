@@ -47,7 +47,7 @@ const Layout = () => {
 
         {/* ✨ 모든 페이지에 공통 적용되는 스크롤 영역과 여백 */}
         <main className="flex-1 overflow-y-auto bg-bg-view scroll-smooth">
-          <div className="max-w-[1440px] mx-auto p-8 animate-in fade-in slide-in-from-bottom-2 duration-300">
+          <div className="max-w-360 mx-auto p-8 animate-in fade-in slide-in-from-bottom-2 duration-300">
             {!isLoggedIn && !isPublicPath ? (
               <div className="flex items-center justify-center min-h-[60vh]">
                 <p className="text-gray-400 font-medium text-lg text-center">
