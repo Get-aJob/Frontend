@@ -23,6 +23,8 @@ const Layout = () => {
         return { ...baseConfig, title: '이력서 관리', badge: 'RESUME' };
       case PATH.SCRAP:
         return { ...baseConfig, title: '공고 스크랩', badge: 'SCRAP' };
+      case PATH.NOTIFICATION:
+        return { ...baseConfig, title: '알림', badge: 'NOTIFICATION' };
       case PATH.SETTINGS:
         return { ...baseConfig, title: '계정 설정', badge: 'SETTINGS' };
       default:
