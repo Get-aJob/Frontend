@@ -41,6 +41,8 @@ const PostingDetailModal = ({ isOpen, onClose, job }: PostingDetailModalProps) =
       >
         <button
           onClick={onClose}
+          aria-label="닫기"
+          title="닫기"
           className="absolute top-8 right-8 z-10 p-2 bg-gray-50 rounded-full text-gray-400 hover:text-gray-600 transition-colors"
         >
           <X size={20} />
@@ -119,13 +121,15 @@ const PostingDetailModal = ({ isOpen, onClose, job }: PostingDetailModalProps) =
             </div>
           </div>
 
-          <div className="space-y-6 pt-4">
-            <h3 className="text-lg font-black text-gray-900 flex items-center gap-2 ml-1">
-              <MessageSquare size={20} className="text-btn-point" />
-              댓글
-            </h3>
-            <JobCommentPanel jobId={String(job.id)} />
-          </div>
+          {job.sourceType !== 'manual' && (
+            <div className="space-y-6 pt-4">
+              <h3 className="text-lg font-black text-gray-900 flex items-center gap-2 ml-1">
+                <MessageSquare size={20} className="text-btn-point" />
+                댓글
+              </h3>
+              <JobCommentPanel jobId={String(job.id)} />
+            </div>
+          )}
         </div>
 
         <div className="p-8 bg-white border-t border-gray-50 flex gap-4 shrink-0">

@@ -121,14 +121,16 @@ const PostingCard = ({ posting, isScrapped, onScrap, onDetail }: PostingCardProp
         />
       </div>
 
-      <div className="flex items-center gap-4 text-gray-300 text-[11px] font-black pt-4 border-t border-gray-50">
-        <span className="flex items-center gap-1.5">
-          <Eye size={14} strokeWidth={3} /> {posting.viewCount || 0}
-        </span>
-        <span className="flex items-center gap-1.5">
-          <MessageSquare size={14} strokeWidth={3} /> {displayCommentCount}
-        </span>
-      </div>
+      {posting.sourceType !== 'manual' && (
+        <div className="flex items-center gap-4 text-gray-300 text-[11px] font-black pt-4 border-t border-gray-50">
+          <span className="flex items-center gap-1.5">
+            <Eye size={14} strokeWidth={3} /> {posting.viewCount || 0}
+          </span>
+          <span className="flex items-center gap-1.5">
+            <MessageSquare size={14} strokeWidth={3} /> {displayCommentCount}
+          </span>
+        </div>
+      )}
     </article>
   );
 };
