@@ -1,4 +1,3 @@
-// common/UI/ConfirmModal.tsx 전체 코드
 import Button from './Button';
 
 interface ConfirmModalProps {

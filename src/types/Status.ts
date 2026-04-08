@@ -1,8 +1,8 @@
-// 백엔드 job_postings 테이블 조인 결과
 export interface JobPostingSummary {
   id: string;
   title: string;
   companyName: string;
+  deadline?: string;
 }
 
 export interface ApplicationStatus {
@@ -21,6 +21,7 @@ export interface ApplicationRecord {
   updatedAt: string;
   jobPostings: JobPostingSummary;
   applicationStatuses?: ApplicationStatus;
+  statusName?: string;
 }
 
 export interface CreateApplicationPayload {

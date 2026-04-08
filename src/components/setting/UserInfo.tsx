@@ -1,3 +1,4 @@
+// src/components/setting/UserInfo.tsx
 import React, { useRef } from 'react';
 import Badge from '@/components/common/UI/Badge';
 
@@ -5,7 +6,7 @@ interface UserInfoProps {
   name: string;
   email: string;
   profileImageUrl?: string | null;
-  provider?: string; // ✨ 로그인 제공자 정보 추가
+  provider?: string;
   onUploadImage: (file: File) => void;
   onDeleteImage: () => void;
 }
@@ -27,12 +28,16 @@ const UserInfo: React.FC<UserInfoProps> = ({
     e.target.value = '';
   };
 
-  const isGoogle = provider === 'google';
+  const isGoogle = provider?.toLowerCase() === 'google';
 
   return (
     <div className="flex flex-col sm:flex-row items-center sm:items-start gap-8 pb-10 mb-10 border-b border-gray-100">
       <div className="relative group shrink-0">
-        <div className="flex items-center justify-center w-28 h-28 rounded-full bg-btn-point text-[36px] font-black text-white shadow-md overflow-hidden transition-transform group-hover:scale-[1.02]">
+        <div
+          className={`flex items-center justify-center w-28 h-28 rounded-full bg-btn-point text-[36px] font-black text-white shadow-md overflow-hidden transition-transform ${
+            !isGoogle ? 'group-hover:scale-[1.02]' : ''
+          }`}
+        >
           {profileImageUrl ? (
             <img src={profileImageUrl} alt="Profile" className="w-full h-full object-cover" />
           ) : (
@@ -40,29 +45,33 @@ const UserInfo: React.FC<UserInfoProps> = ({
           )}
         </div>
 
-        <div className="absolute inset-0 bg-black/40 backdrop-blur-[2px] rounded-full opacity-0 group-hover:opacity-100 flex flex-col items-center justify-center gap-2 transition-all duration-200">
-          <button
-            onClick={() => fileInputRef.current?.click()}
-            className="text-white text-[13px] font-bold hover:text-purple-200 transition-colors"
-          >
-            이미지 변경
-          </button>
-          {profileImageUrl && (
-            <button
-              onClick={onDeleteImage}
-              className="text-red-300 text-[13px] font-bold hover:text-red-400 transition-colors"
-            >
-              삭제
-            </button>
-          )}
-        </div>
-        <input
-          type="file"
-          accept="image/*"
-          className="hidden"
-          ref={fileInputRef}
-          onChange={handleFileChange}
-        />
+        {!isGoogle && (
+          <>
+            <div className="absolute inset-0 bg-black/40 backdrop-blur-[2px] rounded-full opacity-0 group-hover:opacity-100 flex flex-col items-center justify-center gap-2 transition-all duration-200">
+              <button
+                onClick={() => fileInputRef.current?.click()}
+                className="text-white text-[13px] font-bold hover:text-purple-200 transition-colors"
+              >
+                이미지 변경
+              </button>
+              {profileImageUrl && (
+                <button
+                  onClick={onDeleteImage}
+                  className="text-red-300 text-[13px] font-bold hover:text-red-400 transition-colors"
+                >
+                  삭제
+                </button>
+              )}
+            </div>
+            <input
+              type="file"
+              accept="image/*"
+              className="hidden"
+              ref={fileInputRef}
+              onChange={handleFileChange}
+            />
+          </>
+        )}
       </div>
 
       <div className="flex-1 min-w-0 text-center sm:text-left pt-2">
@@ -73,7 +82,6 @@ const UserInfo: React.FC<UserInfoProps> = ({
           {email || '이메일 정보가 없습니다.'}
         </p>
 
-        {/* ✨ 로그인 수단에 따른 배지 구분 */}
         <div className="mt-4 flex gap-2 justify-center sm:justify-start">
           {isGoogle ? (
             <Badge

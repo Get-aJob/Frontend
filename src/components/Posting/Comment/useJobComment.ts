@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { getJobComments, createComment, deleteComment } from '@/api/Comment';
 import { useAuthStore } from '@/store/useAuthStore';
+import { usePostingStore } from '@/store/usePostingStore'; // 💡 스토어 임포트 추가
 
 export interface FeedComment {
   id: string;
@@ -75,6 +76,9 @@ export const useJobComment = (jobId: string) => {
 
   const userInfo = useAuthStore((state) => state.userInfo);
 
+  // 💡 Zustand 스토어의 댓글 카운트 업데이트 함수 가져오기
+  const updateCommentCount = usePostingStore((state) => state.updateCommentCount);
+
   const fetchComments = useCallback(async () => {
     if (!jobId) return;
     setIsLoadingComments(true);
@@ -128,6 +132,9 @@ export const useJobComment = (jobId: string) => {
       };
       setComments((prev) => [newComment, ...prev]);
 
+      // 💡 서버에 등록 성공 시 전역 스토어 댓글 수 1 증가
+      updateCommentCount(jobId, 1);
+
       await fetchComments();
     } catch (err) {
       console.error('댓글 등록 실패:', err);
@@ -139,6 +146,9 @@ export const useJobComment = (jobId: string) => {
     try {
       await deleteComment(jobId, String(commentId));
       setComments((prev) => prev.filter((c) => String(c.id) !== String(commentId)));
+
+      // 💡 삭제 성공 시 전역 스토어 댓글 수 1 감소
+      updateCommentCount(jobId, -1);
     } catch (err) {
       console.error('댓글 삭제 실패:', err);
     }

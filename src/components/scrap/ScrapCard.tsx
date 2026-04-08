@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import type { ScrapItem } from '@/api/Scrap';
 import ApplyModal from '@/components/status/ApplyModal';
+import ConfirmModal from '@/components/common/UI/ConfirmModal';
 
 interface ScrapCardProps {
   scrap: ScrapItem;
@@ -8,7 +9,6 @@ interface ScrapCardProps {
   onApplySuccess?: () => void;
 }
 
-// ... GRADIENTS, getGradientForName, calculateDday 생략 (기존 코드와 동일하게 유지)
 const GRADIENTS = [
   'linear-gradient(135deg, #ff8f00, #e65100)',
   'linear-gradient(135deg, #5c6bc0, #3949ab)',
@@ -64,11 +64,35 @@ const calculateDday = (deadline: string) => {
 
 const ScrapCard: React.FC<ScrapCardProps> = ({ scrap, onUnscrap, onApplySuccess }) => {
   const [isApplyModalOpen, setIsApplyModalOpen] = useState(false);
+  const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
+  const [modalMode, setModalMode] = useState<'confirm' | 'success'>('confirm');
+  const [modalMessage, setModalMessage] = useState('');
+
   const dday = calculateDday(scrap.deadline);
+
+  const handleUnscrapClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setModalMode('confirm');
+    setModalMessage('이 공고를 스크랩 목록에서 삭제하시겠습니까?');
+    setIsConfirmModalOpen(true);
+  };
+
+  const handleConfirmUnscrap = async () => {
+    try {
+      await onUnscrap(scrap.jobPostingId);
+      setModalMessage('스크랩이 정상적으로 해제되었습니다.');
+      setModalMode('success');
+    } catch {
+      // 💡 78라인: 'error' 변수를 제거하여 no-unused-vars 해결
+      setModalMessage('해제 중 오류가 발생했습니다. 다시 시도해주세요.');
+      setModalMode('success');
+    }
+  };
 
   return (
     <>
-      <div className="bg-white p-5 rounded-2xl border border-gray-200 hover:border-btn-point hover:shadow-[0_4px_20px_rgba(0,0,0,0.06)] hover:-translate-y-1 transition-all duration-200 flex flex-col justify-between min-h-[140px] cursor-pointer group">
+      {/* 💡 86라인: min-h-[140px]를 권장되는 min-h-35로 변경 */}
+      <div className="bg-white p-5 rounded-2xl border border-gray-200 hover:border-btn-point hover:shadow-[0_4px_20px_rgba(0,0,0,0.06)] hover:-translate-y-1 transition-all duration-200 flex flex-col justify-between min-h-35 cursor-pointer group">
         <div className="flex justify-between items-start gap-4">
           <div className="flex gap-3.5 min-w-0 flex-1">
             <div
@@ -113,10 +137,7 @@ const ScrapCard: React.FC<ScrapCardProps> = ({ scrap, onUnscrap, onApplySuccess 
           </span>
           <div className="flex gap-2">
             <button
-              onClick={(e) => {
-                e.stopPropagation();
-                onUnscrap(scrap.jobPostingId);
-              }}
+              onClick={handleUnscrapClick}
               className="text-xs px-3 py-1.5 border border-gray-200 bg-white rounded-lg text-gray-500 font-bold hover:bg-red-50 hover:text-status-error hover:border-red-200 transition-colors"
             >
               해제
@@ -125,7 +146,9 @@ const ScrapCard: React.FC<ScrapCardProps> = ({ scrap, onUnscrap, onApplySuccess 
               onClick={(e) => {
                 e.stopPropagation();
                 if (scrap.isApplied) {
-                  alert('이미 지원한 공고입니다.');
+                  setModalMode('success');
+                  setModalMessage('이미 지원 완료된 공고입니다.');
+                  setIsConfirmModalOpen(true);
                   return;
                 }
                 setIsApplyModalOpen(true);
@@ -143,14 +166,27 @@ const ScrapCard: React.FC<ScrapCardProps> = ({ scrap, onUnscrap, onApplySuccess 
         </div>
       </div>
 
+      <ConfirmModal
+        isOpen={isConfirmModalOpen}
+        title={modalMode === 'confirm' ? '스크랩 해제' : '알림'}
+        message={modalMessage}
+        confirmText={modalMode === 'confirm' ? '해제하기' : '확인'}
+        cancelText="닫기"
+        isDanger={modalMode === 'confirm'}
+        onConfirm={
+          modalMode === 'confirm' ? handleConfirmUnscrap : () => setIsConfirmModalOpen(false)
+        }
+        onClose={() => setIsConfirmModalOpen(false)}
+      />
+
       {isApplyModalOpen && (
         <ApplyModal
           jobPostingId={scrap.jobPostingId}
           companyName={scrap.companyName}
           title={scrap.title}
-          onClose={() => setIsApplyModalOpen(false)} // 사용자가 '닫기'를 누르거나 X를 누를 때 닫힘
+          onClose={() => setIsApplyModalOpen(false)}
           onSuccess={() => {
-            if (onApplySuccess) onApplySuccess(); // 실시간 상태 업데이트 실행!
+            if (onApplySuccess) onApplySuccess();
           }}
         />
       )}

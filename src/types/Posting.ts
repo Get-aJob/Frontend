@@ -38,6 +38,8 @@ export interface JobPosting {
   sourceType?: string;
   externalId?: string;
   description?: string;
+  commentCount?: number;
+  viewCount?: number;
 }
 
 export interface PostingResponse {

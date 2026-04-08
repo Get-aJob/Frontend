@@ -13,27 +13,33 @@ const Scrap = () => {
   const [isLoading, setIsLoading] = useState(true);
   const increaseUnreadCount = useNotificationStore((state) => state.increaseUnreadCount);
 
+  const fetchScraps = async () => {
+    try {
+      const data = await getMyScraps();
+      setScraps(data);
+    } catch (error: unknown) {
+      console.error('스크랩 목록 로드 실패:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   useEffect(() => {
-    const fetchScraps = async () => {
-      try {
-        const data = await getMyScraps();
-        setScraps(data);
-      } catch (error) {
-        console.error('스크랩 목록 로드 실패:', error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
     fetchScraps();
   }, []);
 
+  // 💡 수정된 부분: alert와 confirm을 제거했습니다.
+  // 이제 ScrapCard에서 처리된 후 데이터만 갱신하는 역할을 합니다.
   const handleUnscrap = async (id: string) => {
-    if (!window.confirm('스크랩을 해제하시겠습니까?')) return;
     try {
       await toggleScrap(id);
+      // 낙관적 업데이트: 서버 응답을 기다리지 않고 리스트에서 즉시 제거하여 반응 속도를 높임
       setScraps((prev) => prev.filter((item) => item.jobPostingId !== id));
-    } catch {
-      alert('스크랩 해제에 실패했습니다.');
+    } catch (error: unknown) {
+      console.error('스크랩 해제 실패:', error);
+      // 실패 시 목록을 다시 불러와 상태를 동기화
+      fetchScraps();
+      throw error; // 에러를 던져서 ScrapCard의 catch 문이 모달 메시지를 띄우게 함
     }
   };
 
@@ -63,9 +69,7 @@ const Scrap = () => {
   }, [scraps, sortBy]);
 
   return (
-    /* ✨ Layout에서 p-8과 애니메이션을 담당하므로, 여기선 구조적 간격(gap)만 설정합니다. */
     <div className="flex flex-col gap-8">
-      {/* 상단 헤더: 공고 개수와 정렬 필터 */}
       <ScrapHeader count={scraps.length} sortBy={sortBy} onSortChange={handleSortChange} />
 
       {isLoading ? (
@@ -74,7 +78,6 @@ const Scrap = () => {
           <p className="font-medium tracking-wide">저장된 공고를 불러오는 중입니다...</p>
         </div>
       ) : scraps.length > 0 ? (
-        /* 리스트 영역 */
         <div className="w-full">
           <ScrapList
             scraps={sortedScraps}
@@ -83,7 +86,6 @@ const Scrap = () => {
           />
         </div>
       ) : (
-        /* ✨ 데이터가 없을 때: 다른 페이지들과 디자인 톤을 맞춘 EmptyState */
         <div className="flex items-center justify-center py-32 bg-white rounded-[32px] border border-border-light shadow-sm">
           <EmptyState
             icon={<Bookmark size={48} className="text-gray-300" />}

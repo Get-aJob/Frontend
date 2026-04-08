@@ -19,13 +19,14 @@ export const getPostings = async (
     offset: String((page - 1) * limit),
   });
 
-  if (site) params.append('site', site);
+  // 백엔드 요청 규격에 맞춰 파라미터 이름을 'source_site'로 수정
+  if (site) params.append('source_site', site);
 
   const response = await api.get(`/jobs?${params.toString()}`);
   return response.data;
 };
 
-// 직접 입력(direct) 공고 목록 조회 [새로 추가된 백엔드 라우팅 대응]
+// 직접 입력(direct) 공고 목록 조회
 export const getDirectJobs = async (
   page: number,
   limit: number,
@@ -74,4 +75,13 @@ export const manualPreview = async (url: string): Promise<{ preview: Record<stri
 export const manualSave = async (data: ManualSaveRequest): Promise<{ job: BackendJob }> => {
   const response = await api.post('/jobs/manual/save', data);
   return response.data;
+};
+
+// 조회수 증가 API
+export const incrementViewCount = async (jobId: string | number): Promise<void> => {
+  try {
+    await api.patch(`/jobs/${jobId}/view`);
+  } catch (error: unknown) {
+    console.error('조회수 증가 실패:', error);
+  }
 };
