@@ -17,7 +17,7 @@ const ResumeFormPreviewButton = ({ className, id, children }: ResumeFormPreviewB
   const [isGenerating, setIsGenerating] = useState(false);
   const { data: value } = useGetResume(id);
   const { user } = useAuthStore();
-  const { openPreview } = usePreviewStore();
+  const openPreview = usePreviewStore((state) => state.openPreview);
 
   const handleGenerate = async () => {
     setIsGenerating(true);

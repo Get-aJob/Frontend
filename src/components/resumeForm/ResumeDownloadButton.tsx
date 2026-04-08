@@ -16,7 +16,7 @@ interface ResumeDownloadButtonProps {
 const ResumeDownloadButton = ({ data, id, className, children }: ResumeDownloadButtonProps) => {
   const [isGenerating, setIsGenerating] = useState(false);
   const { data: value } = useGetResume(id);
-  const { user } = useAuthStore();
+  const user = useAuthStore((state) => state.user);
 
   const handleDownload = async () => {
     setIsGenerating(true);

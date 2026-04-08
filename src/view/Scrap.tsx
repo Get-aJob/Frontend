@@ -82,7 +82,7 @@ const Scrap = () => {
           />
         </div>
       ) : (
-        <div className="flex items-center justify-center py-32 bg-white rounded-[32px] border border-border-light shadow-sm">
+        <div className="flex items-center justify-center py-32 bg-white rounded-4xl border border-border-light shadow-sm">
           <EmptyState
             icon={<Bookmark size={48} className="text-gray-300" />}
             title="스크랩한 공고가 없습니다"

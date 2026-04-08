@@ -20,7 +20,7 @@ export const usePreviewStore = create<PreviewStore>((set, get) => ({
       return;
     }
 
-    set({ isOpen: true, name: name });
+    set((state) => ({ ...state, isOpen: true, name: name }));
 
     const currentUrl = get().previewUrl;
     if (currentUrl) {
@@ -34,7 +34,7 @@ export const usePreviewStore = create<PreviewStore>((set, get) => ({
       url = value;
     }
 
-    set({ previewUrl: url });
+    set((state) => ({ ...state, previewUrl: url }));
   },
 
   closePreview: () => {
@@ -42,6 +42,6 @@ export const usePreviewStore = create<PreviewStore>((set, get) => ({
     if (currentUrl) {
       URL.revokeObjectURL(currentUrl);
     }
-    set({ previewUrl: null, isOpen: false });
+    set({ previewUrl: null, isOpen: false, name: '' });
   },
 }));

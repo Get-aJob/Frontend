@@ -50,7 +50,7 @@ const DropzoneBox = ({ value, onChange, index }: DropzoneBoxProps) => {
   });
 
   const { watch, setValue } = useFormContext<ResumeFormInputs>();
-  const { openPreview } = usePreviewStore();
+  const openPreview = usePreviewStore((state) => state.openPreview);
 
   const portfolio = watch(`portfolio.${index}`);
 
@@ -101,7 +101,7 @@ const DropzoneBox = ({ value, onChange, index }: DropzoneBoxProps) => {
         <p>
           {isDragActive
             ? '여기에 놓으세요!'
-            : 'PDF 파일(최대 50MB)을 여기다 드래그 하거나 클릭하세요!'}
+            : 'PDF 파일(최대 50MB)을 여기에 드래그 하거나 클릭하세요!'}
         </p>
       </div>
     </div>

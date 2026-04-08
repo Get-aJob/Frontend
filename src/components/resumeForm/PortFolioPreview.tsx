@@ -1,12 +1,19 @@
 import { usePreviewStore } from '@/store/usePdfPreviewStore';
 import { useEffect, useRef } from 'react';
+import { useShallow } from 'zustand/react/shallow';
 
 interface PortFolioPreviewProps {
   name: string;
 }
 
 const PortFolioPreview = ({ name }: PortFolioPreviewProps) => {
-  const { isOpen, previewUrl, closePreview } = usePreviewStore();
+  const { isOpen, previewUrl, closePreview } = usePreviewStore(
+    useShallow((state) => ({
+      isOpen: state.isOpen,
+      previewUrl: state.previewUrl,
+      closePreview: state.closePreview,
+    })),
+  );
   const previewRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {

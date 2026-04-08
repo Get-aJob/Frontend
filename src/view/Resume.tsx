@@ -6,11 +6,14 @@ import { useResumeList } from '@/hooks/resume';
 import { usePreviewStore } from '@/store/usePdfPreviewStore';
 import { useResumeItemMenuStore } from '@/store/useResumeItemMenuStore';
 import { FileText } from 'lucide-react';
+import { useShallow } from 'zustand/react/shallow';
 
 const Resume = () => {
   const { data: lists, isLoading } = useResumeList();
-  const { isAnyMenuOpen } = useResumeItemMenuStore();
-  const { isOpen, name } = usePreviewStore();
+  const isAnyMenuOpen = useResumeItemMenuStore((state) => state.isAnyMenuOpen);
+  const { isOpen, name } = usePreviewStore(
+    useShallow((state) => ({ isOpen: state.isOpen, name: state.name })),
+  );
   return (
     <div className="flex flex-col gap-8 relative">
       {isOpen && <PortFolioPreview name={name} />}

@@ -11,6 +11,7 @@ import { usePreviewStore } from '@/store/usePdfPreviewStore';
 import PortFolioPreview from '@/components/resumeForm/PortFolioPreview';
 import { useAuthStore } from '@/store/useAuthStore';
 import ResumeFormPortfolio from '@/components/resumeForm/ResumeFormPortfolio';
+import { useShallow } from 'zustand/react/shallow';
 
 const ResumeForm = () => {
   const resume = useForm<ResumeFormInputs>({
@@ -58,8 +59,13 @@ const ResumeForm = () => {
       portfolio: [{ name: '', url: '', file: null, type: 'file' }],
     },
   });
-  const { user } = useAuthStore();
-  const { isOpen, name } = usePreviewStore();
+  const user = useAuthStore((state) => state.user);
+  const { isOpen, name } = usePreviewStore(
+    useShallow((state) => ({
+      isOpen: state.isOpen,
+      name: state.name,
+    })),
+  );
 
   return (
     <div className="w-full h-dvh overflow-hidden">
