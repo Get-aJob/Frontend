@@ -10,9 +10,10 @@ export interface TopbarProps {
   badge?: string;
   showSearch?: boolean;
   showAddButton?: boolean;
+  unreadCount?: number;
 }
 
-const Topbar = ({ title, badge, showSearch, showAddButton }: TopbarProps) => {
+const Topbar = ({ title, badge, showSearch, showAddButton, unreadCount = 0 }: TopbarProps) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [showLoginToast, setShowLoginToast] = useState(false);
   const isLoggedIn = useAuthStore((state) => state.isLoggedIn);
@@ -41,6 +42,11 @@ const Topbar = ({ title, badge, showSearch, showAddButton }: TopbarProps) => {
           {badge && (
             <Badge variant="point" className="px-2.5 py-1 text-[11px] font-bold">
               {badge}
+            </Badge>
+          )}
+          {isLoggedIn && unreadCount > 0 && (
+            <Badge variant="error" className="px-2.5 py-1 text-[11px] font-bold">
+              미확인 {unreadCount}
             </Badge>
           )}
         </div>

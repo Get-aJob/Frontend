@@ -66,8 +66,8 @@
 
 | 순번 | 우선순위 | 작업 | 상태 | 비고 |
 |:----:|:--------:|------|:----:|------|
-| 18 | P3 | **미읽음 개수**를 전역 상태(예: Zustand) 또는 React Query로 보관 | ❌ | 배너·사이드바·탑바와 공유 |
-| 19 | P3 | 로그인 직후(또는 앱 초기) `getUnreadCount` 호출 후 **탑바/사이드바 배지** 반영 | ❌ | 기획서 §5.3 |
+| 18 | P3 | **미읽음 개수**를 전역 상태(예: Zustand) 또는 React Query로 보관 | ✅ | `src/store/useNotificationStore.ts` 전역 `unreadCount` 관리 (커스텀 이벤트 없이 상태 기반) |
+| 19 | P3 | 로그인 직후(또는 앱 초기) `getUnreadCount` 호출 후 **탑바/사이드바 배지** 반영 | ✅ | `Layout` 로그인 상태 `syncUnreadCount()` + `notification:new` 수신 시 `increaseUnreadCount()`로 배지 동기화 |
 | 20 | P3 | 알림 페이지 상단 **미확인 배너**를 서버 `unreadCount`(또는 동일 소스)와 연동 | ❌ | 목록 `items`에서 계산한 미읽음 수; `fetchUnreadCount` API 미연동 |
 | 21 | P3 | Socket **단일 연결** 위치 확정(Layout·Provider·훅) — 페이지 이탈 시에도 정책에 맞게 유지/해제 | ❌ | 기획서 §5.2 |
 | 22 | P3 | `notification:new`(실제 이벤트명에 맞게) 수신 시 **목록 상단 merge** + 미읽음 수 증가 | ❌ | 중복 `id` 방지 |
@@ -119,4 +119,4 @@
 
 ---
 
-*문서 버전: 1.9*
+*문서 버전: 2.1*

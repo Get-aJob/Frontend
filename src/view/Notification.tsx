@@ -11,7 +11,8 @@ import {
   fetchAllNotification,
 } from '@/api/Notification';
 import { mapNotificationToItem, type INotificationItem } from '@/types/Notification';
-import { useNotificationSocket } from '@/hooks/useSocket'; // 추가
+import { useNotificationSocket } from '@/hooks/useSocket';
+import { useNotificationStore } from '@/store/useNotificationStore';
 
 function Notification() {
   const navigate = useNavigate();
@@ -23,6 +24,13 @@ function Notification() {
   const [unreadOnly, setUnreadOnly] = useState(false);
   const [loginBannerDismissed, setLoginBannerDismissed] = useState(false);
 
+  const unreadCount = useMemo(() => items.filter((n) => n.readAt === null).length, [items]);
+  const setGlobalUnreadCount = useNotificationStore((state) => state.setUnreadCount);
+
+  useEffect(() => {
+    setGlobalUnreadCount(unreadCount);
+  }, [unreadCount, setGlobalUnreadCount]);
+
   // 실시간 알림 수신 -> 최상단 병합 + 중복 제거
   const handleSocketNewNotification = useCallback((newItem: INotificationItem) => {
     setItems((prev) => {
@@ -33,8 +41,6 @@ function Notification() {
 
   // 추가
   useNotificationSocket(handleSocketNewNotification);
-
-  const unreadCount = useMemo(() => items.filter((n) => n.readAt === null).length, [items]);
 
   const visibleItems = useMemo(() => {
     const sorted = [...items].sort(
@@ -64,7 +70,7 @@ function Notification() {
   }, []);
 
   useEffect(() => {
-    loadInitialNotifications();
+    void loadInitialNotifications();
   }, [loadInitialNotifications]);
 
   const markRead = useCallback(
