@@ -24,12 +24,7 @@ function Notification() {
   const [loginBannerDismissed, setLoginBannerDismissed] = useState(false);
 
   const unreadCount = useMemo(() => items.filter((n) => n.readAt === null).length, [items]);
-  const setGlobalUnreadCount = useNotificationStore((state) => state.setUnreadCount);
   const socketEventVersion = useNotificationStore((state) => state.socketEventVersion);
-
-  useEffect(() => {
-    setGlobalUnreadCount(unreadCount);
-  }, [unreadCount, setGlobalUnreadCount]);
 
   const visibleItems = useMemo(() => {
     const sorted = [...items].sort(
