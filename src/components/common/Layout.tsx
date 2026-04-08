@@ -14,6 +14,7 @@ const Layout = () => {
 
   const syncUnreadCount = useNotificationStore((state) => state.syncUnreadCount);
   const increaseUnreadCount = useNotificationStore((state) => state.increaseUnreadCount);
+  const notifySocketNew = useNotificationStore((state) => state.notifySocketNew);
   const resetUnreadCount = useNotificationStore((state) => state.resetUnreadCount);
   const unreadCount = useNotificationStore((state) => state.unreadCount);
 
@@ -36,13 +37,14 @@ const Layout = () => {
       if (isUnread) {
         increaseUnreadCount(1);
       }
+      notifySocketNew();
     });
     socket.connect();
     return () => {
       socket.off(SOCKET_EVENT.SERVER.NOTIFICATION_NEW);
       socket.disconnect();
     };
-  }, [isLoggedIn, increaseUnreadCount]);
+  }, [isLoggedIn, increaseUnreadCount, notifySocketNew]);
 
   const getTopbarConfig = () => {
     const baseConfig = { showSearch: true, showAddButton: true };

@@ -5,13 +5,11 @@ import ScrapHeader from '@/components/scrap/ScrapHeader';
 import ScrapList from '@/components/scrap/ScrapList';
 import { LoaderCircle, Bookmark } from 'lucide-react';
 import EmptyState from '@/components/common/UI/EmptyState';
-import { useNotificationStore } from '@/store/useNotificationStore';
 
 const Scrap = () => {
   const [scraps, setScraps] = useState<ScrapItem[]>([]);
   const [sortBy, setSortBy] = useState<'latest' | 'deadline'>('latest');
   const [isLoading, setIsLoading] = useState(true);
-  const increaseUnreadCount = useNotificationStore((state) => state.increaseUnreadCount);
 
   const fetchScraps = async () => {
     try {
@@ -47,8 +45,6 @@ const Scrap = () => {
     setScraps((prev) =>
       prev.map((item) => (item.jobPostingId === jobId ? { ...item, isApplied: true } : item)),
     );
-    // 동일 클라이언트에서 지원 성공이 확정됐으므로 unread 즉시 +1
-    increaseUnreadCount(1);
   };
 
   const handleSortChange = (e: ChangeEvent<HTMLSelectElement>) => {
