@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { PATH } from '@/router/Path';
 import LoginForm from './LoginForm';
 import PasswordResetForm from './PasswordResetForm';
-import { loginApi, googleCredentialLoginApi } from '@/api/Auth'; // 👈 구글 api 추가
+import { loginApi, googleCredentialLoginApi } from '@/api/Auth';
 import type { LoginField } from '@/types/Auth';
 import { useAuthStore } from '@/store/useAuthStore';
 
@@ -20,7 +20,6 @@ const Login: React.FC<LoginProps> = ({ onSwitchRegister }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
 
-  // 1. 일반 이메일 로그인 처리
   const handleLogin = async (data: LoginField) => {
     setIsLoading(true);
     setErrorMsg('');
@@ -33,6 +32,7 @@ const Login: React.FC<LoginProps> = ({ onSwitchRegister }) => {
           name: response.user.name,
           email: response.user.email,
           profile_image_url: response.user.profile_image_url,
+          provider: response.user.provider || 'local',
         });
         navigate(PATH.ROOT);
       }
@@ -67,6 +67,7 @@ const Login: React.FC<LoginProps> = ({ onSwitchRegister }) => {
         name: response.user.name,
         email: response.user.email,
         profile_image_url: response.user.profile_image_url,
+        provider: response.user.provider || 'google',
       });
       navigate(PATH.ROOT);
     } catch {
