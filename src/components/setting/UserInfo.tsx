@@ -28,13 +28,16 @@ const UserInfo: React.FC<UserInfoProps> = ({
     e.target.value = '';
   };
 
-  // ✨ 대소문자 무관하게 안전하게 구글 계정 판별
   const isGoogle = provider?.toLowerCase() === 'google';
 
   return (
     <div className="flex flex-col sm:flex-row items-center sm:items-start gap-8 pb-10 mb-10 border-b border-gray-100">
       <div className="relative group shrink-0">
-        <div className="flex items-center justify-center w-28 h-28 rounded-full bg-btn-point text-[36px] font-black text-white shadow-md overflow-hidden transition-transform group-hover:scale-[1.02]">
+        <div
+          className={`flex items-center justify-center w-28 h-28 rounded-full bg-btn-point text-[36px] font-black text-white shadow-md overflow-hidden transition-transform ${
+            !isGoogle ? 'group-hover:scale-[1.02]' : ''
+          }`}
+        >
           {profileImageUrl ? (
             <img src={profileImageUrl} alt="Profile" className="w-full h-full object-cover" />
           ) : (
@@ -42,29 +45,33 @@ const UserInfo: React.FC<UserInfoProps> = ({
           )}
         </div>
 
-        <div className="absolute inset-0 bg-black/40 backdrop-blur-[2px] rounded-full opacity-0 group-hover:opacity-100 flex flex-col items-center justify-center gap-2 transition-all duration-200">
-          <button
-            onClick={() => fileInputRef.current?.click()}
-            className="text-white text-[13px] font-bold hover:text-purple-200 transition-colors"
-          >
-            이미지 변경
-          </button>
-          {profileImageUrl && (
-            <button
-              onClick={onDeleteImage}
-              className="text-red-300 text-[13px] font-bold hover:text-red-400 transition-colors"
-            >
-              삭제
-            </button>
-          )}
-        </div>
-        <input
-          type="file"
-          accept="image/*"
-          className="hidden"
-          ref={fileInputRef}
-          onChange={handleFileChange}
-        />
+        {!isGoogle && (
+          <>
+            <div className="absolute inset-0 bg-black/40 backdrop-blur-[2px] rounded-full opacity-0 group-hover:opacity-100 flex flex-col items-center justify-center gap-2 transition-all duration-200">
+              <button
+                onClick={() => fileInputRef.current?.click()}
+                className="text-white text-[13px] font-bold hover:text-purple-200 transition-colors"
+              >
+                이미지 변경
+              </button>
+              {profileImageUrl && (
+                <button
+                  onClick={onDeleteImage}
+                  className="text-red-300 text-[13px] font-bold hover:text-red-400 transition-colors"
+                >
+                  삭제
+                </button>
+              )}
+            </div>
+            <input
+              type="file"
+              accept="image/*"
+              className="hidden"
+              ref={fileInputRef}
+              onChange={handleFileChange}
+            />
+          </>
+        )}
       </div>
 
       <div className="flex-1 min-w-0 text-center sm:text-left pt-2">
