@@ -10,7 +10,6 @@ import {
 } from 'lucide-react';
 import type { ExtendedJobPosting } from '@/store/usePostingStore';
 import Button from '@/components/common/UI/Button';
-import Badge from '@/components/common/UI/Badge';
 import JobCommentPanel from './Comment/JobCommentPanel';
 
 interface PostingDetailModalProps {
@@ -64,15 +63,7 @@ const PostingDetailModal = ({ isOpen, onClose, job }: PostingDetailModalProps) =
               )}
             </div>
             <div className="flex-1 min-w-0 pt-2">
-              <div className="flex items-center gap-2 mb-3">
-                <Badge variant="point" className="px-3 py-1 font-bold">
-                  {job.site}
-                </Badge>
-                <span className="text-xs text-gray-300 font-bold uppercase tracking-wider">
-                  {job.sourceType || 'manual'}
-                </span>
-              </div>
-              <h2 className="text-2xl font-black text-gray-900 leading-tight mb-2 truncate">
+              <h2 className="text-2xl font-black text-gray-900 leading-tight mb-2 break-words">
                 {job.title}
               </h2>
               <p className="text-lg text-gray-500 font-bold">{job.companyName}</p>
@@ -103,7 +94,12 @@ const PostingDetailModal = ({ isOpen, onClose, job }: PostingDetailModalProps) =
                   <p className="text-[11px] text-gray-400 font-black uppercase mb-0.5 tracking-wider">
                     {item.label}
                   </p>
-                  <p className="text-[15px] font-black text-gray-800 truncate">{item.value}</p>
+                  <p
+                    className="text-[15px] font-black text-gray-800 break-words line-clamp-3 hover:line-clamp-none transition-all cursor-help"
+                    title={String(item.value)}
+                  >
+                    {item.value}
+                  </p>
                 </div>
               </div>
             ))}

@@ -6,14 +6,14 @@ import TextareaInput from './TextareaInput';
 import DeadlineInput from './DeadlineInput';
 import LogoUpload from './LogoUpload';
 import CrawlBar from './CrawlBar';
-import { usePostingStore } from '@/store/usePostingStore';
-import type { JobPosting } from '@/types/Posting';
+import { usePostingStore, type ExtendedJobPosting } from '@/store/usePostingStore';
+import type { DirectJobRequest } from '@/types/Posting';
 
 interface JobModalProps {
   isOpen: boolean;
   onClose: () => void;
   mode?: 'create' | 'edit';
-  initialData?: JobPosting;
+  initialData?: ExtendedJobPosting;
 }
 
 const JobModal = ({ isOpen, onClose, mode = 'create', initialData }: JobModalProps) => {
@@ -45,11 +45,13 @@ const JobModal = ({ isOpen, onClose, mode = 'create', initialData }: JobModalPro
         setDescription(initialData.description || '');
         setLogo(initialData.companyLogo || null);
         setUrl(initialData.url || '');
-        setCrawlUrl(initialData.url || '');
+        setCrawlUrl(''); // 💡 수정 모드에서도 파싱 바는 비워둠
         setExternalId(initialData.externalId);
 
         if (initialData.deadline === '상시채용') {
           setIsAlwaysRecruit(true);
+        } else if (initialData.rawDeadline) {
+          setDeadline(initialData.rawDeadline);
         } else if (initialData.deadline?.startsWith('20')) {
           setDeadline(initialData.deadline);
         }
@@ -89,7 +91,9 @@ const JobModal = ({ isOpen, onClose, mode = 'create', initialData }: JobModalPro
         setLocation((data.location as string) || '');
         setExperience((data.experience as string) || '');
         setLogo((data.companyLogo as string) || null);
-        setExternalId((data.externalId as string) || undefined);
+        if (mode !== 'edit') {
+          setExternalId((data.externalId as string) || undefined);
+        }
 
         // 1. 날짜 포맷 변환 (ISO -> YYYY-MM-DD)
         if (data.deadline) {
@@ -134,7 +138,7 @@ const JobModal = ({ isOpen, onClose, mode = 'create', initialData }: JobModalPro
       // 새 공고 등록 시 파싱된 externalId를 그대로 보내면
       // 크롤러가 수집한 'auto' 공고의 ID와 충돌하여 500 에러(Unique 제약 조건 위반)가 발생.
       // 따라서 수정 모드가 아닐 때는 externalId를 페이로드에서 제외하여 백엔드에서 새 UUID를 생성.
-      const payload: Record<string, unknown> = {
+      const payload: DirectJobRequest = {
         title,
         companyName,
         location,
@@ -144,15 +148,12 @@ const JobModal = ({ isOpen, onClose, mode = 'create', initialData }: JobModalPro
         deadline: isAlwaysRecruit ? undefined : deadline,
         deadlineText: isAlwaysRecruit ? '상시채용' : undefined,
         sourceUrl: url || '',
-        content: { description },
       };
 
       if (mode === 'edit' && (initialData?.externalId || externalId)) {
         const idToUpdate = (initialData?.externalId || externalId) as string;
-        payload.externalId = idToUpdate;
         await updateJob(idToUpdate, payload);
       } else {
-        // 등록 모드일 경우 externalId를 빼고 전송 -> 백엔드가 랜덤 생성
         await createJob(payload);
       }
 
@@ -169,28 +170,41 @@ const JobModal = ({ isOpen, onClose, mode = 'create', initialData }: JobModalPro
   return (
     <div className="fixed inset-0 z-200 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
       <div className="bg-white w-full max-w-2xl rounded-4xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
-        {/* 헤더 */}
         <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between bg-white sticky top-0 z-10">
           <h2 className="text-xl font-bold text-slate-800">
             {mode === 'edit' ? '공고 수정하기' : '새 공고 등록'}
           </h2>
-          <button
-            onClick={onClose}
-            aria-label="닫기"
-            className="p-2 hover:bg-gray-100 rounded-full transition-colors"
-          >
-            <X size={20} className="text-gray-400" />
-          </button>
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={() => handleReset()}
+              title="입력 내용 초기화"
+              className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-all"
+            >
+              <RotateCcw size={14} />
+              초기화
+            </button>
+            <div className="w-px h-4 bg-gray-100 mx-1" />
+            <button
+              onClick={onClose}
+              aria-label="닫기"
+              className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+            >
+              <X size={20} className="text-gray-400" />
+            </button>
+          </div>
         </div>
 
         {/* 본문 */}
         <div className="flex-1 overflow-y-auto p-6 space-y-6">
-          <CrawlBar
-            url={crawlUrl}
-            onUrlChange={setCrawlUrl}
-            onParse={handleParse}
-            isParsing={isParsing}
-          />
+          {mode !== 'edit' && (
+            <CrawlBar
+              url={crawlUrl}
+              onUrlChange={setCrawlUrl}
+              onParse={handleParse}
+              isParsing={isParsing}
+            />
+          )}
 
           <div className="flex flex-col md:flex-row gap-6">
             <div className="flex-1 space-y-6">
@@ -248,17 +262,7 @@ const JobModal = ({ isOpen, onClose, mode = 'create', initialData }: JobModalPro
           />
         </div>
 
-        {/* 푸터 */}
-        <div className="px-6 py-4 border-t border-gray-100 bg-gray-50 flex items-center justify-between">
-          <button
-            type="button"
-            onClick={() => handleReset()}
-            className="flex items-center gap-2 px-4 py-2 text-sm font-bold text-gray-500 hover:text-slate-800 hover:bg-gray-200 rounded-xl transition-all"
-          >
-            <RotateCcw size={16} />
-            초기화
-          </button>
-
+        <div className="px-6 py-4 border-t border-gray-100 bg-gray-50 flex items-center justify-end">
           <div className="flex gap-3">
             <Button
               variant="outline"

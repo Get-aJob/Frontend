@@ -1,7 +1,8 @@
 import { useEffect, useState, useCallback } from 'react';
 import type { JobPosting } from '@/types/Posting';
 import Badge from '@/components/common/UI/Badge';
-import { MessageSquare, Eye } from 'lucide-react';
+import { MessageSquare, Eye, Edit2, Trash2 } from 'lucide-react';
+import JobModal from '@/components/jobPostForm/JobModal';
 import { ddayVariant } from '@/utils/statusUtils';
 import PostingActionButtons from './PostingActionButtons';
 import { getJobComments } from '@/api/Comment';
@@ -17,6 +18,30 @@ interface PostingCardProps {
 
 const PostingCard = ({ posting, isScrapped, onScrap, onDetail }: PostingCardProps) => {
   const dday = posting.deadline || '상시채용';
+
+  // 💡 삭제 로직 및 수정 모달 상태 추가
+  const deleteJob = usePostingStore((state) => state.deleteJob);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+
+  const handleDelete = async (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (!posting.externalId) {
+      alert('오류: 공고 식별자가 없습니다.');
+      return;
+    }
+    if (window.confirm('이 공고를 정말 삭제하시겠습니까?')) {
+      try {
+        await deleteJob(posting.externalId, 'manual');
+      } catch {
+        alert('삭제 중 오류가 발생했습니다.');
+      }
+    }
+  };
+
+  const handleEdit = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setIsEditModalOpen(true);
+  };
 
   // 💡 1. 전역 스토어 구독 및 업데이트 함수 가져오기
   const storePostings = usePostingStore((state) => state.postings);
@@ -68,70 +93,102 @@ const PostingCard = ({ posting, isScrapped, onScrap, onDetail }: PostingCardProp
   }, [fetchCount]);
 
   return (
-    <article
-      className="group relative bg-white border border-border-light rounded-3xl p-6 transition-all hover:border-btn-point hover:shadow-md cursor-pointer flex flex-col h-full"
-      onClick={() => onDetail(posting)}
-    >
-      <div className="flex justify-between items-start mb-5">
-        <div className="flex items-center gap-4">
-          <div
-            className="w-14 h-14 rounded-2xl bg-gray-50 border border-border-light overflow-hidden flex items-center justify-center shadow-sm cursor-default"
-            onClick={(e) => e.stopPropagation()}
-          >
-            {posting.companyLogo ? (
-              <img
-                src={posting.companyLogo}
-                alt={posting.companyName}
-                className="w-full h-full object-contain p-1.5"
-              />
-            ) : (
-              <span className="text-xl font-black text-gray-300">
-                {posting.companyName.charAt(0)}
-              </span>
-            )}
+    <>
+      <article
+        className="group relative bg-white border border-border-light rounded-3xl p-6 transition-all hover:border-btn-point hover:shadow-md cursor-pointer flex flex-col h-full"
+        onClick={() => onDetail(posting)}
+      >
+        <div className="flex justify-between items-start mb-5">
+          <div className="flex items-center gap-4">
+            <div
+              className="w-14 h-14 rounded-2xl bg-gray-50 border border-border-light overflow-hidden flex items-center justify-center shadow-sm cursor-default"
+              onClick={(e) => e.stopPropagation()}
+            >
+              {posting.companyLogo ? (
+                <img
+                  src={posting.companyLogo}
+                  alt={posting.companyName}
+                  className="w-full h-full object-contain p-1.5"
+                />
+              ) : (
+                <span className="text-xl font-black text-gray-300">
+                  {posting.companyName.charAt(0)}
+                </span>
+              )}
+            </div>
+            <div>
+              <h3 className="text-xs font-black text-gray-400 tracking-tight mb-1">
+                {posting.companyName}
+              </h3>
+              <Badge variant={ddayVariant(dday)}>{dday}</Badge>
+            </div>
           </div>
-          <div>
-            <h3 className="text-xs font-black text-gray-400 tracking-tight mb-1">
-              {posting.companyName}
-            </h3>
-            <Badge variant={ddayVariant(dday)}>{dday}</Badge>
+          {posting.sourceType === 'manual' && (
+            <div className="flex items-center gap-1.5 shrink-0 ml-4">
+              <button
+                onClick={handleEdit}
+                className="p-1.5 text-gray-300 hover:text-blue-500 hover:bg-blue-50 rounded-lg transition-colors flex items-center justify-center bg-white border border-gray-100 shadow-sm"
+                title="수정"
+                aria-label="수정"
+              >
+                <Edit2 size={15} strokeWidth={2.5} />
+              </button>
+              <button
+                onClick={handleDelete}
+                className="p-1.5 text-gray-300 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors flex items-center justify-center bg-white border border-gray-100 shadow-sm"
+                title="삭제"
+                aria-label="삭제"
+              >
+                <Trash2 size={15} strokeWidth={2.5} />
+              </button>
+            </div>
+          )}
+        </div>
+
+        <div className="flex-1 mb-6">
+          <h4 className="text-subtitle font-black text-gray-900 mb-3 line-clamp-1 group-hover:text-btn-point transition-colors">
+            {posting.title}
+          </h4>
+          <div className="flex flex-wrap gap-1.5">
+            <span className="text-[10px] font-bold text-gray-400 bg-gray-50 px-2 py-0.5 rounded-md border border-gray-100">
+              #{posting.location || '전국'}
+            </span>
+            <span className="text-[10px] font-bold text-gray-400 bg-gray-50 px-2 py-0.5 rounded-md border border-gray-100">
+              #{posting.site || '채용공고'}
+            </span>
           </div>
         </div>
-      </div>
 
-      <div className="flex-1 mb-6">
-        <h4 className="text-subtitle font-black text-gray-900 mb-3 line-clamp-1 group-hover:text-btn-point transition-colors">
-          {posting.title}
-        </h4>
-        <div className="flex flex-wrap gap-1.5">
-          <span className="text-[10px] font-bold text-gray-400 bg-gray-50 px-2 py-0.5 rounded-md border border-gray-100">
-            #{posting.location || '전국'}
-          </span>
-          <span className="text-[10px] font-bold text-gray-400 bg-gray-50 px-2 py-0.5 rounded-md border border-gray-100">
-            #{posting.site || '채용공고'}
-          </span>
+        <div className="mb-5">
+          <PostingActionButtons
+            job={{ ...posting, isScrapped }}
+            onScrap={onScrap}
+            onDetailClick={() => onDetail(posting)}
+          />
         </div>
-      </div>
 
-      <div className="mb-5">
-        <PostingActionButtons
-          job={{ ...posting, isScrapped }}
-          onScrap={onScrap}
-          onDetailClick={() => onDetail(posting)}
+        {posting.sourceType !== 'manual' && (
+          <div className="flex items-center gap-4 text-gray-300 text-[11px] font-black pt-4 border-t border-gray-50">
+            <span className="flex items-center gap-1.5">
+              <Eye size={14} strokeWidth={3} /> {posting.viewCount || 0}
+            </span>
+            <span className="flex items-center gap-1.5">
+              <MessageSquare size={14} strokeWidth={3} /> {displayCommentCount}
+            </span>
+          </div>
+        )}
+      </article>
+
+      {/* 외부 모달 이벤트 충돌 방지를 위해 article 바깥에 렌더링 (이벤트 버블링 차단) */}
+      {isEditModalOpen && (
+        <JobModal
+          isOpen={isEditModalOpen}
+          onClose={() => setIsEditModalOpen(false)}
+          mode="edit"
+          initialData={posting}
         />
-      </div>
-
-      {posting.sourceType !== 'manual' && (
-        <div className="flex items-center gap-4 text-gray-300 text-[11px] font-black pt-4 border-t border-gray-50">
-          <span className="flex items-center gap-1.5">
-            <Eye size={14} strokeWidth={3} /> {posting.viewCount || 0}
-          </span>
-          <span className="flex items-center gap-1.5">
-            <MessageSquare size={14} strokeWidth={3} /> {displayCommentCount}
-          </span>
-        </div>
       )}
-    </article>
+    </>
   );
 };
 

@@ -21,6 +21,7 @@ import type {
 
 export interface ExtendedJobPosting extends JobPosting {
   isScrapped?: boolean;
+  rawDeadline?: string; // 수정 폼 등을 위해 원본 날짜 보관
 }
 
 // 💡 any 타입 대체를 위해 백엔드 원본 데이터 스키마를 엄격하게 확장
@@ -205,6 +206,7 @@ export const usePostingStore = create<PostingState>()(
               location: jobData.location || '전국',
               experienceLevel: jobData.experience || '경력무관',
               deadline: finalDeadline,
+              rawDeadline: deadline ? new Date(deadline).toISOString().split('T')[0] : undefined,
               isScrapped: scrappedIds.has(String(jobData.id)),
               sourceType: finalSourceType,
               externalId: jobData.external_id || jobData.externalId || String(jobData.id),
