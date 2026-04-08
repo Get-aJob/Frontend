@@ -133,6 +133,11 @@ const JobModal = ({ isOpen, onClose, mode = 'create', initialData }: JobModalPro
       return;
     }
 
+    if (!isAlwaysRecruit && !deadline) {
+      alert('마감일을 선택하거나 상시 모집을 체크해주세요.');
+      return;
+    }
+
     setIsSubmitting(true);
     try {
       // 새 공고 등록 시 파싱된 externalId를 그대로 보내면
@@ -145,8 +150,8 @@ const JobModal = ({ isOpen, onClose, mode = 'create', initialData }: JobModalPro
         experience,
         description,
         companyLogo: logo || undefined,
-        deadline: isAlwaysRecruit ? undefined : deadline,
-        deadlineText: isAlwaysRecruit ? '상시채용' : undefined,
+        deadline: isAlwaysRecruit ? null : deadline,
+        deadlineText: isAlwaysRecruit ? '상시채용' : '',
         sourceUrl: url || '',
       };
 
@@ -249,7 +254,10 @@ const JobModal = ({ isOpen, onClose, mode = 'create', initialData }: JobModalPro
 
           <DeadlineInput
             isAlwaysRecruit={isAlwaysRecruit}
-            onAlwaysRecruitChange={setIsAlwaysRecruit}
+            onAlwaysRecruitChange={(checked) => {
+              setIsAlwaysRecruit(checked);
+              setDeadline(''); // 상시 모집을 누르거나 취소할 때 날짜 초기화
+            }}
             value={deadline}
             onChange={(e) => setDeadline(e.target.value)}
           />
