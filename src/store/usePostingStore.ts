@@ -2,7 +2,6 @@ import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 import {
   getPostings,
-  getDirectJobs,
   createDirectJob,
   updateDirectJob,
   deleteDirectJob,
@@ -68,8 +67,8 @@ interface PostingState {
   sourceSites: string[];
   selectedSite: string;
   error: string | null;
-  sourceType: 'auto' | 'manual' | 'direct';
-  setSourceType: (type: 'auto' | 'manual' | 'direct') => void;
+  sourceType: 'auto' | 'manual';
+  setSourceType: (type: 'auto' | 'manual') => void;
   setSelectedSite: (site: string) => void;
   fetchPostings: (page: number, site?: string) => Promise<void>;
   toggleScrapStatus: (jobId: string | number) => void;
@@ -120,30 +119,20 @@ export const usePostingStore = create<PostingState>()(
             set({ postings: [], totalPages: 1, isLoading: false, sourceSites: [] });
             return;
           } else {
-            const [manualData, directData] = await Promise.all([
-              getPostings(page, PAGE_SIZE, 'manual'),
-              getDirectJobs(page, PAGE_SIZE),
-            ]);
+            // manual과 direct는 모두 manual로 통합
+            const manualData = await getPostings(page, PAGE_SIZE, 'manual');
 
             const manualJobs = Array.isArray(manualData)
               ? manualData
               : (manualData as PostingResponse).jobs || [];
 
-            const directJobs = Array.isArray(directData)
-              ? directData
-              : (directData as PostingResponse).jobs || [];
-
-            const manualTotal = Array.isArray(manualData)
+            const totalCountValue = Array.isArray(manualData)
               ? manualData.length
               : (manualData.totalCount ?? manualJobs.length);
 
-            const directTotal = Array.isArray(directData)
-              ? directData.length
-              : (directData.totalCount ?? directJobs.length);
-
             data = {
-              jobs: [...manualJobs, ...directJobs],
-              totalCount: manualTotal + directTotal,
+              jobs: manualJobs,
+              totalCount: totalCountValue,
               sourceSites: [],
             };
           }
@@ -201,7 +190,7 @@ export const usePostingStore = create<PostingState>()(
             }
 
             const sourceType = jobData.source_type || jobData.sourceType || 'manual';
-            const finalSourceType = sourceType === 'auto' ? 'auto' : sourceType;
+            const finalSourceType = sourceType === 'auto' ? 'auto' : 'manual';
 
             return {
               id: jobData.id,
@@ -276,8 +265,8 @@ export const usePostingStore = create<PostingState>()(
       },
 
       deleteJob: async (externalId, type) => {
-        if (type !== 'manual' && type !== 'auto' && type !== 'direct') {
-          set({ error: 'Invalid job type: ' + type });
+        if (type !== 'manual' && type !== 'auto') {
+          set({ error: '유효하지 않은 공고 타입입니다: ' + type });
           return;
         }
         set({ isLoading: true });
@@ -285,6 +274,7 @@ export const usePostingStore = create<PostingState>()(
           if (type === 'manual') {
             await deleteManualJob(externalId);
           } else {
+            // 자동 수집 공고 삭제(현재 지원되지 않으나 확장을 위해 분리)
             await deleteDirectJob(externalId);
           }
           await get().fetchPostings(get().currentPage);
