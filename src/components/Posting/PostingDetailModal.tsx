@@ -8,7 +8,10 @@ import {
   Globe,
   Building2,
   MessageSquare,
+  Check,
 } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { PATH } from '@/router/Path';
 import type { ExtendedJobPosting } from '@/store/usePostingStore';
 import Button from '@/components/common/UI/Button';
 import JobCommentPanel from './Comment/JobCommentPanel';
@@ -30,6 +33,7 @@ const PostingDetailModal = ({ isOpen, onClose, job }: PostingDetailModalProps) =
   const { applications } = useStatusStore();
   const isLoggedIn = useAuthStore((state) => state.isLoggedIn);
   const toastTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const navigate = useNavigate();
 
   useEffect(() => {
     return () => {
@@ -50,7 +54,11 @@ const PostingDetailModal = ({ isOpen, onClose, job }: PostingDetailModalProps) =
   };
 
   const handleApplyClick = () => {
-    if (isApplied) return;
+    if (isApplied) {
+      onClose();
+      navigate(PATH.STATUS);
+      return;
+    }
     if (!isLoggedIn) {
       setShowToast(true);
       if (toastTimeoutRef.current) clearTimeout(toastTimeoutRef.current);
@@ -168,17 +176,22 @@ const PostingDetailModal = ({ isOpen, onClose, job }: PostingDetailModalProps) =
             >
               원문 보기 <ExternalLink size={20} className="ml-2" />
             </Button>
-            <div className={`flex-[2] ${isApplied ? 'cursor-not-allowed' : ''}`}>
+            <div className="flex-[2]">
               <Button
                 className={`w-full py-4 rounded-2xl font-black text-lg transition-transform ${
                   isApplied
-                    ? 'bg-gray-200 text-gray-500 shadow-none opacity-100 hover:scale-100'
+                    ? 'bg-blue-50 text-blue-600 border border-blue-100 shadow-none hover:bg-blue-100'
                     : 'shadow-lg shadow-purple-100 transition-transform hover:scale-105 active:scale-[0.98]'
                 }`}
                 onClick={handleApplyClick}
-                disabled={isApplied}
               >
-                {isApplied ? '지원완료' : '지원하기'}
+                {isApplied ? (
+                  <span className="flex items-center justify-center gap-2">
+                    <Check size={20} strokeWidth={3} /> 지원현황 확인하기
+                  </span>
+                ) : (
+                  '지원하기'
+                )}
               </Button>
             </div>
           </div>
