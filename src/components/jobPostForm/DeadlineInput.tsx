@@ -20,6 +20,12 @@ const DeadlineInput = forwardRef<HTMLInputElement, DeadlineInputProps>(
               type="checkbox"
               checked={isAlwaysRecruit}
               onChange={(e) => onAlwaysRecruitChange(e.target.checked)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') {
+                  e.preventDefault();
+                  onAlwaysRecruitChange(!isAlwaysRecruit);
+                }
+              }}
               className="w-4 h-4 rounded accent-btn-point cursor-pointer"
             />
             상시 모집

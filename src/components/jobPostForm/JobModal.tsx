@@ -34,9 +34,14 @@ const JobModal = ({ isOpen, onClose, mode = 'create', initialData }: JobModalPro
   const [isParsing, setIsParsing] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // 초기 데이터 또는 수정 모드일 때 설정
+  // ESC 키로 닫기 및 초기 데이터 설정
   useEffect(() => {
+    const handleEsc = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onClose();
+    };
+
     if (isOpen) {
+      window.addEventListener('keydown', handleEsc);
       if (mode === 'edit' && initialData) {
         setTitle(initialData.title || '');
         setCompanyName(initialData.companyName || '');
@@ -45,7 +50,7 @@ const JobModal = ({ isOpen, onClose, mode = 'create', initialData }: JobModalPro
         setDescription(initialData.description || '');
         setLogo(initialData.companyLogo || null);
         setUrl(initialData.url || '');
-        setCrawlUrl(''); // 💡 수정 모드에서도 파싱 바는 비워둠
+        setCrawlUrl('');
         setExternalId(initialData.externalId);
 
         if (initialData.deadline === '상시채용') {
@@ -59,7 +64,8 @@ const JobModal = ({ isOpen, onClose, mode = 'create', initialData }: JobModalPro
         handleReset(false);
       }
     }
-  }, [isOpen, mode, initialData]);
+    return () => window.removeEventListener('keydown', handleEsc);
+  }, [isOpen, mode, initialData, onClose]);
 
   const handleReset = (confirm = true) => {
     if (confirm && !window.confirm('입력한 내용을 모두 초기화하시겠습니까?')) return;
@@ -127,7 +133,8 @@ const JobModal = ({ isOpen, onClose, mode = 'create', initialData }: JobModalPro
     }
   };
 
-  const handleRegister = async () => {
+  const handleRegister = async (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
     if (!title.trim() || !companyName.trim()) {
       alert('회사명과 직무는 필수 입력 항목입니다.');
       return;
@@ -173,8 +180,11 @@ const JobModal = ({ isOpen, onClose, mode = 'create', initialData }: JobModalPro
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-200 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
-      <div className="bg-white w-full max-w-2xl rounded-4xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
+    <div className="fixed inset-0 z-[1200] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-in fade-in duration-200">
+      <form
+        onSubmit={(e: React.FormEvent) => handleRegister(e)}
+        className="bg-white w-full max-w-2xl rounded-4xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh] animate-in slide-in-from-bottom-8 duration-300"
+      >
         <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between bg-white sticky top-0 z-10">
           <h2 className="text-xl font-bold text-slate-800">
             {mode === 'edit' ? '공고 수정하기' : '새 공고 등록'}
@@ -273,6 +283,7 @@ const JobModal = ({ isOpen, onClose, mode = 'create', initialData }: JobModalPro
         <div className="px-6 py-4 border-t border-gray-100 bg-gray-50 flex items-center justify-end">
           <div className="flex gap-3">
             <Button
+              type="button"
               variant="outline"
               onClick={onClose}
               className="px-6 py-2.5 rounded-xl font-bold"
@@ -280,8 +291,8 @@ const JobModal = ({ isOpen, onClose, mode = 'create', initialData }: JobModalPro
               취소
             </Button>
             <Button
+              type="submit"
               variant="primary"
-              onClick={handleRegister}
               className="px-8 py-2.5 rounded-xl font-bold shadow-lg shadow-blue-500/20 flex items-center justify-center min-w-35"
               disabled={isSubmitting || isParsing}
             >
@@ -295,7 +306,7 @@ const JobModal = ({ isOpen, onClose, mode = 'create', initialData }: JobModalPro
             </Button>
           </div>
         </div>
-      </div>
+      </form>
     </div>
   );
 };

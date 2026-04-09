@@ -17,6 +17,12 @@ const CrawlBar = ({ url, onUrlChange, onParse, isParsing }: CrawlBarProps) => {
         type="url"
         value={url}
         onChange={(e) => onUrlChange(e.target.value)}
+        onKeyDown={(e) => {
+          if (e.key === 'Enter') {
+            e.preventDefault();
+            onParse();
+          }
+        }}
         className="flex-1 bg-transparent border-none outline-none text-[13.5px] text-gray-700 placeholder:text-btn-point/40 font-bold"
         placeholder="URL을 붙여넣으면 자동으로 채워드려요!"
       />
