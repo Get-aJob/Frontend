@@ -11,6 +11,7 @@
 
   /* [버튼 색상] 로그인, 공고 등록 등 주요 액션용 보라색 */
   --color-btn-point: #4f46e5;
+  --color-outline-point: #4f46e5;
 
   /* 상태 표시 컬러 (뱃지나 알림창에 사용) */
   --color-status-success: #10b981; /* 초록색 (Tailwind emerald-500) */
@@ -60,6 +61,10 @@
   }
   .btn-point-interaction:active {
     transform: scale(0.95);
+  }
+  /* form input의 outline */
+  .outline-point {
+    outline-color: #4f46e5;
   }
 
   /* 스켈레톤 로딩 애니메이션 */

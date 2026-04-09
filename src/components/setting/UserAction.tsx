@@ -112,7 +112,6 @@ const UserAction: React.FC<UserActionProps> = ({
         )}
       </div>
 
-      {/* 로그아웃 섹션 */}
       <div className="flex items-center justify-between p-6 rounded-2xl border border-gray-100 bg-gray-50/50">
         <div>
           <div className="text-[15px] font-bold text-gray-800">로그아웃</div>
@@ -128,7 +127,6 @@ const UserAction: React.FC<UserActionProps> = ({
         </button>
       </div>
 
-      {/* 회원탈퇴 섹션 */}
       <div className="flex items-center justify-between p-6 rounded-2xl border border-red-100 bg-red-50/30">
         <div>
           <div className="text-[15px] font-bold text-red-500">회원탈퇴</div>

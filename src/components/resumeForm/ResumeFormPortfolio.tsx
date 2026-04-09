@@ -2,8 +2,6 @@ import type { ResumeFormInputs } from '@/types/ResumeFormType';
 import { Trash2 } from 'lucide-react';
 import { useFieldArray, useFormContext } from 'react-hook-form';
 import ResumeFormDropzone from './ResumeFormDropzone';
-import Button from '@/components/common/UI/Button';
-import clsx from 'clsx';
 
 const ResumeFormPortfolio = () => {
   const { register, control, setValue, watch } = useFormContext<ResumeFormInputs>();
@@ -13,102 +11,102 @@ const ResumeFormPortfolio = () => {
   });
 
   return (
-    <section className="bg-white p-8 rounded-2xl border border-gray-100 shadow-sm mb-10">
-      <h2 className="text-subtitle font-bold mb-6 flex items-center gap-2">
-        <span className="w-1.5 h-5 bg-btn-point rounded-full" />
-        포트폴리오
-      </h2>
-      <div className="space-y-4">
-        {fields.map((field, index) => {
-          const uploadType = watch(`portfolio.${index}.type`);
-          return (
-            <div
-              key={field.id}
-              className="relative p-6 rounded-xl border border-gray-100 bg-gray-50/40 group focus-within:border-btn-point focus-within:ring-1 focus-within:bg-white transition-all"
-            >
-              <div className="flex flex-col gap-4">
-                <input
-                  {...register(`portfolio.${index}.name`)}
-                  type="text"
-                  placeholder="포트폴리오 제목을 입력해주세요."
-                  className="w-full bg-transparent text-lg font-bold text-gray-900 outline-none placeholder:text-gray-300"
-                />
-
-                {/* 탭 형식의 타입 선택 UI */}
-                <div className="flex gap-1 bg-gray-200/60 p-1 rounded-lg w-fit mt-2">
-                  <button
-                    type="button"
-                    onClick={() => {
+    <div className="w-full my-20 max-lg:mb-45">
+      <label className="text-xl ml-2">포트폴리오</label>
+      {fields.map((field, index) => {
+        const uploadType = watch(`portfolio.${index}.type`);
+        return (
+          <div
+            key={field.id}
+            className="w-full relative flex mt-10 group has-focus:outline-2 outline-btn-point rounded-lg p-3 hover:outline-2"
+          >
+            <div className="flex-1">
+              <input
+                {...register(`portfolio.${index}.name`)}
+                type="text"
+                placeholder="포트폴리오명을 입력해 주세요."
+                className="w-full text-lg outline-none resize-none"
+              />
+              <div className="flex gap-2 my-1">
+                <label>
+                  <input
+                    type="radio"
+                    checked={uploadType === 'file'}
+                    name={`uploadType-${index}`}
+                    value={'file'}
+                    onChange={() => {
                       setValue(`portfolio.${index}.type`, 'file');
                       setValue(`portfolio.${index}.url`, '');
                     }}
-                    className={clsx(
-                      'px-4 py-1.5 rounded-md text-sm font-bold transition-all',
-                      uploadType === 'file'
-                        ? 'bg-white shadow-sm text-btn-point'
-                        : 'text-gray-500 hover:text-gray-700',
-                    )}
-                  >
-                    PDF 파일 첨부
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => {
+                  />
+                  <span>pdf</span>
+                </label>
+                <label>
+                  <input
+                    type="radio"
+                    name={`uploadType-${index}`}
+                    checked={uploadType === 'url'}
+                    value={'url'}
+                    onChange={() => {
                       setValue(`portfolio.${index}.type`, 'url');
                       setValue(`portfolio.${index}.file`, null);
                     }}
-                    className={clsx(
-                      'px-4 py-1.5 rounded-md text-sm font-bold transition-all',
-                      uploadType === 'url'
-                        ? 'bg-white shadow-sm text-btn-point'
-                        : 'text-gray-500 hover:text-gray-700',
-                    )}
-                  >
-                    URL 링크
-                  </button>
-                </div>
-
-                {/* 첨부 영역 */}
-                <div className="mt-2">
-                  {uploadType === 'url' ? (
-                    <input
-                      {...register(`portfolio.${index}.url`)}
-                      type="text"
-                      placeholder="https:// URL 주소를 입력해주세요."
-                      className="w-full bg-white border border-gray-200 rounded-lg px-4 py-3 outline-none focus:border-btn-point transition-colors"
-                    />
-                  ) : (
-                    <ResumeFormDropzone
-                      index={index}
-                      name={`portfolio.${index}.file`}
-                      control={control}
-                    />
-                  )}
-                </div>
+                  />
+                  <span>url</span>
+                </label>
               </div>
-
+              {uploadType === 'url' ? (
+                <input
+                  {...register(`portfolio.${index}.url`)}
+                  type="text"
+                  placeholder="URL주소를 입력해 주세요."
+                  className="w-full outline-none resize-none"
+                />
+              ) : (
+                <ResumeFormDropzone
+                  index={index}
+                  name={`portfolio.${index}.file`}
+                  control={control}
+                />
+              )}
+            </div>
+            <div className="absolute -bottom-14 left-[48%] w-14 h-14 p-2 z-20">
               <button
                 type="button"
-                onClick={() => remove(index)}
-                className="absolute top-4 right-4 p-2 text-gray-400 hover:text-status-error hover:bg-red-50 rounded-lg transition-colors opacity-0 group-hover:opacity-100"
-                title="삭제"
+                onClick={() => {
+                  append({
+                    name: '',
+                    url: '',
+                    file: null,
+                    type: 'file',
+                  });
+                }}
+                className="w-full h-full rounded-full bg-purple-50 text-outline-point text-3xl text-center justify-center hidden group-hover:flex hover:bg-purple-100 cursor-pointer"
               >
-                <Trash2 size={16} />
+                +
               </button>
             </div>
-          );
-        })}
-
-        <Button
-          type="button"
-          variant="outline"
-          className="w-full border-dashed border-2 py-6 text-gray-500 hover:text-btn-point hover:border-btn-point hover:bg-purple-50/50 rounded-xl"
-          onClick={() => append({ name: '', url: '', file: null, type: 'file' })}
-        >
-          + 포트폴리오 추가하기
-        </Button>
-      </div>
-    </section>
+            <button
+              type="button"
+              onClick={() => {
+                if (fields.length === 1) {
+                  append({
+                    name: '',
+                    url: '',
+                    file: null,
+                    type: 'file',
+                  });
+                }
+                remove(index);
+              }}
+              className="absolute top-4 right-4 w-8 h-8 p-1.5 hidden group-hover:flex items-center justify-center bg-purple-50 rounded-sm hover:bg-purple-100 cursor-pointer"
+            >
+              <Trash2 className="text-outline-point" />
+            </button>
+          </div>
+        );
+      })}
+    </div>
   );
 };
 

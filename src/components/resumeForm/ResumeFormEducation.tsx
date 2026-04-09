@@ -4,7 +4,6 @@ import { useFieldArray, useFormContext } from 'react-hook-form';
 import CharacterCounter from './CharacterCounter';
 import TextAreaAutosize from 'react-textarea-autosize';
 import ResumeFormDatePicker from './ResumeFormDatePicker';
-import Button from '@/components/common/UI/Button';
 import clsx from 'clsx';
 
 const ResumeFormEducation = () => {
@@ -15,104 +14,101 @@ const ResumeFormEducation = () => {
   });
 
   return (
-    <section className="bg-white p-8 rounded-2xl border border-gray-100 shadow-sm mb-10">
-      <h2 className="text-subtitle font-bold mb-6 flex items-center gap-2">
-        <span className="w-1.5 h-5 bg-btn-point rounded-full" />
-        학력
-      </h2>
-      <div className="space-y-4">
-        {fields.map((field, index) => {
-          const isCurrent = watch(`education.${index}.isCurrent`);
-          return (
-            <div
-              key={field.id}
-              className="relative p-6 rounded-xl border border-gray-100 bg-gray-50/40 group focus-within:border-btn-point focus-within:ring-1 focus-within:bg-white transition-all"
-            >
-              <div className="flex flex-col gap-4">
-                <input
-                  {...register(`education.${index}.name`)}
-                  type="text"
-                  placeholder="학교 및 기관 명"
-                  className="w-full bg-transparent text-lg font-bold text-gray-900 outline-none placeholder:text-gray-300"
+    <div className="w-full mt-20">
+      <label className="text-xl ml-2">학력</label>
+      {fields.map((field, index) => {
+        const inCurrent = watch(`education.${index}.isCurrent`);
+        return (
+          <div
+            key={field.id}
+            className="w-full relative flex mt-5 group has-focus:outline-2 outline-btn-point rounded-lg p-3 hover:outline-2"
+          >
+            <div className="flex-1">
+              <input
+                {...register(`education.${index}.name`)}
+                type="text"
+                placeholder="학교 및 기관 명"
+                className="w-full outline-none resize-none"
+              />
+              <div className="w-full flex gap-3">
+                <ResumeFormDatePicker
+                  name={`education.${index}.period.startDate`}
+                  control={control}
+                  disabled={false}
                 />
-                <div className="flex flex-wrap items-center gap-3 text-sm text-gray-600">
-                  <ResumeFormDatePicker
-                    name={`education.${index}.period.startDate`}
-                    control={control}
-                    disabled={false}
-                  />
-                  <span className="text-gray-300">-</span>
-                  <ResumeFormDatePicker
-                    name={`education.${index}.period.endDate`}
-                    control={control}
-                    disabled={isCurrent}
-                  />
-                  <label className="flex items-center gap-1.5 cursor-pointer ml-2">
-                    <input
-                      type="checkbox"
-                      className="w-4 h-4 rounded border-gray-300 text-btn-point focus:ring-btn-point cursor-pointer"
-                      {...register(`education.${index}.isCurrent`)}
-                      onChange={(e) => {
-                        const checked = e.target.checked;
-                        setValue(`education.${index}.isCurrent`, checked);
-                        if (checked) setValue(`education.${index}.period.endDate`, null);
-                      }}
-                    />
-                    <span
-                      className={clsx(
-                        'text-xs font-medium',
-                        isCurrent ? 'text-btn-point font-bold' : 'text-gray-400',
-                      )}
-                    >
-                      현재 진행 중
-                    </span>
-                  </label>
-                </div>
-                <div className="w-full h-px bg-gray-200 my-1" />
-                <TextAreaAutosize
-                  {...register(`education.${index}.description`)}
-                  maxLength={1000}
-                  placeholder="이수 과목 또는 연구 내용을 작성해보세요."
-                  className="w-full outline-none resize-none min-h-[60px] text-[14px] text-gray-700 leading-relaxed bg-transparent placeholder:text-gray-400"
+                <p>-</p>{' '}
+                <ResumeFormDatePicker
+                  name={`education.${index}.period.endDate`}
+                  control={control}
+                  disabled={inCurrent}
                 />
-                <div className="flex justify-end">
-                  <CharacterCounter
-                    control={control}
-                    name={`education.${index}.description`}
-                    limit={1000}
+                <label className="flex items-center justify-center gap-1">
+                  <span className={clsx(!inCurrent ? 'text-black/40' : 'text-black')}>
+                    현재 진행 중
+                  </span>
+                  <input
+                    type="checkbox"
+                    {...register(`education.${index}.isCurrent`)}
+                    onChange={(e) => {
+                      e.stopPropagation();
+                      const checked = e.target.checked;
+                      setValue(`education.${index}.isCurrent`, checked);
+                      if (checked) {
+                        setValue(`education.${index}.period.endDate`, null);
+                      }
+                    }}
                   />
-                </div>
+                </label>
               </div>
-
+              <TextAreaAutosize
+                {...register(`education.${index}.description`)}
+                maxLength={1000}
+                placeholder="이수 과목 또는 연구 내용을 작성해보세요."
+                className="w-full outline-none mt-5 resize-none"
+              />
+              <CharacterCounter
+                control={control}
+                name={`education.${index}.description`}
+                limit={1000}
+              />
+            </div>
+            <div className="absolute -bottom-14 left-[48%] w-14 h-14 p-2 z-20">
               <button
                 type="button"
-                onClick={() => remove(index)}
-                className="absolute top-4 right-4 p-2 text-gray-400 hover:text-status-error hover:bg-red-50 rounded-lg transition-colors opacity-0 group-hover:opacity-100"
-                title="삭제"
+                onClick={() => {
+                  append({
+                    name: '',
+                    period: { startDate: null, endDate: null },
+                    description: '',
+                    isCurrent: false,
+                  });
+                }}
+                className="w-full h-full rounded-full bg-purple-50 text-outline-point text-3xl text-center justify-center hidden group-hover:flex hover:bg-purple-100 cursor-pointer"
               >
-                <Trash2 size={16} />
+                +
               </button>
             </div>
-          );
-        })}
-
-        <Button
-          type="button"
-          variant="outline"
-          className="w-full border-dashed border-2 py-6 text-gray-500 hover:text-btn-point hover:border-btn-point hover:bg-purple-50/50 rounded-xl"
-          onClick={() =>
-            append({
-              name: '',
-              period: { startDate: null, endDate: null },
-              description: '',
-              isCurrent: false,
-            })
-          }
-        >
-          + 학력 추가하기
-        </Button>
-      </div>
-    </section>
+            <button
+              type="button"
+              onClick={() => {
+                remove(index);
+                if (fields.length === 1) {
+                  append({
+                    name: '',
+                    period: { startDate: null, endDate: null },
+                    description: '',
+                    isCurrent: false,
+                  });
+                }
+              }}
+              className="absolute top-4 right-4 w-8 h-8 p-1.5 hidden group-hover:flex items-center justify-center bg-purple-50 rounded-sm hover:bg-purple-100 cursor-pointer"
+            >
+              <Trash2 className="text-blue-600" />
+            </button>
+          </div>
+        );
+      })}
+    </div>
   );
 };
 

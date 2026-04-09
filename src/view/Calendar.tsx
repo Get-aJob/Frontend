@@ -57,7 +57,7 @@ const Calendar = () => {
 
   return (
     /* ✨ Layout의 p-8 여백 안에서 꽉 차는 흰색 컨테이너로 변경 */
-    <div className="w-full bg-white rounded-[32px] shadow-sm p-8 flex flex-col border border-border-light min-h-[800px]">
+    <div className="w-full bg-white rounded-4xl shadow-sm p-8 flex flex-col border border-border-light min-h-200">
       <CalendarHeader
         view={view}
         setView={setView}

@@ -5,26 +5,20 @@ import CharacterCounter from './CharacterCounter';
 
 const ResumeFormSkill = () => {
   const { register, control } = useFormContext<ResumeFormInputs>();
-
   return (
-    <section className="bg-white p-8 rounded-2xl border border-gray-100 shadow-sm transition-all focus-within:border-btn-point focus-within:ring-1 focus-within:ring-btn-point group mb-10">
-      <h2 className="text-subtitle font-bold mb-4 flex items-center gap-2">
-        <span className="w-1.5 h-5 bg-btn-point rounded-full" />
+    <div className="w-full mt-20 group has-focus:outline-2 outline-btn-point rounded-lg p-3 hover:outline-2">
+      <label htmlFor="skill" className="text-xl">
         스킬
-      </h2>
-      <div className="mt-4">
-        <TextAreaAutosize
-          id="skill"
-          {...register('skill')}
-          maxLength={100}
-          placeholder="예: React, TypeScript, Node.js (쉼표로 구분하여 작성해주세요)"
-          className="w-full outline-none resize-none min-h-[60px] text-[15px] text-gray-800 leading-relaxed bg-transparent placeholder:text-gray-400"
-        />
-      </div>
-      <div className="flex justify-end mt-2 pt-4 border-t border-gray-50">
-        <CharacterCounter control={control} name="skill" limit={100} />
-      </div>
-    </section>
+      </label>
+      <TextAreaAutosize
+        id="skill"
+        {...register('skill')}
+        maxLength={100}
+        placeholder=", 로 구분하여 작성해주세요."
+        className="w-full outline-none mt-5 resize-none min-h-10"
+      />
+      <CharacterCounter control={control} name="skill" limit={100} />
+    </div>
   );
 };
 

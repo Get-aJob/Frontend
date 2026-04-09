@@ -52,7 +52,7 @@ const Status: React.FC = () => {
         {viewMode === 'board' ? (
           <StatusBoard />
         ) : (
-          <div className="bg-white rounded-[32px] border border-border-light shadow-sm overflow-hidden">
+          <div className="bg-white rounded-4xl border border-border-light shadow-sm overflow-hidden">
             <table className="w-full text-left border-collapse">
               <thead>
                 <tr className="bg-gray-50/50 border-b border-gray-100 text-gray-500 text-sm">
