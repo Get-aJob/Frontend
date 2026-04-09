@@ -50,7 +50,8 @@ const ApplyModal: React.FC<ApplyModalProps> = ({
       });
 
       await fetchData();
-      // ✨ [수정 핵심] 여기서 onSuccess()와 onClose()를 바로 호출하지 않고 성공 모달만 엽니다.
+      // 지원 성공 즉시 부모에 알림 (사이드바 배지 즉시 반영)
+      onSuccess();
       setIsSuccessModalOpen(true);
     } catch (err) {
       const error = err as AxiosError;
@@ -64,13 +65,11 @@ const ApplyModal: React.FC<ApplyModalProps> = ({
   // ✨ 모달을 닫을 때 부모(ScrapCard 등)에게 완료를 알림
   const handleConfirmClose = () => {
     setIsSuccessModalOpen(false);
-    onSuccess();
     onClose();
   };
 
   const handleGoToStatus = () => {
     setIsSuccessModalOpen(false);
-    onSuccess();
     onClose();
     navigate(PATH.STATUS);
   };

@@ -1,12 +1,50 @@
 import { Outlet, useLocation } from 'react-router-dom';
+import { useEffect } from 'react';
 import Sidebar from './Sidebar/Sidebar';
 import Topbar from './Topbar/Topbar';
 import { PATH } from '@/router/Path';
 import { useAuthStore } from '@/store/useAuthStore';
+import { useNotificationStore } from '@/store/useNotificationStore';
+import { createNotificationSocket } from '@/socket/SocketClient';
+import { SOCKET_EVENT } from '@/socket/events';
 
 const Layout = () => {
   const location = useLocation();
   const isLoggedIn = useAuthStore((state) => state.isLoggedIn);
+
+  const syncUnreadCount = useNotificationStore((state) => state.syncUnreadCount);
+  const increaseUnreadCount = useNotificationStore((state) => state.increaseUnreadCount);
+  const notifySocketNew = useNotificationStore((state) => state.notifySocketNew);
+  const resetUnreadCount = useNotificationStore((state) => state.resetUnreadCount);
+  const unreadCount = useNotificationStore((state) => state.unreadCount);
+
+  // 로그인 직후/앱 초기 unread count 동기화
+  useEffect(() => {
+    if (!isLoggedIn) {
+      resetUnreadCount();
+      return;
+    }
+    void syncUnreadCount();
+  }, [isLoggedIn, syncUnreadCount, resetUnreadCount]);
+
+  // 어느 화면에 있든 notification:new 반영 (소켓 이벤트 기반 증분)
+  useEffect(() => {
+    if (!isLoggedIn) return;
+    const socket = createNotificationSocket();
+    socket.on(SOCKET_EVENT.SERVER.NOTIFICATION_NEW, (payload) => {
+      // 신규 알림 이벤트는 보통 unread 상태로 오며, 필드가 없으면 unread로 간주
+      const isUnread = payload.read_at == null;
+      if (isUnread) {
+        increaseUnreadCount(1);
+      }
+      notifySocketNew();
+    });
+    socket.connect();
+    return () => {
+      socket.off(SOCKET_EVENT.SERVER.NOTIFICATION_NEW);
+      socket.disconnect();
+    };
+  }, [isLoggedIn, increaseUnreadCount, notifySocketNew]);
 
   const getTopbarConfig = () => {
     const baseConfig = { showSearch: true, showAddButton: true };
@@ -23,6 +61,8 @@ const Layout = () => {
         return { ...baseConfig, title: '이력서 관리', badge: 'RESUME' };
       case PATH.SCRAP:
         return { ...baseConfig, title: '공고 스크랩', badge: 'SCRAP' };
+      case PATH.NOTIFICATION:
+        return { ...baseConfig, title: '알림', badge: 'NOTIFICATION' };
       case PATH.SETTINGS:
         return { ...baseConfig, title: '계정 설정', badge: 'SETTINGS' };
       default:
@@ -41,6 +81,7 @@ const Layout = () => {
         <Topbar
           title={config.title}
           badge={config.badge}
+          unreadCount={unreadCount}
           showSearch={config.showSearch}
           showAddButton={config.showAddButton}
         />
