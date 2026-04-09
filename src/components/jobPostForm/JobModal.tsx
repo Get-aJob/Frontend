@@ -180,7 +180,7 @@ const JobModal = ({ isOpen, onClose, mode = 'create', initialData }: JobModalPro
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-[1200] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-in fade-in duration-200">
+    <div className="fixed inset-0 z-1200 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-in fade-in duration-200">
       <form
         onSubmit={(e: React.FormEvent) => handleRegister(e)}
         className="bg-white w-full max-w-2xl rounded-4xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh] animate-in slide-in-from-bottom-8 duration-300"
@@ -286,14 +286,14 @@ const JobModal = ({ isOpen, onClose, mode = 'create', initialData }: JobModalPro
               type="button"
               variant="outline"
               onClick={onClose}
-              className="px-6 py-2.5 rounded-xl font-bold"
+              className="px-6 py-2.5 rounded-xl font-bold transition-transform hover:scale-105 active:scale-[0.98]"
             >
               취소
             </Button>
             <Button
               type="submit"
               variant="primary"
-              className="px-8 py-2.5 rounded-xl font-bold shadow-lg shadow-blue-500/20 flex items-center justify-center min-w-35"
+              className="px-8 py-2.5 rounded-xl font-bold shadow-lg shadow-blue-500/20 flex items-center justify-center min-w-35 transition-transform hover:scale-105 active:scale-[0.98]"
               disabled={isSubmitting || isParsing}
             >
               {isSubmitting ? (
