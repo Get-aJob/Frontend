@@ -10,6 +10,7 @@ import PostingDetailModal from '@/components/Posting/PostingDetailModal';
 import StatusDetailSlide from '@/components/status/StatusDetailSlide';
 import { usePostingStore, type ExtendedJobPosting } from '@/store/usePostingStore';
 import { useStatusStore } from '@/store/useStatusStore';
+import { useAuthStore } from '@/store/useAuthStore'; // ✨ AuthStore 추가
 
 const parseDescription = (content: string | Record<string, unknown> | undefined): string => {
   if (!content) return '';
@@ -37,10 +38,14 @@ const Calendar = () => {
 
   const postings = usePostingStore((state) => state.postings);
   const { fetchData: fetchStatusData } = useStatusStore();
+  const { isLoggedIn } = useAuthStore(); // ✨ 로그인 상태 가져오기
 
+  // 로그인 상태일 때만 지원 현황 데이터 패칭
   useEffect(() => {
-    fetchStatusData();
-  }, [fetchStatusData]);
+    if (isLoggedIn) {
+      fetchStatusData();
+    }
+  }, [fetchStatusData, isLoggedIn]);
 
   useEffect(() => {
     let isMounted = true;
@@ -61,9 +66,10 @@ const Calendar = () => {
       const endDate = end.toISOString().split('T')[0];
 
       try {
+        // ✨ 비로그인 시 지원현황(getUserApplications)은 호출하지 않음 방어 로직 추가
         const [scheduleRes, applicationsRes] = await Promise.all([
           getSchedules({ startDate, endDate }),
-          getUserApplications(),
+          isLoggedIn ? getUserApplications() : Promise.resolve([]),
         ]);
 
         let combinedEvents: ScheduleEvent[] = [];
@@ -75,7 +81,7 @@ const Calendar = () => {
           combinedEvents = [...deadlineEvents];
         }
 
-        if (applicationsRes) {
+        if (applicationsRes && applicationsRes.length > 0) {
           setApplications(applicationsRes);
 
           const appliedEvents: ScheduleEvent[] = applicationsRes.map((app) => {
@@ -108,9 +114,8 @@ const Calendar = () => {
     return () => {
       isMounted = false;
     };
-  }, [currentDate, view]);
+  }, [currentDate, view, isLoggedIn]);
 
-  // ✨ 마감일 지난 공고 필터링 추가
   const filteredEvents = useMemo(() => {
     const toLocalDateStr = (d: Date) => {
       const y = d.getFullYear();
@@ -120,9 +125,10 @@ const Calendar = () => {
     };
     const todayStr = toLocalDateStr(new Date());
 
-    // 마감일이 오늘 이전인 'deadline' 이벤트 제거
     const validEvents = events.filter((e) => {
       if (e.eventType === 'deadline' && e.date < todayStr) return false;
+      // ✨ 비로그인 상태일 때 수동 공고(manual) 숨김 처리
+      if (!isLoggedIn && e.sourceType === 'manual') return false;
       return true;
     });
 
@@ -133,7 +139,7 @@ const Calendar = () => {
       return validEvents.filter((e) => e.eventType === 'deadline' && e.sourceType === 'auto');
     if (filter === 'applied') return validEvents.filter((e) => e.eventType === 'applied');
     return validEvents;
-  }, [events, filter]);
+  }, [events, filter, isLoggedIn]);
 
   const handleEventClick = async (event: ScheduleEvent) => {
     if (event.eventType === 'applied') {

@@ -2,6 +2,7 @@ import { useState, useRef, useEffect } from 'react';
 import type { ViewType, EventFilterType } from '@/types/Calendar';
 import { ChevronDown, ChevronLeft, ChevronRight, Filter } from 'lucide-react';
 import Badge from '@/components/common/UI/Badge';
+import { useAuthStore } from '@/store/useAuthStore'; // ✨ AuthStore 추가
 
 interface Props {
   view: ViewType;
@@ -22,6 +23,7 @@ const CalendarHeader = ({
 }: Props) => {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const { isLoggedIn } = useAuthStore(); // ✨ 로그인 상태 가져오기
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -73,17 +75,20 @@ const CalendarHeader = ({
                   전체
                 </Badge>
               </button>
-              <button onClick={() => setFilter('manual')} className="cursor-pointer">
-                {/* ✨ 수동 공고: rose */}
-                <Badge
-                  variant={filter === 'manual' ? 'rose' : 'default'}
-                  className={filter === 'manual' ? 'ring-2 ring-rose-100' : 'opacity-60'}
-                >
-                  수동 공고
-                </Badge>
-              </button>
+
+              {/* ✨ 비로그인 시 수동 공고 필터 숨김 */}
+              {isLoggedIn && (
+                <button onClick={() => setFilter('manual')} className="cursor-pointer">
+                  <Badge
+                    variant={filter === 'manual' ? 'rose' : 'default'}
+                    className={filter === 'manual' ? 'ring-2 ring-rose-100' : 'opacity-60'}
+                  >
+                    수동 공고
+                  </Badge>
+                </button>
+              )}
+
               <button onClick={() => setFilter('auto')} className="cursor-pointer">
-                {/* ✨ 자동 공고: blue */}
                 <Badge
                   variant={filter === 'auto' ? 'blue' : 'default'}
                   className={filter === 'auto' ? 'ring-2 ring-blue-100' : 'opacity-60'}
@@ -91,15 +96,18 @@ const CalendarHeader = ({
                   자동 공고
                 </Badge>
               </button>
-              <button onClick={() => setFilter('applied')} className="cursor-pointer">
-                {/* ✨ 지원 현황: emerald */}
-                <Badge
-                  variant={filter === 'applied' ? 'emerald' : 'default'}
-                  className={filter === 'applied' ? 'ring-2 ring-emerald-100' : 'opacity-60'}
-                >
-                  지원 현황
-                </Badge>
-              </button>
+
+              {/* ✨ 비로그인 시 지원 현황 필터 숨김 */}
+              {isLoggedIn && (
+                <button onClick={() => setFilter('applied')} className="cursor-pointer">
+                  <Badge
+                    variant={filter === 'applied' ? 'emerald' : 'default'}
+                    className={filter === 'applied' ? 'ring-2 ring-emerald-100' : 'opacity-60'}
+                  >
+                    지원 현황
+                  </Badge>
+                </button>
+              )}
             </div>
           </div>
 
