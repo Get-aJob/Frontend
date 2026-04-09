@@ -79,7 +79,10 @@ const ApplyModal: React.FC<ApplyModalProps> = ({
     <>
       <div
         className="fixed inset-0 z-1200 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4"
-        onClick={onClose}
+        onClick={(e) => {
+          e.stopPropagation();
+          onClose();
+        }}
       >
         <div
           className="bg-white w-full max-w-md p-8 rounded-2xl shadow-2xl animate-in fade-in zoom-in duration-200"
