@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import {
   X,
   ExternalLink,
@@ -10,8 +11,9 @@ import {
 } from 'lucide-react';
 import type { ExtendedJobPosting } from '@/store/usePostingStore';
 import Button from '@/components/common/UI/Button';
-import Badge from '@/components/common/UI/Badge';
 import JobCommentPanel from './Comment/JobCommentPanel';
+import ApplyModal from '@/components/status/ApplyModal';
+import { useStatusStore } from '@/store/useStatusStore';
 
 interface PostingDetailModalProps {
   isOpen: boolean;
@@ -20,7 +22,12 @@ interface PostingDetailModalProps {
 }
 
 const PostingDetailModal = ({ isOpen, onClose, job }: PostingDetailModalProps) => {
+  const [isApplyModalOpen, setIsApplyModalOpen] = useState(false);
+  const { applications } = useStatusStore();
+
   if (!isOpen || !job) return null;
+
+  const isApplied = applications.some((app) => String(app.jobPostingId) === String(job.id));
 
   const handleGoToSite = () => {
     if (job.url) {
@@ -41,6 +48,8 @@ const PostingDetailModal = ({ isOpen, onClose, job }: PostingDetailModalProps) =
       >
         <button
           onClick={onClose}
+          aria-label="닫기"
+          title="닫기"
           className="absolute top-8 right-8 z-10 p-2 bg-gray-50 rounded-full text-gray-400 hover:text-gray-600 transition-colors"
         >
           <X size={20} />
@@ -62,15 +71,7 @@ const PostingDetailModal = ({ isOpen, onClose, job }: PostingDetailModalProps) =
               )}
             </div>
             <div className="flex-1 min-w-0 pt-2">
-              <div className="flex items-center gap-2 mb-3">
-                <Badge variant="point" className="px-3 py-1 font-bold">
-                  {job.site}
-                </Badge>
-                <span className="text-xs text-gray-300 font-bold uppercase tracking-wider">
-                  {job.sourceType || 'manual'}
-                </span>
-              </div>
-              <h2 className="text-2xl font-black text-gray-900 leading-tight mb-2 truncate">
+              <h2 className="text-2xl font-black text-gray-900 leading-tight mb-2 break-words">
                 {job.title}
               </h2>
               <p className="text-lg text-gray-500 font-bold">{job.companyName}</p>
@@ -101,7 +102,12 @@ const PostingDetailModal = ({ isOpen, onClose, job }: PostingDetailModalProps) =
                   <p className="text-[11px] text-gray-400 font-black uppercase mb-0.5 tracking-wider">
                     {item.label}
                   </p>
-                  <p className="text-[15px] font-black text-gray-800 truncate">{item.value}</p>
+                  <p
+                    className="text-[15px] font-black text-gray-800 break-words line-clamp-3 hover:line-clamp-none transition-all cursor-help"
+                    title={String(item.value)}
+                  >
+                    {item.value}
+                  </p>
                 </div>
               </div>
             ))}
@@ -119,24 +125,54 @@ const PostingDetailModal = ({ isOpen, onClose, job }: PostingDetailModalProps) =
             </div>
           </div>
 
-          <div className="space-y-6 pt-4">
-            <h3 className="text-lg font-black text-gray-900 flex items-center gap-2 ml-1">
-              <MessageSquare size={20} className="text-btn-point" />
-              댓글
-            </h3>
-            <JobCommentPanel jobId={String(job.id)} />
-          </div>
+          {job.sourceType !== 'manual' && (
+            <div className="space-y-6 pt-4">
+              <h3 className="text-lg font-black text-gray-900 flex items-center gap-2 ml-1">
+                <MessageSquare size={20} className="text-btn-point" />
+                댓글
+              </h3>
+              <JobCommentPanel jobId={String(job.id)} />
+            </div>
+          )}
         </div>
 
         <div className="p-8 bg-white border-t border-gray-50 flex gap-4 shrink-0">
           <Button
-            className="w-full py-4 rounded-2xl font-black text-lg shadow-lg shadow-purple-100 transition-transform active:scale-[0.98]"
+            variant="outline"
+            className="flex-1 py-4 rounded-2xl font-black text-lg border-gray-200 text-gray-500 hover:bg-gray-50 transition-all active:scale-[0.98]"
             onClick={handleGoToSite}
           >
-            원문 사이트 바로가기 <ExternalLink size={20} className="ml-2" />
+            원문 보기 <ExternalLink size={20} className="ml-2" />
           </Button>
+          <div className={`flex-[2] ${isApplied ? 'cursor-not-allowed' : ''}`}>
+            <Button
+              className={`w-full py-4 rounded-2xl font-black text-lg transition-transform ${
+                isApplied
+                  ? 'bg-gray-200 text-gray-500 shadow-none opacity-100 hover:scale-100'
+                  : 'shadow-lg shadow-purple-100 transition-transform hover:scale-105 active:scale-[0.98]'
+              }`}
+              onClick={() => !isApplied && setIsApplyModalOpen(true)}
+              disabled={isApplied}
+            >
+              {isApplied ? '지원완료' : '지원하기'}
+            </Button>
+          </div>
         </div>
       </div>
+
+      {/* 지원 현황 등록 모달 */}
+      {isApplyModalOpen && (
+        <ApplyModal
+          jobPostingId={String(job.id)}
+          companyName={job.companyName}
+          title={job.title}
+          onClose={() => setIsApplyModalOpen(false)}
+          onSuccess={() => {
+            setIsApplyModalOpen(false);
+            // 필요 시 추가적인 성공 처리 (예: 알림)
+          }}
+        />
+      )}
     </div>
   );
 };

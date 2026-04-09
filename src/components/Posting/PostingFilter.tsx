@@ -10,10 +10,9 @@ const PostingFilter = ({ totalCount }: PostingFilterProps) => {
   const { sourceType, setSourceType, sourceSites, selectedSite, setSelectedSite } =
     usePostingStore();
 
-  const filterOptions: { id: 'auto' | 'manual' | 'direct'; label: string }[] = [
+  const filterOptions: { id: 'auto' | 'manual'; label: string }[] = [
     { id: 'auto', label: '자동 수집' },
     { id: 'manual', label: '수동 등록' },
-    { id: 'direct', label: '직접 작성' },
   ];
 
   return (

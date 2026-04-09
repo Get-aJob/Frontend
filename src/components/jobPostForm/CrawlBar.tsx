@@ -17,6 +17,13 @@ const CrawlBar = ({ url, onUrlChange, onParse, isParsing }: CrawlBarProps) => {
         type="url"
         value={url}
         onChange={(e) => onUrlChange(e.target.value)}
+        onKeyDown={(e) => {
+          if (e.key === 'Enter') {
+            e.preventDefault();
+            if (isParsing || !url.trim()) return;
+            onParse();
+          }
+        }}
         className="flex-1 bg-transparent border-none outline-none text-[13.5px] text-gray-700 placeholder:text-btn-point/40 font-bold"
         placeholder="URL을 붙여넣으면 자동으로 채워드려요!"
       />
@@ -24,7 +31,7 @@ const CrawlBar = ({ url, onUrlChange, onParse, isParsing }: CrawlBarProps) => {
         type="button"
         onClick={onParse}
         disabled={isParsing || !url.trim()}
-        className="px-4 py-2 text-[12px] bg-btn-point text-white rounded-lg font-black hover:bg-purple-700 transition-all active:scale-95 disabled:bg-gray-300 shadow-sm"
+        className="px-4 py-2 text-body bg-btn-point text-white rounded-lg font-black hover:bg-purple-700 transition-all active:scale-95 disabled:bg-gray-300 shadow-sm"
       >
         {isParsing ? '파싱 중...' : '파싱'}
       </button>

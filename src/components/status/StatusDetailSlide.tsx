@@ -18,7 +18,6 @@ const StatusDetailSlide: React.FC<StatusDetailSlideProps> = ({ application, isOp
   const [notes, setNotes] = useState('');
   const [isSaving, setIsSaving] = useState(false);
 
-  // 데이터 갱신 및 현재 선택된 애플리케이션 상태 업데이트를 위해 스토어에서 함수를 가져옵니다.
   const { fetchData, statuses, setSelectedApplication } = useStatusStore();
 
   useEffect(() => {
