@@ -28,6 +28,8 @@ const Topbar = ({ title, badge, showSearch, showAddButton, unreadCount = 0 }: To
   const handleAddButtonClick = () => {
     if (!isLoggedIn) {
       setShowToast(true);
+      // 기존 타이머가 있다면 초기화하여 토스트가 조기에 닫히는 것을 방지
+      if (toastTimeoutRef.current) clearTimeout(toastTimeoutRef.current);
       toastTimeoutRef.current = setTimeout(() => setShowToast(false), 3000);
       return;
     }
