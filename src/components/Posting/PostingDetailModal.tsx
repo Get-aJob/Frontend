@@ -43,7 +43,8 @@ const PostingDetailModal = ({ isOpen, onClose, job }: PostingDetailModalProps) =
 
   if (!isOpen || !job) return null;
 
-  const isApplied = applications.some((app) => String(app.jobPostingId) === String(job.id));
+  const isApplied =
+    isLoggedIn && applications.some((app) => String(app.jobPostingId) === String(job.id));
 
   const handleGoToSite = () => {
     if (job.url) {
@@ -171,7 +172,7 @@ const PostingDetailModal = ({ isOpen, onClose, job }: PostingDetailModalProps) =
           <div className="p-8 bg-white border-t border-gray-50 flex gap-4 shrink-0">
             <Button
               variant="outline"
-              className="flex-1 py-4 rounded-2xl font-black text-lg border-gray-200 text-gray-500 hover:bg-gray-50 transition-all active:scale-[0.98]"
+              className="flex-1 py-4 rounded-2xl font-black text-lg border-gray-200 text-gray-500 hover:bg-gray-50 transition-transform hover:scale-105 active:scale-[0.98]"
               onClick={handleGoToSite}
             >
               원문 보기 <ExternalLink size={20} className="ml-2" />
