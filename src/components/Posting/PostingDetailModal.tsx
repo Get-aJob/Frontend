@@ -13,6 +13,7 @@ import type { ExtendedJobPosting } from '@/store/usePostingStore';
 import Button from '@/components/common/UI/Button';
 import JobCommentPanel from './Comment/JobCommentPanel';
 import ApplyModal from '@/components/status/ApplyModal';
+import { useStatusStore } from '@/store/useStatusStore';
 
 interface PostingDetailModalProps {
   isOpen: boolean;
@@ -22,8 +23,11 @@ interface PostingDetailModalProps {
 
 const PostingDetailModal = ({ isOpen, onClose, job }: PostingDetailModalProps) => {
   const [isApplyModalOpen, setIsApplyModalOpen] = useState(false);
+  const { applications } = useStatusStore();
 
   if (!isOpen || !job) return null;
+
+  const isApplied = applications.some((app) => String(app.jobPostingId) === String(job.id));
 
   const handleGoToSite = () => {
     if (job.url) {
@@ -140,12 +144,19 @@ const PostingDetailModal = ({ isOpen, onClose, job }: PostingDetailModalProps) =
           >
             원문 보기 <ExternalLink size={20} className="ml-2" />
           </Button>
-          <Button
-            className="flex-[2] py-4 rounded-2xl font-black text-lg shadow-lg shadow-purple-100 transition-transform active:scale-[0.98]"
-            onClick={() => setIsApplyModalOpen(true)}
-          >
-            지원하기
-          </Button>
+          <div className={`flex-[2] ${isApplied ? 'cursor-not-allowed' : ''}`}>
+            <Button
+              className={`w-full py-4 rounded-2xl font-black text-lg transition-transform ${
+                isApplied
+                  ? 'bg-gray-200 text-gray-500 shadow-none opacity-100 hover:scale-100'
+                  : 'shadow-lg shadow-purple-100 transition-transform hover:scale-105 active:scale-[0.98]'
+              }`}
+              onClick={() => !isApplied && setIsApplyModalOpen(true)}
+              disabled={isApplied}
+            >
+              {isApplied ? '지원완료' : '지원하기'}
+            </Button>
+          </div>
         </div>
       </div>
 
