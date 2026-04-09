@@ -211,7 +211,7 @@ export const usePostingStore = create<PostingState>()(
             totalPages: Math.ceil(totalCount / PAGE_SIZE) || 1,
             totalCount: totalCount,
             isLoading: false,
-            sourceSites: currentSite ? get().sourceSites : data.sourceSites || get().sourceSites,
+            sourceSites: data.sourceSites || get().sourceSites,
           });
         } catch (error: unknown) {
           const err = error as Error;

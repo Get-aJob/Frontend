@@ -18,7 +18,7 @@ export const getPostings = async (
     offset: String((page - 1) * limit),
   });
 
-  if (site) params.append('source_site', site);
+  if (site) params.append('sourceSite', site);
   if (sourceType === 'auto') params.append('sourceType', 'auto');
 
   // sourceType이 manual이면 본인 공고만 가져오는 엔드포인트(/jobs/manual) 호출
