@@ -1,5 +1,3 @@
-// src/components/calendar/CalendarHeader.tsx
-
 import { useState, useRef, useEffect } from 'react';
 import type { ViewType, EventFilterType } from '@/types/Calendar';
 import { ChevronDown, ChevronLeft, ChevronRight, Filter } from 'lucide-react';
@@ -54,7 +52,7 @@ const CalendarHeader = ({
   };
 
   return (
-    <div className="flex flex-col gap-6 border-b border-border-light pb-6 mb-6">
+    <div className="flex flex-col gap-6 pb-2 mb-2">
       <div className="flex items-center justify-between gap-4">
         <h1 className="text-title font-black text-gray-900 tracking-tighter shrink-0">
           {currentDate.getFullYear()}년 {currentDate.getMonth() + 1}월
@@ -75,20 +73,31 @@ const CalendarHeader = ({
                   전체
                 </Badge>
               </button>
-              <button onClick={() => setFilter('deadline')} className="cursor-pointer">
+              <button onClick={() => setFilter('manual')} className="cursor-pointer">
+                {/* ✨ 수동 공고: rose */}
                 <Badge
-                  variant={filter === 'deadline' ? 'error' : 'default'}
-                  className={filter === 'deadline' ? 'ring-2 ring-red-100' : 'opacity-60'}
+                  variant={filter === 'manual' ? 'rose' : 'default'}
+                  className={filter === 'manual' ? 'ring-2 ring-rose-100' : 'opacity-60'}
                 >
-                  마감일
+                  수동 공고
+                </Badge>
+              </button>
+              <button onClick={() => setFilter('auto')} className="cursor-pointer">
+                {/* ✨ 자동 공고: blue */}
+                <Badge
+                  variant={filter === 'auto' ? 'blue' : 'default'}
+                  className={filter === 'auto' ? 'ring-2 ring-blue-100' : 'opacity-60'}
+                >
+                  자동 공고
                 </Badge>
               </button>
               <button onClick={() => setFilter('applied')} className="cursor-pointer">
+                {/* ✨ 지원 현황: emerald */}
                 <Badge
-                  variant={filter === 'applied' ? 'success' : 'default'}
-                  className={filter === 'applied' ? 'ring-2 ring-green-100' : 'opacity-60'}
+                  variant={filter === 'applied' ? 'emerald' : 'default'}
+                  className={filter === 'applied' ? 'ring-2 ring-emerald-100' : 'opacity-60'}
                 >
-                  지원 완료
+                  지원 현황
                 </Badge>
               </button>
             </div>

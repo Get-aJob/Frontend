@@ -97,3 +97,9 @@ export const incrementViewCount = async (jobId: string | number): Promise<void> 
     console.error('조회수 증가 실패:', error);
   }
 };
+
+// 단일 공고 상세 조회 API 추가
+export const getJobById = async (jobId: string | number): Promise<BackendJob> => {
+  const response = await api.get<{ job: BackendJob }>(`/jobs/${jobId}`);
+  return response.data.job;
+};
