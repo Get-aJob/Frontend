@@ -55,7 +55,7 @@ const DropzoneBox = ({ value, onChange, index }: DropzoneBoxProps) => {
   const portfolio = watch(`portfolio.${index}`);
 
   return portfolio.file || portfolio.fileUrl ? (
-    <div className="group relative p-10 w-full my-3 text-center justify-center border rounded-2xl hover:bg-black/10 border-black/20">
+    <div className="group relative p-6 w-full my-2 text-center justify-center border border-border-light rounded-2xl hover:border-btn-point hover:bg-gray-50 transition-all">
       <ResumeFormPortfolioItem
         name={portfolio.file ? portfolio.file.name : portfolio.name}
         file={portfolio.file}
@@ -68,9 +68,9 @@ const DropzoneBox = ({ value, onChange, index }: DropzoneBoxProps) => {
             portfolio.name,
           );
         }}
-        className="absolute top-4 right-28 w-8 h-8 p-1.5 hidden group-hover:flex items-center shadow-sm justify-center bg-white rounded-sm hover:bg-gray-200"
+        className="absolute top-3 right-24 w-7 h-7 p-1.5 hidden group-hover:flex items-center shadow-sm justify-center bg-white border border-border-light rounded-lg hover:bg-gray-100 transition-all"
       >
-        <Download />
+        <Download size={14} />
       </button>
       <button
         type="button"
@@ -78,9 +78,9 @@ const DropzoneBox = ({ value, onChange, index }: DropzoneBoxProps) => {
           e.stopPropagation();
           openPreview(value || portfolio.fileUrl, portfolio.name);
         }}
-        className="absolute top-4 right-16 w-8 h-8 p-1.5 hidden group-hover:flex items-center shadow-sm justify-center bg-white rounded-sm hover:bg-gray-200"
+        className="absolute top-3 right-14 w-7 h-7 p-1.5 hidden group-hover:flex items-center shadow-sm justify-center bg-white border border-border-light rounded-lg hover:bg-gray-100 transition-all"
       >
-        <Eye />
+        <Eye size={14} />
       </button>
       <button
         type="button"
@@ -88,21 +88,20 @@ const DropzoneBox = ({ value, onChange, index }: DropzoneBoxProps) => {
           onChange(null);
           setValue(`portfolio.${index}.fileUrl`, undefined);
         }}
-        className="absolute top-4 right-4 w-8 h-8 p-1.5 hidden group-hover:flex items-center shadow-sm justify-center bg-white rounded-sm hover:bg-gray-200"
+        className="absolute top-3 right-4 w-7 h-7 p-1.5 hidden group-hover:flex items-center shadow-sm justify-center bg-white border border-border-light rounded-lg hover:bg-red-50 hover:border-red-200 transition-all"
       >
-        <Trash2 />
+        <Trash2 size={14} className="text-gray-400" />
       </button>
     </div>
   ) : (
-    <div {...getRootProps()} className="p-5">
+    <div {...getRootProps()} className="p-2">
       <input {...getInputProps()} />
-      <div className="flex flex-col items-center w-full h-85 my-5 text-center justify-center border rounded-2xl hover:bg-black/10 border-black/20">
-        <Upload size={50} />
-        <p>
-          {isDragActive
-            ? '여기에 놓으세요!'
-            : 'PDF 파일(최대 50MB)을 여기에 드래그 하거나 클릭하세요!'}
+      <div className="flex flex-col items-center w-full h-60 my-2 text-center justify-center border-2 border-dashed border-border-light rounded-2xl hover:border-btn-point hover:bg-purple-50/30 transition-all cursor-pointer">
+        <Upload size={36} className="text-gray-300 mb-2" />
+        <p className="text-sm font-bold text-gray-400">
+          {isDragActive ? '여기에 놓으세요!' : 'PDF 파일을 드래그하거나 클릭하세요'}
         </p>
+        <p className="text-xs text-gray-300 mt-1">최대 50MB</p>
       </div>
     </div>
   );

@@ -31,18 +31,18 @@ const PortFolioPreview = ({ name }: PortFolioPreviewProps) => {
   if (!isOpen || !previewUrl) return null;
 
   return (
-    <div className="fixed inset-0 flex justify-center items-center top-0 left-0 w-full h-full border bg-black/5 z-30">
+    <div className="fixed inset-0 flex justify-center items-center top-0 left-0 w-full h-full bg-black/50 backdrop-blur-sm z-30">
       <div
         ref={previewRef}
         onClick={(e) => e.stopPropagation()}
-        className="bg-white p-10 w-fit h-fit rounded-2xl"
+        className="bg-white p-8 w-fit h-fit rounded-4xl shadow-2xl border border-border-light"
       >
-        <h1 className="text-title">{name}</h1>
+        <h1 className="text-base font-black text-gray-800 mb-4">{name}</h1>
         <embed
           key={previewUrl}
           src={`${previewUrl}#toolbar=0&navpanes=0&scrollbar=0`}
           type="application/pdf"
-          className="border h-70 w-95 lg:h-140 lg:w-190"
+          className="border border-border-light rounded-2xl h-70 w-95 lg:h-140 lg:w-190"
         />
       </div>
     </div>

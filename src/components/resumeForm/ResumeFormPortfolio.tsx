@@ -11,24 +11,27 @@ const ResumeFormPortfolio = () => {
   });
 
   return (
-    <div className="w-full my-20 max-lg:mb-45">
-      <label className="text-xl ml-2">포트폴리오</label>
+    <div className="w-full my-8 max-lg:mb-45">
+      <div className="px-4 mb-2">
+        <label className="text-base font-black text-gray-700 tracking-tight">포트폴리오</label>
+        <div className="w-full mt-2 h-px bg-gray-100" />
+      </div>
       {fields.map((field, index) => {
         const uploadType = watch(`portfolio.${index}.type`);
         return (
           <div
             key={field.id}
-            className="w-full relative flex mt-10 group has-focus:outline-2 outline-btn-point rounded-lg p-3 hover:outline-2"
+            className="w-full relative flex mt-3 group rounded-2xl p-4 hover:bg-gray-50 transition-colors border border-transparent hover:border-border-light"
           >
             <div className="flex-1">
               <input
                 {...register(`portfolio.${index}.name`)}
                 type="text"
                 placeholder="포트폴리오명을 입력해 주세요."
-                className="w-full text-lg outline-none resize-none"
+                className="w-full text-sm font-bold text-gray-800 outline-none resize-none placeholder:text-gray-300 bg-transparent"
               />
-              <div className="flex gap-2 my-1">
-                <label>
+              <div className="flex gap-3 my-2">
+                <label className="flex items-center gap-1.5 cursor-pointer">
                   <input
                     type="radio"
                     checked={uploadType === 'file'}
@@ -39,9 +42,9 @@ const ResumeFormPortfolio = () => {
                       setValue(`portfolio.${index}.url`, '');
                     }}
                   />
-                  <span>pdf</span>
+                  <span className="text-xs font-bold text-gray-500">PDF</span>
                 </label>
-                <label>
+                <label className="flex items-center gap-1.5 cursor-pointer">
                   <input
                     type="radio"
                     name={`uploadType-${index}`}
@@ -52,15 +55,15 @@ const ResumeFormPortfolio = () => {
                       setValue(`portfolio.${index}.file`, null);
                     }}
                   />
-                  <span>url</span>
+                  <span className="text-xs font-bold text-gray-500">URL</span>
                 </label>
               </div>
               {uploadType === 'url' ? (
                 <input
                   {...register(`portfolio.${index}.url`)}
                   type="text"
-                  placeholder="URL주소를 입력해 주세요."
-                  className="w-full outline-none resize-none"
+                  placeholder="URL 주소를 입력해 주세요."
+                  className="w-full outline-none resize-none text-sm text-gray-700 placeholder:text-gray-300 bg-transparent border-b border-border-light pb-1 focus:border-btn-point transition-colors"
                 />
               ) : (
                 <ResumeFormDropzone
@@ -70,7 +73,7 @@ const ResumeFormPortfolio = () => {
                 />
               )}
             </div>
-            <div className="absolute -bottom-14 left-[48%] w-14 h-14 p-2 z-20">
+            <div className="absolute -bottom-5 left-[48%] w-10 h-10 p-1.5 z-20">
               <button
                 type="button"
                 onClick={() => {
@@ -81,7 +84,7 @@ const ResumeFormPortfolio = () => {
                     type: 'file',
                   });
                 }}
-                className="w-full h-full rounded-full bg-purple-50 text-outline-point text-3xl text-center justify-center hidden group-hover:flex hover:bg-purple-100 cursor-pointer"
+                className="w-full h-full rounded-full bg-white border border-border-light text-btn-point text-xl shadow-sm text-center justify-center hidden group-hover:flex hover:bg-purple-50 hover:border-btn-point cursor-pointer transition-all"
               >
                 +
               </button>
@@ -99,9 +102,9 @@ const ResumeFormPortfolio = () => {
                 }
                 remove(index);
               }}
-              className="absolute top-4 right-4 w-8 h-8 p-1.5 hidden group-hover:flex items-center justify-center bg-purple-50 rounded-sm hover:bg-purple-100 cursor-pointer"
+              className="absolute top-3 right-3 w-7 h-7 p-1.5 hidden group-hover:flex items-center justify-center bg-white border border-border-light rounded-lg shadow-sm hover:bg-red-50 hover:border-red-200 cursor-pointer transition-all"
             >
-              <Trash2 className="text-outline-point" />
+              <Trash2 size={14} className="text-gray-400 hover:text-red-400" />
             </button>
           </div>
         );
