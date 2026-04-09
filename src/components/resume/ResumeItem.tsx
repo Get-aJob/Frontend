@@ -57,7 +57,7 @@ const ResumeItem = ({ title, id, updatedAt }: ResumeItemProps) => {
   const date = new Date(updatedAt);
 
   return (
-    <div className="w-full h-64 xl:h-75 relative group">
+    <div className="w-full h-44 xl:h-55 relative group">
       <div
         ref={itemRef}
         onClick={() => {
@@ -70,8 +70,8 @@ const ResumeItem = ({ title, id, updatedAt }: ResumeItemProps) => {
         {isFormOpen ? (
           <UpdateTitleForm id={id} title={title} setIsFormOpen={setIsFormOpen} />
         ) : (
-          <div className="flex flex-col gap-4">
-            <h1 className="text-2xl">{title}</h1>
+          <div className="flex flex-col gap-4 overflow-hidden">
+            <h1 className="text-2xl w-10/12 truncate">{title}</h1>
             <p className="font-black text-gray-400 tracking-tight">
               {date.toISOString().split('T')[0]}
             </p>

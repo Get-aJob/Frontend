@@ -77,48 +77,47 @@ const ResumeFormTopbar = () => {
     }
   };
   return (
-    <aside className="bg-white fixed w-full z-50">
-      <div className="w-full min-h-20 flex justify-between items-center gap-10">
+    <aside className="bg-white fixed w-full z-50 border-b border-border-light shadow-sm">
+      <div className="w-full min-h-16 flex justify-between items-center gap-10 px-2">
         <button
           type="button"
           onClick={() => {
             navigate(PATH.RESUME);
           }}
-          className="flex p-2 mx-5 rounded-xl hover:bg-black/5"
+          className="flex items-center gap-1 p-2 mx-3 rounded-xl text-gray-500 hover:text-gray-900 hover:bg-gray-100 transition-all font-bold text-sm"
         >
-          <ChevronLeft size={18} className="mt-0.5" />
+          <ChevronLeft size={16} className="mt-0.5" />
           <p className="max-md:hidden">이전 페이지</p>
         </button>
         <input
           {...register('title')}
           type="text"
           placeholder="제목을 입력하세요."
-          className="p-3 rounded-xl shadow-inner"
+          className="px-3.5 py-2 rounded-xl border-[1.5px] border-border-light text-sm font-bold outline-none transition-all focus:border-btn-point focus:ring-2 focus:ring-purple-100 placeholder:text-gray-400"
         />
-        <div className="h-full flex w-fit">
+        <div className="h-full flex w-fit items-center">
           <ResumeDownloadButton
             data={formData}
-            className="block py-2 px-3 rounded-xl hover:bg-black/10"
+            className="p-2 mx-1 rounded-xl text-gray-500 hover:text-gray-900 hover:bg-gray-100 transition-all"
           >
-            <Download />
+            <Download size={18} />
           </ResumeDownloadButton>
           <button
             type="button"
             onClick={handleSubmit(onSubmit)}
-            className="py-2 px-3 border mx-5 rounded-xl text-white bg-btn-point hover:bg-[#4338ca]"
+            className="flex items-center justify-center gap-2 py-2 px-4 mx-3 rounded-xl text-sm font-bold text-white bg-btn-point hover:scale-105 hover:shadow-md transition-all active:scale-95 disabled:opacity-50 min-w-20"
           >
             {saveResume.isPending ? (
-              <LoaderCircle className="animate-spin" />
+              <LoaderCircle className="animate-spin" size={18} />
             ) : (
-              <div>
+              <>
                 <p className="hidden lg:block">작성 완료</p>
-                <Save className="lg:hidden" />
-              </div>
+                <Save className="lg:hidden" size={18} />
+              </>
             )}
           </button>
         </div>
       </div>
-      <div className="w-full h-px bg-black/5" />
     </aside>
   );
 };

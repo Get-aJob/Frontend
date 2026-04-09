@@ -72,9 +72,11 @@ const ResumeForm = () => {
       {isOpen && <PortFolioPreview name={name} />}
       <FormProvider {...resume}>
         <ResumeFormTopbar />
-        <div className="w-full h-full bg-purple-50 overflow-y-scroll">
-          <form className="mx-auto my-auto xl:mx-50 mt-20 lg:mt-16 xl:mt-30 xl:mb-45 p-3 lg:p-15 bg-white">
-            <h1 className="text-3xl mb-5 pl-2">{user?.name}</h1>
+        <div className="w-full h-full bg-gray-50 overflow-y-scroll">
+          <form className="mx-auto my-auto xl:mx-50 mt-20 lg:mt-16 xl:mt-30 xl:mb-45 p-4 lg:p-10 bg-white border border-border-light shadow-sm rounded-none xl:rounded-3xl">
+            <h1 className="text-2xl font-black text-gray-900 mb-6 pl-3 border-l-4 border-btn-point">
+              {user?.name}
+            </h1>
             <ResumeFormProfile />
             <ResumeFormExperience />
             <ResumeFormSkill />
