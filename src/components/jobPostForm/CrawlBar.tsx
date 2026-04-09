@@ -1,47 +1,37 @@
 import { Link } from 'lucide-react';
 
-type CrawlBarProps = {
+interface CrawlBarProps {
   url: string;
   onUrlChange: (value: string) => void;
-  onParse: () => void;
-  isParsing?: boolean;
-};
+  onParse: () => Promise<void>;
+  isParsing: boolean;
+}
 
-const STYLES = {
-  container:
-    'flex gap-[8px] py-[11px] px-[14px] bg-[#eef2ff] border-[1.5px] border-dashed border-[#c7d2fe] rounded-[10px] mb-[16px] items-center',
-  iconWrapper: 'text-[#4f46e5] flex items-center',
-  input: 'flex-1 bg-transparent border-none outline-none text-[12.5px]',
-  button:
-    'px-[13px] py-[6px] text-[12px] bg-[#4f46e5] text-white rounded-[6px] border border-transparent font-medium cursor-pointer hover:bg-[#4338ca] transition-colors',
-};
-
-const CrawlBar = ({
-  url = '',
-  onUrlChange = () => {},
-  onParse = () => {},
-  isParsing = false,
-}: CrawlBarProps) => {
+const CrawlBar = ({ url, onUrlChange, onParse, isParsing }: CrawlBarProps) => {
   return (
-    <div className={STYLES.container}>
-      <span className={STYLES.iconWrapper}>
+    <div className="flex gap-3 py-3 px-4 bg-purple-50/50 border border-dashed border-btn-point/30 rounded-xl mb-8 items-center focus-within:bg-purple-50 transition-all">
+      <span className="text-btn-point flex items-center shrink-0">
         <Link size={16} />
       </span>
       <input
         type="url"
         value={url}
         onChange={(e) => onUrlChange(e.target.value)}
-        className={STYLES.input}
+        onKeyDown={(e) => {
+          if (e.key === 'Enter') {
+            e.preventDefault();
+            if (isParsing || !url.trim()) return;
+            onParse();
+          }
+        }}
+        className="flex-1 bg-transparent border-none outline-none text-[13.5px] text-gray-700 placeholder:text-btn-point/40 font-bold"
         placeholder="URL을 붙여넣으면 자동으로 채워드려요!"
-        aria-label="공고 URL 입력"
-        inputMode="url"
       />
-
       <button
         type="button"
         onClick={onParse}
         disabled={isParsing || !url.trim()}
-        className={STYLES.button}
+        className="px-4 py-2 text-body bg-btn-point text-white rounded-lg font-black hover:bg-purple-700 transition-all active:scale-95 disabled:bg-gray-300 shadow-sm"
       >
         {isParsing ? '파싱 중...' : '파싱'}
       </button>

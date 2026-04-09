@@ -1,215 +1,295 @@
-import React from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import type { JobPosting } from '@/types/Posting';
-import PostingActionButtons from './PostingActionButtons';
+import Badge from '@/components/common/UI/Badge';
+import { MessageSquare, Eye, Edit2, Trash2, Bookmark } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import JobModal from '@/components/jobPostForm/JobModal';
+import { ddayVariant } from '@/utils/statusUtils';
+import { getJobComments } from '@/api/Comment';
+import type { RawCommentData } from './Comment/useJobComment';
+import { usePostingStore } from '@/store/usePostingStore';
+import { toggleScrap } from '@/api/Scrap';
+import { incrementViewCount } from '@/api/Posting';
+import ConfirmModal from '@/components/common/UI/ConfirmModal';
 
 interface PostingCardProps {
-  job: JobPosting;
+  posting: JobPosting;
+  isScrapped?: boolean;
+  onScrap: (id: string | number) => void;
+  onDetail: (job: JobPosting) => void;
 }
 
-const styles = {
-  card: {
-    background: '#ffffff',
-    border: '1.5px solid #e8eaf0',
-    borderRadius: '16px',
-    padding: '24px',
-    boxShadow: '0 2px 8px rgba(0, 0, 0, 0.04)',
-    display: 'flex',
-    flexDirection: 'column' as const,
-    justifyContent: 'space-between',
-    minHeight: '180px',
-    transition: 'all 0.15s ease',
-    cursor: 'pointer',
-    fontFamily: '"Noto Sans KR", sans-serif',
-  },
-  topSection: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: '16px',
-    position: 'relative' as const,
-  },
-  logoBoxInfo: {
-    width: '54px',
-    height: '54px',
-    borderRadius: '14px',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    fontSize: '22px',
-    fontWeight: 800,
-    color: '#fff',
-    backgroundColor: '#4ade80', // 네이버 등 기본 그린 색상
-    flexShrink: 0,
-  },
-  logoImg: {
-    width: '54px',
-    height: '54px',
-    borderRadius: '14px',
-    objectFit: 'contain' as const,
-    backgroundColor: '#fff',
-    border: '1px solid #f3f4f6',
-    flexShrink: 0,
-  },
-  textContainer: {
-    display: 'flex',
-    flexDirection: 'column' as const,
-    flex: 1,
-    paddingRight: '60px', // 우측 상단 텍스트(deadline)와 겹치지 않게 여유 공간
-  },
-  title: {
-    fontSize: '18px',
-    fontWeight: 700,
-    color: '#1f2937',
-    marginBottom: '6px',
-    letterSpacing: '-0.3px',
-    lineHeight: '1.3',
-    display: '-webkit-box',
-    WebkitLineClamp: 1,
-    WebkitBoxOrient: 'vertical' as const,
-    overflow: 'hidden',
-  },
-  company: {
-    fontSize: '14px',
-    fontWeight: 600,
-    color: '#6b7280',
-    letterSpacing: '-0.2px',
-  },
-  deadline: {
-    position: 'absolute' as const,
-    top: '4px',
-    right: '0',
-    fontSize: '14px',
-    fontWeight: 800,
-  },
-  bottomSection: {
-    display: 'flex',
-    justifyContent: 'space-between',
-    alignItems: 'flex-end',
-    marginTop: '28px',
-  },
-  tagsLeft: {
-    display: 'flex',
-    flexDirection: 'column' as const,
-    gap: '10px',
-  },
-  tagRow: {
-    display: 'flex',
-    gap: '8px',
-  },
-  expTag: {
-    background: '#f3f0ff',
-    color: '#7c3aed',
-    fontSize: '12px',
-    fontWeight: 700,
-    padding: '4px 10px',
-    borderRadius: '6px',
-  },
-  locTag: {
-    background: '#f3f0ff',
-    color: '#7c3aed',
-    fontSize: '12px',
-    fontWeight: 700,
-    padding: '4px 10px',
-    borderRadius: '6px',
-  },
-  sourceTag: {
-    background: '#f0f9ff',
-    color: '#0284c7',
-    fontSize: '12px',
-    fontWeight: 700,
-    padding: '4px 10px',
-    borderRadius: '6px',
-    width: 'max-content',
-  },
-};
+const PostingCard = ({ posting, isScrapped, onScrap, onDetail }: PostingCardProps) => {
+  const dday = posting.deadline || '상시채용';
 
-const PostingCard: React.FC<PostingCardProps> = ({ job }) => {
-  const getDdayColor = (dday: string) => {
-    if (dday === 'D-Day' || dday.includes('마감')) return '#f43f5e'; // 긴급 또는 마감된 공고
+  // 💡 삭제 로직 및 수정 모달 상태 추가
+  const navigate = useNavigate();
+  const deleteJob = usePostingStore((state) => state.deleteJob);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
 
-    const match = dday.match(/^D-(\d+)$/);
-    if (match) {
-      const days = parseInt(match[1], 10);
-      if (days <= 3) return '#f43f5e'; // 1-3일: 빨간색
-      if (days <= 7) return '#f59e0b'; // 4-7일: 주황색
-      return '#10b981'; // 7일 초과: 초록색
+  // 스크랩 관련 상태
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [modalMode, setModalMode] = useState<'confirm' | 'success'>('confirm');
+  const [modalContent, setModalContent] = useState({
+    title: '',
+    message: '',
+    confirmText: '',
+  });
+
+  const handleCardClick = () => {
+    if (posting.sourceType !== 'manual') {
+      incrementViewCount(posting.id);
     }
-    return '#6b7280'; // 기본 회색
+    onDetail(posting);
   };
 
-  const handleClick = () => {
-    if (job.url) {
-      window.open(job.url, '_blank', 'noopener,noreferrer');
+  const handleConfirmScrap = async () => {
+    try {
+      const result = await toggleScrap(String(posting.id));
+      onScrap(posting.id);
+
+      if (result.added) {
+        setModalContent({
+          title: '스크랩 완료',
+          message: '관심있는 공고로 등록되었습니다.',
+          confirmText: '내가 저장한 스크랩 확인하기',
+        });
+        setModalMode('success');
+        setIsModalOpen(true);
+      } else {
+        setIsModalOpen(false);
+      }
+    } catch (error: unknown) {
+      const err = error as { response?: { status?: number } };
+      if (err.response?.status === 401) {
+        setModalContent({
+          title: '권한 없음',
+          message: '로그인이 필요한 기능입니다.',
+          confirmText: '로그인하러 가기',
+        });
+        setModalMode('success');
+        setIsModalOpen(true);
+      } else {
+        setIsModalOpen(false);
+      }
     }
   };
 
-  const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter' || e.key === ' ') {
-      if (e.key === ' ') e.preventDefault();
-      handleClick();
+  const handleScrapClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (isScrapped) {
+      setModalMode('confirm');
+      setModalContent({
+        title: '스크랩 해제',
+        message: '이 공고를 스크랩 목록에서 제거하시겠습니까?',
+        confirmText: '해제하기',
+      });
+      setIsModalOpen(true);
+    } else {
+      handleConfirmScrap();
     }
   };
+
+  const handleDelete = async (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (!posting.externalId) {
+      alert('오류: 공고 식별자가 없습니다.');
+      return;
+    }
+    if (window.confirm('이 공고를 정말 삭제하시겠습니까?')) {
+      try {
+        await deleteJob(posting.externalId, 'manual');
+      } catch {
+        alert('삭제 중 오류가 발생했습니다.');
+      }
+    }
+  };
+
+  const handleEdit = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setIsEditModalOpen(true);
+  };
+
+  // 💡 1. 전역 스토어 구독 및 업데이트 함수 가져오기
+  const storePostings = usePostingStore((state) => state.postings);
+  const updateCommentCount = usePostingStore((state) => state.updateCommentCount);
+  const currentStoreJob = storePostings.find((p) => String(p.id) === String(posting.id));
+
+  // 💡 2. API 호출 결과를 저장할 상태
+  const [apiCommentCount, setApiCommentCount] = useState<number | null>(null);
+
+  // 💡 3. 표시될 댓글 수 결정
+  const displayCommentCount =
+    currentStoreJob?.commentCount ?? apiCommentCount ?? posting.commentCount ?? 0;
+
+  const fetchCount = useCallback(async () => {
+    try {
+      const response = await getJobComments(String(posting.id));
+      const list: RawCommentData[] = Array.isArray(response)
+        ? response
+        : (response as { comments?: RawCommentData[] }).comments || [];
+
+      const count = list.length;
+      setApiCommentCount(count);
+
+      // 💡 [중요] 가져온 개수를 전역 스토어에도 반영합니다.
+      // 이렇게 하면 새로고침 후에도 스토어가 최신 값을 유지하려 노력합니다.
+      if (currentStoreJob && currentStoreJob.commentCount !== count) {
+        updateCommentCount(posting.id, count - (currentStoreJob.commentCount || 0));
+      }
+    } catch (error) {
+      console.error('댓글수 조회 실패:', error);
+    }
+  }, [posting.id, currentStoreJob, updateCommentCount]);
+
+  // 💡 4. [ESLint 해결] useEffect 내 비동기 호출
+  useEffect(() => {
+    // 수동 공고인 경우 댓글/조회수 관련 로직을 수행하지 않음
+    if (posting.sourceType === 'manual') return;
+
+    let isMounted = true;
+
+    const getCount = async () => {
+      if (isMounted) {
+        await fetchCount();
+      }
+    };
+
+    getCount();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [fetchCount, posting.sourceType]);
 
   return (
-    <div
-      style={styles.card}
-      onClick={handleClick}
-      onKeyDown={handleKeyDown}
-      role="button"
-      tabIndex={0}
-    >
-      <div style={styles.topSection}>
-        {/* 맨 왼쪽: company_logo */}
-        {job.companyLogo ? (
-          <img src={job.companyLogo} alt={job.companyName} style={styles.logoImg} />
-        ) : (
-          <div style={styles.logoBoxInfo}>
-            {job.companyName ? job.companyName.charAt(0).toUpperCase() : 'C'}
+    <>
+      <article
+        className="group relative bg-white border border-border-light rounded-3xl p-6 transition-all hover:border-btn-point hover:shadow-md cursor-pointer flex flex-col h-full"
+        onClick={handleCardClick}
+      >
+        <div className="flex justify-between items-start mb-5">
+          <div className="flex items-center gap-4">
+            <div
+              className="w-14 h-14 rounded-2xl bg-gray-50 border border-border-light overflow-hidden flex items-center justify-center shadow-sm cursor-default"
+              onClick={(e) => e.stopPropagation()}
+            >
+              {posting.companyLogo ? (
+                <img
+                  src={posting.companyLogo}
+                  alt={posting.companyName}
+                  className="w-full h-full object-contain p-1.5"
+                />
+              ) : (
+                <span className="text-xl font-black text-gray-300">
+                  {posting.companyName.charAt(0)}
+                </span>
+              )}
+            </div>
+            <div>
+              <h3 className="text-xs font-black text-gray-400 tracking-tight mb-1">
+                {posting.companyName}
+              </h3>
+              <Badge variant={ddayVariant(dday)}>{dday}</Badge>
+            </div>
+          </div>
+          <div className="flex items-center gap-1.5 shrink-0 ml-4">
+            {/* 공통 스크랩 버튼 */}
+            <button
+              onClick={handleScrapClick}
+              className={`p-1.5 rounded-lg transition-colors flex items-center justify-center bg-white border shadow-sm ${
+                isScrapped
+                  ? 'text-btn-point border-btn-point bg-blue-50'
+                  : 'text-gray-300 border-gray-100 hover:text-btn-point hover:bg-blue-50'
+              }`}
+              title={isScrapped ? '스크랩 취소' : '스크랩'}
+            >
+              <Bookmark size={15} fill={isScrapped ? 'currentColor' : 'none'} strokeWidth={2.5} />
+            </button>
+
+            {/* 수동 공고 전용 버튼 (수정/삭제) */}
+            {posting.sourceType === 'manual' && (
+              <>
+                <button
+                  onClick={handleEdit}
+                  className="p-1.5 text-gray-300 hover:text-blue-500 hover:bg-blue-50 rounded-lg transition-colors flex items-center justify-center bg-white border border-gray-100 shadow-sm"
+                  title="수정"
+                  aria-label="수정"
+                >
+                  <Edit2 size={15} strokeWidth={2.5} />
+                </button>
+                <button
+                  onClick={handleDelete}
+                  className="p-1.5 text-gray-300 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors flex items-center justify-center bg-white border border-gray-100 shadow-sm"
+                  title="삭제"
+                  aria-label="삭제"
+                >
+                  <Trash2 size={15} strokeWidth={2.5} />
+                </button>
+              </>
+            )}
+          </div>
+        </div>
+
+        <div className="flex-1">
+          <h4 className="text-subtitle font-black text-gray-900 mb-3 line-clamp-1 group-hover:text-btn-point transition-colors">
+            {posting.title}
+          </h4>
+          <div className="flex flex-wrap gap-1.5">
+            <span className="text-[10px] font-bold text-gray-400 bg-gray-50 px-2 py-0.5 rounded-md border border-gray-100">
+              #{posting.location || '전국'}
+            </span>
+            <span className="text-[10px] font-bold text-gray-400 bg-gray-50 px-2 py-0.5 rounded-md border border-gray-100">
+              #{posting.site || '채용공고'}
+            </span>
+          </div>
+        </div>
+
+        {posting.sourceType !== 'manual' && (
+          <div className="flex items-center gap-4 text-gray-300 text-[11px] font-black pt-4 border-t border-gray-50">
+            <span className="flex items-center gap-1.5">
+              <Eye size={14} strokeWidth={3} /> {posting.viewCount || 0}
+            </span>
+            <span className="flex items-center gap-1.5">
+              <MessageSquare size={14} strokeWidth={3} /> {displayCommentCount}
+            </span>
           </div>
         )}
+      </article>
 
-        {/* 로고 우측: title 그 아래 company_name */}
-        <div style={styles.textContainer}>
-          <div style={styles.title}>{job.title}</div>
-          <div style={styles.company}>{job.companyName}</div>
-        </div>
+      {/* 편집 모달 */}
+      {isEditModalOpen && (
+        <JobModal
+          isOpen={isEditModalOpen}
+          onClose={() => setIsEditModalOpen(false)}
+          mode="edit"
+          initialData={posting}
+        />
+      )}
 
-        {/* 맨 오른쪽 상단: deadline / deadline_text */}
-        <div
-          style={{
-            ...styles.deadline,
-            color: job.deadline.includes('상시') ? '#059669' : getDdayColor(job.deadline),
-            ...(job.deadline.includes('상시') || job.deadline.includes('채용시')
-              ? {
-                  background: '#ecfdf5',
-                  padding: '3px 8px',
-                  borderRadius: '6px',
-                  border: '1px solid #a7f3d0',
-                  fontSize: '11px',
-                  top: '0px',
-                }
-              : {}),
-          }}
-        >
-          {job.deadline}
-        </div>
-      </div>
-
-      <div style={styles.bottomSection}>
-        {/* 왼쪽 하단: 경력, 위치, 출처 서비스 */}
-        <div style={styles.tagsLeft}>
-          <div style={styles.tagRow}>
-            {job.experienceLevel && <span style={styles.expTag}>{job.experienceLevel}</span>}
-            <span style={styles.locTag}>{job.location || '전국'}</span>
-          </div>
-          <div style={styles.tagRow}>
-            <span style={styles.sourceTag}>{job.site}</span>
-          </div>
-        </div>
-
-        {/* 💡 핵심 수정 부분: url 뿐만 아니라 jobId도 함께 넘겨줍니다! */}
-        <PostingActionButtons url={job.url} jobId={job.id} />
-      </div>
-    </div>
+      {/* 스크랩 확인/성공 모달 */}
+      <ConfirmModal
+        isOpen={isModalOpen}
+        title={modalContent.title}
+        message={modalContent.message}
+        confirmText={modalContent.confirmText}
+        cancelText="닫기"
+        isDanger={modalMode === 'confirm' && isScrapped}
+        onConfirm={() => {
+          if (modalMode === 'confirm') {
+            handleConfirmScrap();
+          } else {
+            if (modalContent.confirmText === '로그인하러 가기') {
+              navigate('/auth');
+            } else {
+              navigate('/scrap');
+            }
+            setIsModalOpen(false);
+          }
+        }}
+        onClose={() => setIsModalOpen(false)}
+      />
+    </>
   );
 };
 

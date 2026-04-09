@@ -11,28 +11,33 @@ const AddLanguageTest = ({ fieldIndex }: { fieldIndex: number }) => {
   });
 
   return (
-    <div>
+    <div className="mt-2">
       <button
         type="button"
         onClick={() => {
           append({ testName: '', score: '', date: null });
         }}
-        className="p-2 hover:bg-black/10 rounded-lg"
+        className="text-xs font-bold text-btn-point hover:bg-purple-50 px-2 py-1 rounded-lg transition-colors"
       >
-        +어학시험 추가
+        + 어학시험 추가
       </button>
       {fields.map((field, index) => (
-        <div key={field.id} className="w-full group relative p-2 rounded-xl hover:bg-black/10">
-          <div className="flex gap-1">
+        <div
+          key={field.id}
+          className="w-full group relative p-2 rounded-xl hover:bg-white hover:shadow-sm transition-all mt-1"
+        >
+          <div className="flex gap-2 items-center">
             <input
               {...register(`language.${fieldIndex}.test.${index}.testName`)}
               type="text"
               placeholder="시험명"
+              className="text-xs text-gray-700 placeholder:text-gray-300 outline-none bg-transparent border-b border-border-light pb-0.5 focus:border-btn-point transition-colors w-24"
             />
             <input
               {...register(`language.${fieldIndex}.test.${index}.score`)}
               type="text"
               placeholder="점수/등급"
+              className="text-xs text-gray-700 placeholder:text-gray-300 outline-none bg-transparent border-b border-border-light pb-0.5 focus:border-btn-point transition-colors w-20"
             />
           </div>
           <ResumeFormDatePicker
@@ -52,9 +57,9 @@ const AddLanguageTest = ({ fieldIndex }: { fieldIndex: number }) => {
               }
               remove(index);
             }}
-            className="absolute top-2 right-2 w-8 h-8 p-1.5 hidden group-hover:flex items-center shadow-sm justify-center bg-white rounded-sm hover:bg-black/5"
+            className="absolute top-2 right-2 w-6 h-6 p-1 hidden group-hover:flex items-center justify-center bg-white border border-border-light rounded-md shadow-sm hover:bg-red-50 hover:border-red-200 transition-all"
           >
-            <Trash2 className="text-black" />
+            <Trash2 size={12} className="text-gray-400" />
           </button>
         </div>
       ))}

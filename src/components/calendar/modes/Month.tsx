@@ -5,9 +5,10 @@ interface Props {
   currentDate: Date;
   events: ScheduleEvent[];
   onEventClick: (e: ScheduleEvent) => void;
+  onMoreClick?: (date: string) => void; // ✨ 추가
 }
 
-const Month = ({ currentDate, events, onEventClick }: Props) => {
+const Month = ({ currentDate, events, onEventClick, onMoreClick }: Props) => {
   const year = currentDate.getFullYear();
   const month = currentDate.getMonth();
   const firstDay = new Date(year, month, 1).getDay();
@@ -18,7 +19,7 @@ const Month = ({ currentDate, events, onEventClick }: Props) => {
     cells.push(
       <div
         key={`empty-${i}`}
-        className="min-h-37.5 bg-gray-50/20 border-r border-b border-gray-100"
+        className="min-h-37.5 bg-gray-50/20 border-r border-b border-border-light"
       />,
     );
   }
@@ -33,13 +34,14 @@ const Month = ({ currentDate, events, onEventClick }: Props) => {
         isCurrentMonth={true}
         events={events.filter((e) => e.date === fullDate)}
         onEventClick={onEventClick}
+        onMoreClick={onMoreClick}
       />,
     );
   }
 
   return (
-    <div className="border-t border-l border-gray-100 rounded-3xl overflow-hidden shadow-sm">
-      <div className="grid grid-cols-7 bg-gray-50/50 border-b border-gray-100">
+    <div className="border-t border-l border-border-light rounded-3xl overflow-hidden shadow-sm">
+      <div className="grid grid-cols-7 bg-gray-50/50 border-b border-border-light">
         {['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'].map((day) => (
           <div
             key={day}

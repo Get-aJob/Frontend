@@ -40,6 +40,7 @@ api.interceptors.response.use(
       ) {
         return Promise.reject(error);
       }
+
       if (isRefreshing) {
         return new Promise((resolve) => {
           addRefreshSubscriber(() => {
@@ -63,9 +64,12 @@ api.interceptors.response.use(
         isRefreshing = false;
         refreshSubscribers = [];
 
-        const { logout } = useAuthStore.getState();
-        logout();
-        if (window.location.pathname !== PATH.AUTH) {
+        const authStore = useAuthStore.getState();
+        const wasLoggedIn = authStore.isLoggedIn;
+
+        authStore.logout();
+
+        if (wasLoggedIn && window.location.pathname !== PATH.AUTH) {
           alert('세션이 만료되었습니다. 안전을 위해 다시 로그인해주세요.');
           window.location.href = PATH.AUTH;
         }
