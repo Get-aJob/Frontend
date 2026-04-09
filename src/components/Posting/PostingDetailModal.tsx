@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import {
   X,
   ExternalLink,
@@ -11,6 +12,7 @@ import {
 import type { ExtendedJobPosting } from '@/store/usePostingStore';
 import Button from '@/components/common/UI/Button';
 import JobCommentPanel from './Comment/JobCommentPanel';
+import ApplyModal from '@/components/status/ApplyModal';
 
 interface PostingDetailModalProps {
   isOpen: boolean;
@@ -19,6 +21,8 @@ interface PostingDetailModalProps {
 }
 
 const PostingDetailModal = ({ isOpen, onClose, job }: PostingDetailModalProps) => {
+  const [isApplyModalOpen, setIsApplyModalOpen] = useState(false);
+
   if (!isOpen || !job) return null;
 
   const handleGoToSite = () => {
@@ -130,13 +134,34 @@ const PostingDetailModal = ({ isOpen, onClose, job }: PostingDetailModalProps) =
 
         <div className="p-8 bg-white border-t border-gray-50 flex gap-4 shrink-0">
           <Button
-            className="w-full py-4 rounded-2xl font-black text-lg shadow-lg shadow-purple-100 transition-transform active:scale-[0.98]"
+            variant="outline"
+            className="flex-1 py-4 rounded-2xl font-black text-lg border-gray-200 text-gray-500 hover:bg-gray-50 transition-all active:scale-[0.98]"
             onClick={handleGoToSite}
           >
-            원문 사이트 바로가기 <ExternalLink size={20} className="ml-2" />
+            원문 보기 <ExternalLink size={20} className="ml-2" />
+          </Button>
+          <Button
+            className="flex-[2] py-4 rounded-2xl font-black text-lg shadow-lg shadow-purple-100 transition-transform active:scale-[0.98]"
+            onClick={() => setIsApplyModalOpen(true)}
+          >
+            지원하기
           </Button>
         </div>
       </div>
+
+      {/* 지원 현황 등록 모달 */}
+      {isApplyModalOpen && (
+        <ApplyModal
+          jobPostingId={String(job.id)}
+          companyName={job.companyName}
+          title={job.title}
+          onClose={() => setIsApplyModalOpen(false)}
+          onSuccess={() => {
+            setIsApplyModalOpen(false);
+            // 필요 시 추가적인 성공 처리 (예: 알림)
+          }}
+        />
+      )}
     </div>
   );
 };

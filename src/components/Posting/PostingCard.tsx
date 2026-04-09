@@ -1,13 +1,16 @@
 import { useEffect, useState, useCallback } from 'react';
 import type { JobPosting } from '@/types/Posting';
 import Badge from '@/components/common/UI/Badge';
-import { MessageSquare, Eye, Edit2, Trash2 } from 'lucide-react';
+import { MessageSquare, Eye, Edit2, Trash2, Bookmark } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import JobModal from '@/components/jobPostForm/JobModal';
 import { ddayVariant } from '@/utils/statusUtils';
-import PostingActionButtons from './PostingActionButtons';
 import { getJobComments } from '@/api/Comment';
 import type { RawCommentData } from './Comment/useJobComment';
 import { usePostingStore } from '@/store/usePostingStore';
+import { toggleScrap } from '@/api/Scrap';
+import { incrementViewCount } from '@/api/Posting';
+import ConfirmModal from '@/components/common/UI/ConfirmModal';
 
 interface PostingCardProps {
   posting: JobPosting;
@@ -20,8 +23,70 @@ const PostingCard = ({ posting, isScrapped, onScrap, onDetail }: PostingCardProp
   const dday = posting.deadline || '상시채용';
 
   // 💡 삭제 로직 및 수정 모달 상태 추가
+  const navigate = useNavigate();
   const deleteJob = usePostingStore((state) => state.deleteJob);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+
+  // 스크랩 관련 상태
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [modalMode, setModalMode] = useState<'confirm' | 'success'>('confirm');
+  const [modalContent, setModalContent] = useState({
+    title: '',
+    message: '',
+    confirmText: '',
+  });
+
+  const handleCardClick = () => {
+    incrementViewCount(posting.id);
+    onDetail(posting);
+  };
+
+  const handleConfirmScrap = async () => {
+    try {
+      const result = await toggleScrap(String(posting.id));
+      onScrap(posting.id);
+
+      if (result.added) {
+        setModalContent({
+          title: '스크랩 완료',
+          message: '관심있는 공고로 등록되었습니다.',
+          confirmText: '내가 저장한 스크랩 확인하기',
+        });
+        setModalMode('success');
+        setIsModalOpen(true);
+      } else {
+        setIsModalOpen(false);
+      }
+    } catch (error: unknown) {
+      const err = error as { response?: { status?: number } };
+      if (err.response?.status === 401) {
+        setModalContent({
+          title: '권한 없음',
+          message: '로그인이 필요한 기능입니다.',
+          confirmText: '로그인하러 가기',
+        });
+        setModalMode('success');
+        setIsModalOpen(true);
+      } else {
+        setIsModalOpen(false);
+      }
+    }
+  };
+
+  const handleScrapClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (isScrapped) {
+      setModalMode('confirm');
+      setModalContent({
+        title: '스크랩 해제',
+        message: '이 공고를 스크랩 목록에서 제거하시겠습니까?',
+        confirmText: '해제하기',
+      });
+      setIsModalOpen(true);
+    } else {
+      handleConfirmScrap();
+    }
+  };
 
   const handleDelete = async (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -96,7 +161,7 @@ const PostingCard = ({ posting, isScrapped, onScrap, onDetail }: PostingCardProp
     <>
       <article
         className="group relative bg-white border border-border-light rounded-3xl p-6 transition-all hover:border-btn-point hover:shadow-md cursor-pointer flex flex-col h-full"
-        onClick={() => onDetail(posting)}
+        onClick={handleCardClick}
       >
         <div className="flex justify-between items-start mb-5">
           <div className="flex items-center gap-4">
@@ -123,29 +188,45 @@ const PostingCard = ({ posting, isScrapped, onScrap, onDetail }: PostingCardProp
               <Badge variant={ddayVariant(dday)}>{dday}</Badge>
             </div>
           </div>
-          {posting.sourceType === 'manual' && (
-            <div className="flex items-center gap-1.5 shrink-0 ml-4">
-              <button
-                onClick={handleEdit}
-                className="p-1.5 text-gray-300 hover:text-blue-500 hover:bg-blue-50 rounded-lg transition-colors flex items-center justify-center bg-white border border-gray-100 shadow-sm"
-                title="수정"
-                aria-label="수정"
-              >
-                <Edit2 size={15} strokeWidth={2.5} />
-              </button>
-              <button
-                onClick={handleDelete}
-                className="p-1.5 text-gray-300 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors flex items-center justify-center bg-white border border-gray-100 shadow-sm"
-                title="삭제"
-                aria-label="삭제"
-              >
-                <Trash2 size={15} strokeWidth={2.5} />
-              </button>
-            </div>
-          )}
+          <div className="flex items-center gap-1.5 shrink-0 ml-4">
+            {/* 공통 스크랩 버튼 */}
+            <button
+              onClick={handleScrapClick}
+              className={`p-1.5 rounded-lg transition-colors flex items-center justify-center bg-white border shadow-sm ${
+                isScrapped
+                  ? 'text-btn-point border-btn-point bg-blue-50'
+                  : 'text-gray-300 border-gray-100 hover:text-btn-point hover:bg-blue-50'
+              }`}
+              title={isScrapped ? '스크랩 취소' : '스크랩'}
+            >
+              <Bookmark size={15} fill={isScrapped ? 'currentColor' : 'none'} strokeWidth={2.5} />
+            </button>
+
+            {/* 수동 공고 전용 버튼 (수정/삭제) */}
+            {posting.sourceType === 'manual' && (
+              <>
+                <button
+                  onClick={handleEdit}
+                  className="p-1.5 text-gray-300 hover:text-blue-500 hover:bg-blue-50 rounded-lg transition-colors flex items-center justify-center bg-white border border-gray-100 shadow-sm"
+                  title="수정"
+                  aria-label="수정"
+                >
+                  <Edit2 size={15} strokeWidth={2.5} />
+                </button>
+                <button
+                  onClick={handleDelete}
+                  className="p-1.5 text-gray-300 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors flex items-center justify-center bg-white border border-gray-100 shadow-sm"
+                  title="삭제"
+                  aria-label="삭제"
+                >
+                  <Trash2 size={15} strokeWidth={2.5} />
+                </button>
+              </>
+            )}
+          </div>
         </div>
 
-        <div className="flex-1 mb-6">
+        <div className="flex-1">
           <h4 className="text-subtitle font-black text-gray-900 mb-3 line-clamp-1 group-hover:text-btn-point transition-colors">
             {posting.title}
           </h4>
@@ -157,14 +238,6 @@ const PostingCard = ({ posting, isScrapped, onScrap, onDetail }: PostingCardProp
               #{posting.site || '채용공고'}
             </span>
           </div>
-        </div>
-
-        <div className="mb-5">
-          <PostingActionButtons
-            job={{ ...posting, isScrapped }}
-            onScrap={onScrap}
-            onDetailClick={() => onDetail(posting)}
-          />
         </div>
 
         {posting.sourceType !== 'manual' && (
@@ -179,7 +252,7 @@ const PostingCard = ({ posting, isScrapped, onScrap, onDetail }: PostingCardProp
         )}
       </article>
 
-      {/* 외부 모달 이벤트 충돌 방지를 위해 article 바깥에 렌더링 (이벤트 버블링 차단) */}
+      {/* 편집 모달 */}
       {isEditModalOpen && (
         <JobModal
           isOpen={isEditModalOpen}
@@ -188,6 +261,29 @@ const PostingCard = ({ posting, isScrapped, onScrap, onDetail }: PostingCardProp
           initialData={posting}
         />
       )}
+
+      {/* 스크랩 확인/성공 모달 */}
+      <ConfirmModal
+        isOpen={isModalOpen}
+        title={modalContent.title}
+        message={modalContent.message}
+        confirmText={modalContent.confirmText}
+        cancelText="닫기"
+        isDanger={modalMode === 'confirm' && isScrapped}
+        onConfirm={() => {
+          if (modalMode === 'confirm') {
+            handleConfirmScrap();
+          } else {
+            if (modalContent.confirmText === '로그인하러 가기') {
+              navigate('/auth');
+            } else {
+              navigate('/scrap');
+            }
+            setIsModalOpen(false);
+          }
+        }}
+        onClose={() => setIsModalOpen(false)}
+      />
     </>
   );
 };
