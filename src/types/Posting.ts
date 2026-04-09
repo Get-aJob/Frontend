@@ -54,8 +54,8 @@ export interface DirectJobRequest {
   location?: string;
   experience?: string;
   companyLogo?: string;
-  deadline?: string;
-  deadlineText?: string;
+  deadline?: string | null;
+  deadlineText?: string | null;
   description?: string;
   sourceUrl?: string;
 }

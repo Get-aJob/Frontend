@@ -77,13 +77,21 @@ const ApplyModal: React.FC<ApplyModalProps> = ({
   // 폼이 보일지 말지 결정 (성공 모달이 뜨면 폼은 뒤에 흐리게 남겨둠)
   return (
     <>
-      <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
-        <div className="bg-white w-full max-w-md p-8 rounded-2xl shadow-2xl animate-in fade-in zoom-in duration-200">
+      <div
+        className="fixed inset-0 z-1200 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4"
+        onClick={onClose}
+      >
+        <div
+          className="bg-white w-full max-w-md p-8 rounded-2xl shadow-2xl animate-in fade-in zoom-in duration-200"
+          onClick={(e) => e.stopPropagation()}
+        >
           <div className="flex justify-between items-center mb-6">
             <h2 className="text-2xl font-extrabold text-gray-900">지원 정보 입력</h2>
             <button
               onClick={onClose}
               className="text-gray-400 hover:text-gray-600 transition-colors"
+              title="닫기"
+              aria-label="닫기"
             >
               <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path
@@ -109,6 +117,7 @@ const ApplyModal: React.FC<ApplyModalProps> = ({
                 onChange={(e) => setAppliedAt(e.target.value)}
                 required
                 className="w-full p-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-btn-point outline-none transition-all"
+                title="지원일 선택"
               />
             </div>
 
@@ -119,6 +128,7 @@ const ApplyModal: React.FC<ApplyModalProps> = ({
                 onChange={(e) => setStatusId(e.target.value)}
                 required
                 className="w-full p-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-btn-point outline-none bg-white transition-all cursor-pointer"
+                title="지원 상태 선택"
               >
                 <option value="">지원 상태를 선택하세요</option>
                 {options.map((opt) => (
@@ -160,7 +170,7 @@ const ApplyModal: React.FC<ApplyModalProps> = ({
       </div>
 
       {/* ✨ 지원 완료 모달 (z-index를 더 높게 설정) */}
-      <div className="relative z-[200]">
+      <div className="relative z-1300">
         <ConfirmModal
           isOpen={isSuccessModalOpen}
           onClose={handleConfirmClose}

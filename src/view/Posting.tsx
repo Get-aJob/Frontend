@@ -8,6 +8,8 @@ import PostingDetailModal from '@/components/Posting/PostingDetailModal';
 import { Briefcase } from 'lucide-react';
 import { incrementViewCount } from '@/api/Posting';
 import type { ExtendedJobPosting } from '@/store/usePostingStore';
+import { useAuthStore } from '@/store/useAuthStore';
+import { useStatusStore } from '@/store/useStatusStore';
 
 const Posting = () => {
   const {
@@ -15,11 +17,14 @@ const Posting = () => {
     isLoading,
     fetchPostings,
     totalPages,
+    totalCount,
     currentPage,
     selectedSite,
     toggleScrapStatus,
     updateViewCount,
   } = usePostingStore();
+  const isLoggedIn = useAuthStore((state) => state.isLoggedIn);
+  const { fetchData } = useStatusStore();
 
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
   // 💡 데이터 객체 대신 ID만 저장하여 스토어와 실시간 동기화 유도
@@ -27,8 +32,11 @@ const Posting = () => {
 
   useEffect(() => {
     fetchPostings(currentPage, selectedSite);
+    if (isLoggedIn) {
+      fetchData();
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [isLoggedIn]);
 
   const handlePageChange = (page: number) => {
     const mainElement = document.querySelector('main');
@@ -62,7 +70,7 @@ const Posting = () => {
 
   return (
     <div className="flex flex-col gap-8">
-      <PostingFilter totalCount={postings.length} />
+      <PostingFilter totalCount={totalCount} />
 
       <div className="w-full">
         {isLoading ? (

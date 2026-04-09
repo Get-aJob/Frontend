@@ -2,7 +2,6 @@ import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 import {
   getPostings,
-  getDirectJobs,
   createDirectJob,
   updateDirectJob,
   deleteDirectJob,
@@ -22,6 +21,7 @@ import type {
 
 export interface ExtendedJobPosting extends JobPosting {
   isScrapped?: boolean;
+  rawDeadline?: string; // 수정 폼 등을 위해 원본 날짜 보관
 }
 
 // 💡 any 타입 대체를 위해 백엔드 원본 데이터 스키마를 엄격하게 확장
@@ -60,16 +60,26 @@ const parseDescription = (content: string | Record<string, unknown> | undefined)
   }
 };
 
+// 로컬 날짜 포맷터 (YYYY-MM-DD)
+const formatLocalDate = (date: string | Date): string => {
+  const d = new Date(date);
+  const year = d.getFullYear();
+  const month = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+};
+
 interface PostingState {
   postings: ExtendedJobPosting[];
   currentPage: number;
   totalPages: number;
+  totalCount: number;
   isLoading: boolean;
   sourceSites: string[];
   selectedSite: string;
   error: string | null;
-  sourceType: 'auto' | 'manual' | 'direct';
-  setSourceType: (type: 'auto' | 'manual' | 'direct') => void;
+  sourceType: 'auto' | 'manual';
+  setSourceType: (type: 'auto' | 'manual') => void;
   setSelectedSite: (site: string) => void;
   fetchPostings: (page: number, site?: string) => Promise<void>;
   toggleScrapStatus: (jobId: string | number) => void;
@@ -88,6 +98,7 @@ export const usePostingStore = create<PostingState>()(
       postings: [],
       currentPage: 1,
       totalPages: 1,
+      totalCount: 0,
       isLoading: false,
       sourceSites: [],
       selectedSite: '',
@@ -115,37 +126,19 @@ export const usePostingStore = create<PostingState>()(
           let data: PostingResponse = { jobs: [], totalCount: 0 };
 
           if (currentSourceType === 'auto') {
-            data = await getPostings(page, PAGE_SIZE, 'auto'); // 전체 데이터 요청
+            data = await getPostings(page, PAGE_SIZE, 'auto', currentSite); // 사이트 필터 추가
           } else if (!isLoggedIn) {
-            set({ postings: [], totalPages: 1, isLoading: false, sourceSites: [] });
+            set({
+              postings: [],
+              totalPages: 1,
+              totalCount: 0,
+              isLoading: false,
+              sourceSites: [],
+            });
             return;
           } else {
-            const [manualData, directData] = await Promise.all([
-              getPostings(page, PAGE_SIZE, 'manual'),
-              getDirectJobs(page, PAGE_SIZE),
-            ]);
-
-            const manualJobs = Array.isArray(manualData)
-              ? manualData
-              : (manualData as PostingResponse).jobs || [];
-
-            const directJobs = Array.isArray(directData)
-              ? directData
-              : (directData as PostingResponse).jobs || [];
-
-            const manualTotal = Array.isArray(manualData)
-              ? manualData.length
-              : (manualData.totalCount ?? manualJobs.length);
-
-            const directTotal = Array.isArray(directData)
-              ? directData.length
-              : (directData.totalCount ?? directJobs.length);
-
-            data = {
-              jobs: [...manualJobs, ...directJobs],
-              totalCount: manualTotal + directTotal,
-              sourceSites: [],
-            };
+            // manual과 direct는 모두 manual로 통합
+            data = await getPostings(page, PAGE_SIZE, 'manual');
           }
 
           const scrapData: ScrapItem[] = useAuthStore.getState().isLoggedIn
@@ -154,22 +147,9 @@ export const usePostingStore = create<PostingState>()(
           const scrappedIds = new Set(scrapData.map((s: ScrapItem) => String(s.jobPostingId)));
 
           const rawJobs = data.jobs || [];
+          const totalCount = data.totalCount || rawJobs.length;
 
-          // 💡 프론트엔드 강제 필터링 로직 (any 없이 ExtendedBackendJob 인터페이스 활용)
-          let filteredJobs = rawJobs;
-          if (currentSourceType === 'auto' && currentSite) {
-            filteredJobs = rawJobs.filter((j: BackendJob) => {
-              const jobData = j as ExtendedBackendJob;
-              const siteName = jobData.source_site_name || jobData.sourceSiteName || '';
-              return siteName === currentSite;
-            });
-          }
-
-          const totalCount = currentSite
-            ? filteredJobs.length
-            : data.totalCount || filteredJobs.length;
-
-          const sortedJobs = [...filteredJobs].sort((a: BackendJob, b: BackendJob) => {
+          const sortedJobs = [...rawJobs].sort((a: BackendJob, b: BackendJob) => {
             const extA = a as ExtendedBackendJob;
             const extB = b as ExtendedBackendJob;
             const dateA = new Date(extA.created_at || extA.createdAt || 0).getTime();
@@ -201,7 +181,7 @@ export const usePostingStore = create<PostingState>()(
             }
 
             const sourceType = jobData.source_type || jobData.sourceType || 'manual';
-            const finalSourceType = sourceType === 'auto' ? 'auto' : sourceType;
+            const finalSourceType = sourceType === 'auto' ? 'auto' : 'manual';
 
             return {
               id: jobData.id,
@@ -216,6 +196,7 @@ export const usePostingStore = create<PostingState>()(
               location: jobData.location || '전국',
               experienceLevel: jobData.experience || '경력무관',
               deadline: finalDeadline,
+              rawDeadline: deadline ? formatLocalDate(deadline) : undefined,
               isScrapped: scrappedIds.has(String(jobData.id)),
               sourceType: finalSourceType,
               externalId: jobData.external_id || jobData.externalId || String(jobData.id),
@@ -229,8 +210,9 @@ export const usePostingStore = create<PostingState>()(
             postings: mappedJobs,
             currentPage: page,
             totalPages: Math.ceil(totalCount / PAGE_SIZE) || 1,
+            totalCount: totalCount,
             isLoading: false,
-            sourceSites: currentSite ? get().sourceSites : data.sourceSites || get().sourceSites,
+            sourceSites: data.sourceSites || get().sourceSites,
           });
         } catch (error: unknown) {
           const err = error as Error;
@@ -276,8 +258,8 @@ export const usePostingStore = create<PostingState>()(
       },
 
       deleteJob: async (externalId, type) => {
-        if (type !== 'manual' && type !== 'auto' && type !== 'direct') {
-          set({ error: 'Invalid job type: ' + type });
+        if (type !== 'manual' && type !== 'auto') {
+          set({ error: '유효하지 않은 공고 타입입니다: ' + type });
           return;
         }
         set({ isLoading: true });
@@ -285,6 +267,7 @@ export const usePostingStore = create<PostingState>()(
           if (type === 'manual') {
             await deleteManualJob(externalId);
           } else {
+            // 자동 수집 공고 삭제(현재 지원되지 않으나 확장을 위해 분리)
             await deleteDirectJob(externalId);
           }
           await get().fetchPostings(get().currentPage);
