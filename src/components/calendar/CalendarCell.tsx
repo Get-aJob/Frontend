@@ -14,13 +14,13 @@ const CalendarCell = ({ date, fullDate, isCurrentMonth, events, onEventClick }: 
 
   return (
     <div
-      className={`min-h-40 p-3 border-r border-b border-gray-100 transition-colors hover:bg-gray-50/50 ${!isCurrentMonth ? 'bg-gray-50/20' : 'bg-white'}`}
+      className={`min-h-40 p-3 border-r border-b border-border-light transition-colors hover:bg-gray-50/50 ${!isCurrentMonth ? 'bg-gray-50/20' : 'bg-white'}`}
     >
       <div className="flex justify-between items-start mb-3">
         <span
           className={`
           text-xs font-black w-7 h-7 flex items-center justify-center rounded-full transition-all
-          ${!isCurrentMonth ? 'text-gray-200' : isToday ? 'bg-indigo-600 text-white shadow-lg' : 'text-gray-700'}
+          ${!isCurrentMonth ? 'text-gray-200' : isToday ? 'bg-btn-point text-white shadow-lg' : 'text-gray-700'}
         `}
         >
           {date}
@@ -39,8 +39,8 @@ const CalendarCell = ({ date, fullDate, isCurrentMonth, events, onEventClick }: 
                   : 'bg-rose-50 text-rose-700 border-rose-100'
             }`}
           >
-            <div className="font-black truncate">{e.companyName}</div>
-            <div className="font-bold opacity-70 truncate mt-0.5">{e.title}</div>
+            <div className="font-black text-ellipsis-1">{e.companyName}</div>
+            <div className="font-bold opacity-70 text-ellipsis-1 mt-0.5">{e.title}</div>
           </div>
         ))}
       </div>

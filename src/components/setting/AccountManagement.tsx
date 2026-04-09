@@ -1,3 +1,4 @@
+// src/components/setting/AccountManagement.tsx
 import { useNavigate } from 'react-router-dom';
 import {
   logoutApi,
@@ -15,6 +16,9 @@ import UserAction from './UserAction';
 const AccountManagement = () => {
   const navigate = useNavigate();
   const { userInfo, logout, login } = useAuthStore();
+
+  // ✨ 대소문자 무관하게 안전하게 구글 계정 판별
+  const isGoogle = userInfo?.provider?.toLowerCase() === 'google';
 
   const handleUploadImage = async (file: File) => {
     try {
@@ -108,11 +112,12 @@ const AccountManagement = () => {
   };
 
   return (
-    <div className="bg-white p-8 rounded-3xl border border-[#e8eaf0] shadow-sm animate-[fadeUp_0.3s_ease]">
+    <div className="bg-white p-10 rounded-[32px] border border-gray-100 shadow-[0_8px_30px_rgb(0,0,0,0.04)] animate-[fadeUp_0.3s_ease]">
       <UserInfo
         name={userInfo?.name || ''}
         email={userInfo?.email || ''}
         profileImageUrl={userInfo?.profile_image_url}
+        provider={userInfo?.provider}
         onUploadImage={handleUploadImage}
         onDeleteImage={handleDeleteImage}
       />
@@ -120,6 +125,7 @@ const AccountManagement = () => {
         onLogout={handleLogout}
         onDeleteAccount={handleDeleteAccount}
         onRequestPasswordReset={handlePasswordResetFlow}
+        isGoogle={isGoogle} // 구글 계정 여부 전달
       />
     </div>
   );
