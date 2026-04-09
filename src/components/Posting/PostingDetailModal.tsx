@@ -94,7 +94,7 @@ const PostingDetailModal = ({ isOpen, onClose, job }: PostingDetailModalProps) =
                   </div>
                 )}
               </div>
-              <div className="flex-1 min-w-0 pt-2">
+              <div className="flex-1 min-w-0 pt-2 pr-10">
                 <h2 className="text-2xl font-black text-gray-900 leading-tight mb-2 break-words">
                   {job.title}
                 </h2>
