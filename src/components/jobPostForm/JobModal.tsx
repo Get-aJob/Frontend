@@ -101,13 +101,16 @@ const JobModal = ({ isOpen, onClose, mode = 'create', initialData }: JobModalPro
           setExternalId((data.externalId as string) || undefined);
         }
 
-        // 1. 날짜 포맷 변환 (ISO -> YYYY-MM-DD)
-        if (data.deadline) {
-          const dateStr = data.deadline as string;
-          setDeadline(dateStr.split('T')[0]);
-        }
+        // 1. 날짜 및 상시채용 여부 설정
+        const deadlineVal = (data.deadline as string) || '';
+        const isAlways = data.deadlineText === '상시채용';
 
-        if (data.deadlineText === '상시채용') setIsAlwaysRecruit(true);
+        setIsAlwaysRecruit(isAlways);
+        if (isAlways) {
+          setDeadline('');
+        } else if (deadlineVal) {
+          setDeadline(deadlineVal.split('T')[0]);
+        }
 
         // 2. 상세 내용 추출 (지원자격/우대사항 등)
         const content = data.content as {
@@ -201,6 +204,7 @@ const JobModal = ({ isOpen, onClose, mode = 'create', initialData }: JobModalPro
             </button>
             <div className="w-px h-4 bg-gray-100 mx-1" />
             <button
+              type="button"
               onClick={onClose}
               aria-label="닫기"
               className="p-2 hover:bg-gray-100 rounded-full transition-colors"

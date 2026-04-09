@@ -24,6 +24,16 @@ export const getPostings = async (
   // sourceType이 manual이면 본인 공고만 가져오는 엔드포인트(/jobs/manual) 호출
   const url = sourceType === 'manual' ? '/jobs/manual' : '/jobs';
   const response = await api.get(`${url}?${params.toString()}`);
+
+  // 백엔드 엔드포인트에 따라 응답 형태가 다를 수 있으므로 정규화
+  // /jobs/manual이 배열을 반환하는 경우 PostingResponse 형태로 감싸줌
+  if (Array.isArray(response.data)) {
+    return {
+      jobs: response.data,
+      totalCount: response.data.length,
+    };
+  }
+
   return response.data;
 };
 

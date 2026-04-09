@@ -37,7 +37,9 @@ const PostingCard = ({ posting, isScrapped, onScrap, onDetail }: PostingCardProp
   });
 
   const handleCardClick = () => {
-    incrementViewCount(posting.id);
+    if (posting.sourceType !== 'manual') {
+      incrementViewCount(posting.id);
+    }
     onDetail(posting);
   };
 
@@ -142,6 +144,9 @@ const PostingCard = ({ posting, isScrapped, onScrap, onDetail }: PostingCardProp
 
   // 💡 4. [ESLint 해결] useEffect 내 비동기 호출
   useEffect(() => {
+    // 수동 공고인 경우 댓글/조회수 관련 로직을 수행하지 않음
+    if (posting.sourceType === 'manual') return;
+
     let isMounted = true;
 
     const getCount = async () => {
@@ -155,7 +160,7 @@ const PostingCard = ({ posting, isScrapped, onScrap, onDetail }: PostingCardProp
     return () => {
       isMounted = false;
     };
-  }, [fetchCount]);
+  }, [fetchCount, posting.sourceType]);
 
   return (
     <>

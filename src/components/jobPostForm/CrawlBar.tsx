@@ -20,6 +20,7 @@ const CrawlBar = ({ url, onUrlChange, onParse, isParsing }: CrawlBarProps) => {
         onKeyDown={(e) => {
           if (e.key === 'Enter') {
             e.preventDefault();
+            if (isParsing || !url.trim()) return;
             onParse();
           }
         }}
@@ -30,7 +31,7 @@ const CrawlBar = ({ url, onUrlChange, onParse, isParsing }: CrawlBarProps) => {
         type="button"
         onClick={onParse}
         disabled={isParsing || !url.trim()}
-        className="px-4 py-2 text-[12px] bg-btn-point text-white rounded-lg font-black hover:bg-purple-700 transition-all active:scale-95 disabled:bg-gray-300 shadow-sm"
+        className="px-4 py-2 text-body bg-btn-point text-white rounded-lg font-black hover:bg-purple-700 transition-all active:scale-95 disabled:bg-gray-300 shadow-sm"
       >
         {isParsing ? '파싱 중...' : '파싱'}
       </button>

@@ -80,9 +80,12 @@ const ApplyModal: React.FC<ApplyModalProps> = ({
     <>
       <div
         className="fixed inset-0 z-1200 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4"
-        onClick={(e) => e.stopPropagation()}
+        onClick={onClose}
       >
-        <div className="bg-white w-full max-w-md p-8 rounded-2xl shadow-2xl animate-in fade-in zoom-in duration-200">
+        <div
+          className="bg-white w-full max-w-md p-8 rounded-2xl shadow-2xl animate-in fade-in zoom-in duration-200"
+          onClick={(e) => e.stopPropagation()}
+        >
           <div className="flex justify-between items-center mb-6">
             <h2 className="text-2xl font-extrabold text-gray-900">지원 정보 입력</h2>
             <button

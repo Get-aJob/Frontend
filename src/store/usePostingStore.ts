@@ -60,6 +60,15 @@ const parseDescription = (content: string | Record<string, unknown> | undefined)
   }
 };
 
+// 로컬 날짜 포맷터 (YYYY-MM-DD)
+const formatLocalDate = (date: string | Date): string => {
+  const d = new Date(date);
+  const year = d.getFullYear();
+  const month = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+};
+
 interface PostingState {
   postings: ExtendedJobPosting[];
   currentPage: number;
@@ -119,25 +128,17 @@ export const usePostingStore = create<PostingState>()(
           if (currentSourceType === 'auto') {
             data = await getPostings(page, PAGE_SIZE, 'auto', currentSite); // 사이트 필터 추가
           } else if (!isLoggedIn) {
-            set({ postings: [], totalPages: 1, isLoading: false, sourceSites: [] });
+            set({
+              postings: [],
+              totalPages: 1,
+              totalCount: 0,
+              isLoading: false,
+              sourceSites: [],
+            });
             return;
           } else {
             // manual과 direct는 모두 manual로 통합
-            const manualData = await getPostings(page, PAGE_SIZE, 'manual');
-
-            const manualJobs = Array.isArray(manualData)
-              ? manualData
-              : (manualData as PostingResponse).jobs || [];
-
-            const totalCountValue = Array.isArray(manualData)
-              ? manualData.length
-              : (manualData.totalCount ?? manualJobs.length);
-
-            data = {
-              jobs: manualJobs,
-              totalCount: totalCountValue,
-              sourceSites: [],
-            };
+            data = await getPostings(page, PAGE_SIZE, 'manual');
           }
 
           const scrapData: ScrapItem[] = useAuthStore.getState().isLoggedIn
@@ -195,7 +196,7 @@ export const usePostingStore = create<PostingState>()(
               location: jobData.location || '전국',
               experienceLevel: jobData.experience || '경력무관',
               deadline: finalDeadline,
-              rawDeadline: deadline ? new Date(deadline).toISOString().split('T')[0] : undefined,
+              rawDeadline: deadline ? formatLocalDate(deadline) : undefined,
               isScrapped: scrappedIds.has(String(jobData.id)),
               sourceType: finalSourceType,
               externalId: jobData.external_id || jobData.externalId || String(jobData.id),
