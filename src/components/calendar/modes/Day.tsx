@@ -1,5 +1,4 @@
 import type { ScheduleEvent } from '@/types/Calendar';
-import Badge from '@/components/common/UI/Badge';
 
 interface Props {
   currentDate: Date;
@@ -8,7 +7,13 @@ interface Props {
 }
 
 const Day = ({ currentDate, events, onEventClick }: Props) => {
-  const dayStr = currentDate.toISOString().split('T')[0];
+  const toLocalDateStr = (d: Date) => {
+    const y = d.getFullYear();
+    const m = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    return `${y}-${m}-${day}`;
+  };
+  const dayStr = toLocalDateStr(currentDate);
   const dayEvents = events.filter((e) => e.date === dayStr);
 
   return (
@@ -38,9 +43,11 @@ const Day = ({ currentDate, events, onEventClick }: Props) => {
                 className={`w-14 h-14 rounded-2xl flex items-center justify-center text-white text-xl font-black shrink-0 overflow-hidden ${
                   e.companyLogo
                     ? 'bg-white border border-border-light'
-                    : e.eventType === 'deadline'
-                      ? 'bg-status-error'
-                      : 'bg-status-success'
+                    : e.eventType === 'applied'
+                      ? 'bg-emerald-500'
+                      : e.sourceType === 'auto'
+                        ? 'bg-blue-500'
+                        : 'bg-rose-500'
                 }`}
               >
                 {e.companyLogo ? (
@@ -60,9 +67,19 @@ const Day = ({ currentDate, events, onEventClick }: Props) => {
               </div>
             </div>
 
-            <Badge variant={e.eventType === 'deadline' ? 'error' : 'success'}>
-              {e.eventType.toUpperCase()}
-            </Badge>
+            {e.eventType === 'applied' ? (
+              <span className="text-xs font-bold px-3 py-1.5 rounded-md bg-emerald-50 text-emerald-600 border border-emerald-200">
+                {e.statusName || '지원 현황'}
+              </span>
+            ) : e.sourceType === 'auto' ? (
+              <span className="text-xs font-bold px-3 py-1.5 rounded-md bg-blue-50 text-blue-600 border border-blue-200">
+                자동 공고
+              </span>
+            ) : (
+              <span className="text-xs font-bold px-3 py-1.5 rounded-md bg-rose-50 text-rose-600 border border-rose-200">
+                수동 공고
+              </span>
+            )}
           </div>
         ))
       ) : (

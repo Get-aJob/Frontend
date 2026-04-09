@@ -52,13 +52,13 @@ const Week = ({ currentDate, events, onEventClick }: Props) => {
               {events
                 .filter((e) => e.date === dateStr)
                 .map((e, idx) => {
-                  const isPastDeadline = e.eventType === 'deadline' && e.date < todayStr;
+                  // ✨ 카드 전체 색상 적용
                   const colorClasses =
                     e.eventType === 'applied'
-                      ? 'bg-green-50 text-status-success border-green-100'
-                      : isPastDeadline
-                        ? 'bg-gray-100 text-gray-400 border-gray-200 opacity-60'
-                        : 'bg-rose-50 text-status-error border-rose-100';
+                      ? 'bg-emerald-50 text-emerald-700 border-emerald-100'
+                      : e.sourceType === 'auto'
+                        ? 'bg-blue-50 text-blue-700 border-blue-100'
+                        : 'bg-rose-50 text-rose-700 border-rose-100';
 
                   return (
                     <button
@@ -67,13 +67,23 @@ const Week = ({ currentDate, events, onEventClick }: Props) => {
                       onClick={() => onEventClick(e)}
                       className={`${colorClasses} w-full text-left p-4 rounded-2xl shadow-sm border cursor-pointer hover:scale-105 transition-all`}
                     >
-                      <p className="text-xs font-black text-ellipsis-1">
-                        {isPastDeadline && <span className="mr-1">[종료]</span>}
-                        {e.companyName}
-                      </p>
-                      <p
-                        className={`text-[10px] font-bold text-ellipsis-1 mt-1 ${isPastDeadline ? 'text-gray-400' : 'opacity-70'}`}
-                      >
+                      <div className="flex items-start justify-between gap-1">
+                        <p className="text-xs font-black text-ellipsis-1">{e.companyName}</p>
+                        {/* ✨ 자동/수동 뱃지 색상 적용 */}
+                        {e.eventType === 'deadline' && (
+                          <span
+                            className={`text-[9px] font-bold px-1 py-0.5 rounded shrink-0 ${e.sourceType === 'auto' ? 'bg-blue-200/60 text-blue-800' : 'bg-rose-200/60 text-rose-800'}`}
+                          >
+                            {e.sourceType === 'auto' ? '자동' : '수동'}
+                          </span>
+                        )}
+                        {e.eventType === 'applied' && (
+                          <span className="text-[9px] font-bold px-1 py-0.5 rounded bg-emerald-200/50 text-emerald-800 shrink-0 whitespace-nowrap">
+                            {e.statusName || '지원 현황'}
+                          </span>
+                        )}
+                      </div>
+                      <p className={`text-[10px] font-bold text-ellipsis-1 mt-1 opacity-70`}>
                         {e.title}
                       </p>
                     </button>

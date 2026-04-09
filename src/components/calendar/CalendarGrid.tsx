@@ -8,11 +8,19 @@ interface Props {
   currentDate: Date;
   events: ScheduleEvent[];
   onEventClick: (e: ScheduleEvent) => void;
+  onMoreClick?: (dateStr: string) => void;
 }
 
-const CalendarGrid = ({ view, currentDate, events, onEventClick }: Props) => {
+const CalendarGrid = ({ view, currentDate, events, onEventClick, onMoreClick }: Props) => {
   if (view === 'month') {
-    return <MonthMode currentDate={currentDate} events={events} onEventClick={onEventClick} />;
+    return (
+      <MonthMode
+        currentDate={currentDate}
+        events={events}
+        onEventClick={onEventClick}
+        onMoreClick={onMoreClick}
+      />
+    );
   }
 
   if (view === 'week') {

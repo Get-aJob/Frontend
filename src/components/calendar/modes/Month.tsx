@@ -5,9 +5,10 @@ interface Props {
   currentDate: Date;
   events: ScheduleEvent[];
   onEventClick: (e: ScheduleEvent) => void;
+  onMoreClick?: (date: string) => void; // ✨ 추가
 }
 
-const Month = ({ currentDate, events, onEventClick }: Props) => {
+const Month = ({ currentDate, events, onEventClick, onMoreClick }: Props) => {
   const year = currentDate.getFullYear();
   const month = currentDate.getMonth();
   const firstDay = new Date(year, month, 1).getDay();
@@ -33,6 +34,7 @@ const Month = ({ currentDate, events, onEventClick }: Props) => {
         isCurrentMonth={true}
         events={events.filter((e) => e.date === fullDate)}
         onEventClick={onEventClick}
+        onMoreClick={onMoreClick}
       />,
     );
   }
