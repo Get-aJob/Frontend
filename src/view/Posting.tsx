@@ -20,10 +20,12 @@ const Posting = () => {
     totalCount,
     currentPage,
     selectedSite,
+    sourceType,
     toggleScrapStatus,
     updateViewCount,
   } = usePostingStore();
   const isLoggedIn = useAuthStore((state) => state.isLoggedIn);
+  const isManualWithoutLogin = !isLoggedIn && sourceType === 'manual';
   const { fetchData } = useStatusStore();
 
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
@@ -99,6 +101,12 @@ const Posting = () => {
                   />
                 </div>
               </>
+            ) : isManualWithoutLogin ? (
+              <div className="flex items-center justify-center py-40">
+                <p className="text-gray-400 font-medium text-lg text-center">
+                  로그인이 필요한 서비스입니다.
+                </p>
+              </div>
             ) : (
               <div className="flex items-center justify-center py-32 bg-white rounded-4xl border border-border-light shadow-sm">
                 <EmptyState

@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import JobModal from '@/components/jobPostForm/JobModal';
 import { useAuthStore } from '@/store/useAuthStore';
-import LoginToast from './LoginToast';
+import Toast from '@/components/common/UI/Toast';
 import Button from '@/components/common/UI/Button';
 import Badge from '@/components/common/UI/Badge';
 
@@ -15,7 +15,7 @@ export interface TopbarProps {
 
 const Topbar = ({ title, badge, showSearch, showAddButton, unreadCount = 0 }: TopbarProps) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [showLoginToast, setShowLoginToast] = useState(false);
+  const [showToast, setShowToast] = useState(false);
   const isLoggedIn = useAuthStore((state) => state.isLoggedIn);
   const toastTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -27,8 +27,10 @@ const Topbar = ({ title, badge, showSearch, showAddButton, unreadCount = 0 }: To
 
   const handleAddButtonClick = () => {
     if (!isLoggedIn) {
-      setShowLoginToast(true);
-      toastTimeoutRef.current = setTimeout(() => setShowLoginToast(false), 3000);
+      setShowToast(true);
+      // 기존 타이머가 있다면 초기화하여 토스트가 조기에 닫히는 것을 방지
+      if (toastTimeoutRef.current) clearTimeout(toastTimeoutRef.current);
+      toastTimeoutRef.current = setTimeout(() => setShowToast(false), 3000);
       return;
     }
     setIsModalOpen(true);
@@ -72,7 +74,11 @@ const Topbar = ({ title, badge, showSearch, showAddButton, unreadCount = 0 }: To
           )}
         </div>
       </header>
-      <LoginToast visible={showLoginToast} />
+      <Toast
+        visible={showToast}
+        message="공고 등록은 로그인 후 이용할 수 있어요."
+        showLoginButton
+      />
       <JobModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} />
     </>
   );
