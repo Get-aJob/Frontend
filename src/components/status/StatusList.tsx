@@ -51,8 +51,8 @@ const StatusList: React.FC<StatusListProps> = ({ statusId, items }) => {
                       </h4>
                       <div className="mt-2 flex items-center text-[11px] font-semibold text-gray-400">
                         📅{' '}
-                        {item.appliedAt
-                          ? new Date(item.appliedAt).toLocaleDateString()
+                        {item.updatedAt
+                          ? new Date(item.updatedAt).toLocaleDateString()
                           : '날짜 미상'}
                       </div>
                     </div>
