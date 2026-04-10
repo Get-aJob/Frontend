@@ -22,6 +22,7 @@ export interface ApplicationRecord {
   jobPostings: JobPostingSummary;
   applicationStatuses?: ApplicationStatus;
   statusName?: string;
+  statusChangedAt: string;
 }
 
 export interface CreateApplicationPayload {
