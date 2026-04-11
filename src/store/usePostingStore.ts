@@ -79,9 +79,11 @@ interface PostingState {
   selectedSite: string;
   error: string | null;
   sourceType: 'auto' | 'manual';
+  searchKeyword: string;
+  setSearchKeyword: (keyword: string) => void;
   setSourceType: (type: 'auto' | 'manual') => void;
   setSelectedSite: (site: string) => void;
-  fetchPostings: (page: number, site?: string) => Promise<void>;
+  fetchPostings: (page: number, site?: string, keyword?: string) => Promise<void>;
   toggleScrapStatus: (jobId: string | number) => void;
   createJob: (data: DirectJobRequest) => Promise<void>;
   updateJob: (externalId: string, data: Partial<DirectJobRequest>, type?: string) => Promise<void>;
@@ -104,6 +106,11 @@ export const usePostingStore = create<PostingState>()(
       selectedSite: '',
       error: null,
       sourceType: 'auto',
+      searchKeyword: '',
+
+      setSearchKeyword: (keyword) => {
+        set({ searchKeyword: keyword, currentPage: 1 });
+      },
 
       setSourceType: (type) => {
         set({ sourceType: type, currentPage: 1, selectedSite: '' });
@@ -115,18 +122,19 @@ export const usePostingStore = create<PostingState>()(
         get().fetchPostings(1, site);
       },
 
-      fetchPostings: async (page: number, site?: string) => {
+      fetchPostings: async (page: number, site?: string, keyword?: string) => {
         set({ isLoading: true, error: null });
         try {
           const PAGE_SIZE = 30;
           const currentSourceType = get().sourceType;
           const currentSite = site !== undefined ? site : get().selectedSite;
+          const currentKeyword = keyword !== undefined ? keyword : get().searchKeyword;
           const isLoggedIn = useAuthStore.getState().isLoggedIn;
 
           let data: PostingResponse = { jobs: [], totalCount: 0 };
 
           if (currentSourceType === 'auto') {
-            data = await getPostings(page, PAGE_SIZE, 'auto', currentSite); // 사이트 필터 추가
+            data = await getPostings(page, PAGE_SIZE, 'auto', currentSite, currentKeyword);
           } else if (!isLoggedIn) {
             set({
               postings: [],
@@ -137,8 +145,7 @@ export const usePostingStore = create<PostingState>()(
             });
             return;
           } else {
-            // manual과 direct는 모두 manual로 통합
-            data = await getPostings(page, PAGE_SIZE, 'manual');
+            data = await getPostings(page, PAGE_SIZE, 'manual', undefined, currentKeyword);
           }
 
           const scrapData: ScrapItem[] = useAuthStore.getState().isLoggedIn

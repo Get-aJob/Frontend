@@ -31,7 +31,7 @@ const Pagination = ({ currentPage, totalPages, onPageChange }: PaginationProps) 
       <button
         disabled={currentPage === 1}
         onClick={() => onPageChange(currentPage - 1)}
-        className="p-2 rounded-xl border border-border-light text-gray-400 hover:bg-gray-50 disabled:opacity-20 disabled:cursor-not-allowed transition-all cursor-pointer"
+        className="p-2 rounded-xl border border-border-light text-gray-600 hover:bg-gray-50 disabled:opacity-20 disabled:cursor-not-allowed transition-all cursor-pointer"
       >
         <ChevronLeft size={20} strokeWidth={2.5} />
       </button>
@@ -43,7 +43,7 @@ const Pagination = ({ currentPage, totalPages, onPageChange }: PaginationProps) 
           className={`w-10 h-10 rounded-xl text-sm font-black transition-all cursor-pointer ${
             currentPage === page
               ? 'bg-btn-point text-white shadow-lg shadow-purple-100 scale-105'
-              : 'text-gray-400 hover:bg-gray-100 hover:text-gray-600'
+              : 'text-gray-500 hover:bg-gray-100 hover:text-gray-700'
           }`}
         >
           {page}
@@ -53,7 +53,7 @@ const Pagination = ({ currentPage, totalPages, onPageChange }: PaginationProps) 
       <button
         disabled={currentPage === totalPages}
         onClick={() => onPageChange(currentPage + 1)}
-        className="p-2 rounded-xl border border-border-light text-gray-400 hover:bg-gray-50 disabled:opacity-20 disabled:cursor-not-allowed transition-all cursor-pointer"
+        className="p-2 rounded-xl border border-border-light text-gray-600 hover:bg-gray-50 disabled:opacity-20 disabled:cursor-not-allowed transition-all cursor-pointer"
       >
         <ChevronRight size={20} strokeWidth={2.5} />
       </button>
