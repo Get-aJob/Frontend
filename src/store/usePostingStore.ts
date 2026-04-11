@@ -92,6 +92,7 @@ interface PostingState {
   saveParsedJob: (data: ManualSaveRequest) => Promise<void>;
   updateCommentCount: (jobId: string | number, delta: number) => void;
   updateViewCount: (jobId: string | number) => void;
+  resetFilters: () => void;
 }
 
 export const usePostingStore = create<PostingState>()(
@@ -330,6 +331,10 @@ export const usePostingStore = create<PostingState>()(
               : job,
           ),
         }));
+      },
+
+      resetFilters: () => {
+        set({ sourceType: 'auto', selectedSite: '', currentPage: 1 });
       },
     }),
     {

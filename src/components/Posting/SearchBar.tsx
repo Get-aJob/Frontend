@@ -5,6 +5,14 @@ import { usePostingStore } from '@/store/usePostingStore';
 const SearchBar = () => {
   const { searchKeyword, setSearchKeyword, fetchPostings, selectedSite } = usePostingStore();
   const [inputValue, setInputValue] = useState(searchKeyword);
+  const [isFocused, setIsFocused] = useState(false);
+  const [prevSearchKeyword, setPrevSearchKeyword] = useState(searchKeyword);
+
+  // 외부에서 검색어가 변경될 경우(예: 초기화) 내부 상태와 동기화 (렌더링 단계에서 처리하여 린트 오류 방지)
+  if (!isFocused && searchKeyword !== prevSearchKeyword) {
+    setPrevSearchKeyword(searchKeyword);
+    setInputValue(searchKeyword);
+  }
 
   // 서버 부하를 줄이기 위한 디바운스 검색 처리
   useEffect(() => {
@@ -42,6 +50,8 @@ const SearchBar = () => {
           placeholder="나에게 딱 맞는 공고를 검색해보세요"
           value={inputValue}
           onChange={(e) => setInputValue(e.target.value)}
+          onFocus={() => setIsFocused(true)}
+          onBlur={() => setIsFocused(false)}
         />
         {inputValue && (
           <button

@@ -25,7 +25,7 @@ const PostingFilter = ({ totalCount }: PostingFilterProps) => {
             {filterOptions.map((type) => (
               <button
                 key={type.id}
-                onClick={() => setSourceType(type.id as 'auto' | 'manual')}
+                onClick={() => setSourceType(type.id)}
                 className={`px-4 py-1.5 rounded-lg text-xs font-bold transition-all duration-200 border border-transparent ${
                   sourceType === type.id
                     ? 'bg-white shadow-sm text-btn-point'

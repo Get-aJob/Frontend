@@ -22,11 +22,10 @@ const Posting = () => {
     currentPage,
     selectedSite,
     sourceType,
-    setSourceType,
-    setSelectedSite,
     searchKeyword,
     toggleScrapStatus,
     updateViewCount,
+    resetFilters,
   } = usePostingStore();
   const isLoggedIn = useAuthStore((state) => state.isLoggedIn);
   const isManualWithoutLogin = !isLoggedIn && sourceType === 'manual';
@@ -35,11 +34,10 @@ const Posting = () => {
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
   const [selectedJobId, setSelectedJobId] = useState<string | number | null>(null);
 
-  // 페이지 진입 시 항상 자동 수집 모드로 초기화
+  // 페이지 진입 시 항상 자동 수집 모드로 초기화 (fetchPostings를 트리거하지 않는 무성 리셋 사용)
   useEffect(() => {
-    setSourceType('auto');
-    setSelectedSite('');
-  }, [setSelectedSite, setSourceType]);
+    resetFilters();
+  }, [resetFilters]);
 
   useEffect(() => {
     fetchPostings(currentPage, selectedSite, searchKeyword);
