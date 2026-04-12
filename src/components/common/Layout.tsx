@@ -12,6 +12,7 @@ import { SOCKET_EVENT } from '@/socket/events';
 const Layout = () => {
   const location = useLocation();
   const isLoggedIn = useAuthStore((state) => state.isLoggedIn);
+  const userId = useAuthStore((state) => state.userInfo?.id ?? state.user?.id);
 
   const syncUnreadCount = useNotificationStore((state) => state.syncUnreadCount);
   const increaseUnreadCount = useNotificationStore((state) => state.increaseUnreadCount);
@@ -33,10 +34,18 @@ const Layout = () => {
     void syncUnreadCount();
   }, [isLoggedIn, syncUnreadCount, resetUnreadCount, closeSidebar]);
 
-  // 어느 화면에 있든 notification:new 반영 (소켓 이벤트 기반 증분)
+  // 어느 화면에 있든 소켓 1개: subscribe 후 user 룸으로만 notification:new 수신
   useEffect(() => {
-    if (!isLoggedIn) return;
+    if (!isLoggedIn || userId == null || userId === '') return;
+
     const socket = createNotificationSocket();
+
+    const subscribe = () => {
+      socket.emit(SOCKET_EVENT.CLIENT.NOTIFICATION_SUBSCRIBE, userId);
+    };
+
+    socket.on('connect', subscribe);
+
     socket.on(SOCKET_EVENT.SERVER.NOTIFICATION_NEW, (payload) => {
       const isUnread = payload.read_at == null;
       if (isUnread) {
@@ -44,12 +53,18 @@ const Layout = () => {
       }
       notifySocketNew();
     });
+
     socket.connect();
+    if (socket.connected) {
+      subscribe();
+    }
+
     return () => {
+      socket.off('connect', subscribe);
       socket.off(SOCKET_EVENT.SERVER.NOTIFICATION_NEW);
       socket.disconnect();
     };
-  }, [isLoggedIn, increaseUnreadCount, notifySocketNew]);
+  }, [isLoggedIn, userId, increaseUnreadCount, notifySocketNew]);
 
   const getTopbarConfig = () => {
     const baseConfig = { showAddButton: true };

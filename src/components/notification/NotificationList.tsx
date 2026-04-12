@@ -5,11 +5,10 @@ import { typeIcon, typeLabel } from './notificationMeta';
 
 interface NotificationListProps {
   items: INotificationItem[];
-  onMove: (item: INotificationItem) => void;
   onMarkRead: (id: string) => void;
 }
 
-function NotificationList({ items, onMove, onMarkRead }: NotificationListProps) {
+function NotificationList({ items, onMarkRead }: NotificationListProps) {
   return (
     <ul className="flex flex-col gap-3 list-none p-0 m-0">
       {items.map((item) => {
@@ -53,27 +52,22 @@ function NotificationList({ items, onMove, onMarkRead }: NotificationListProps) 
 
                   <p className="text-sm text-gray-600 mt-1 leading-relaxed line-clamp-2">{item.body}</p>
 
-                  <div className="flex flex-wrap gap-2 mt-4">
-                    {item.payload?.href && typeof item.payload.href === 'string' && (
-                      <button
-                        type="button"
-                        onClick={() => onMove(item)}
-                        className="text-sm font-semibold text-btn-point hover:underline"
-                      >
-                        바로가기
-                      </button>
-                    )}
-
-                    {unread && (
+                  {unread && (
+                    <div className="mt-4">
                       <button
                         type="button"
                         onClick={() => onMarkRead(item.id)}
-                        className="text-sm font-medium text-gray-500 hover:text-gray-800"
+                        className={clsx(
+                          'inline-flex items-center justify-center cursor-pointer select-none',
+                          'rounded-xl border border-border-light bg-white px-3.5 py-2',
+                          'text-sm font-semibold text-gray-700 shadow-sm',
+                          'transition-colors hover:bg-gray-50 hover:border-gray-300 active:bg-gray-100',
+                        )}
                       >
                         읽음 처리
                       </button>
-                    )}
-                  </div>
+                    </div>
+                  )}
                 </div>
               </div>
             </article>

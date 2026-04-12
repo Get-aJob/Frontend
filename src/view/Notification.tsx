@@ -1,5 +1,4 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { Bell, X } from 'lucide-react';
 
 import EmptyState from '@/components/common/UI/EmptyState';
@@ -25,8 +24,6 @@ const mergeItemsById = (prev: INotificationItem[], next: INotificationItem[]) =>
 };
 
 function Notification() {
-  const navigate = useNavigate();
-
   const [items, setItems] = useState<INotificationItem[]>([]);
   const [isInitialLoading, setIsInitialLoading] = useState(true);
   const [initialLoadError, setInitialLoadError] = useState<string | null>(null);
@@ -36,6 +33,7 @@ function Notification() {
 
   const unreadCount = useMemo(() => items.filter((n) => n.readAt === null).length, [items]);
   const socketEventVersion = useNotificationStore((state) => state.socketEventVersion);
+  const syncUnreadCount = useNotificationStore((state) => state.syncUnreadCount);
 
   const visibleItems = useMemo(() => {
     const sorted = [...items].sort(
@@ -80,16 +78,18 @@ function Notification() {
         if (res.success && res.notification) {
           const updated = mapNotificationToItem(res.notification);
           setItems((prev) => prev.map((n) => (n.id === id ? updated : n)));
+          void syncUnreadCount();
           return;
         }
         const list = await fetchNotifications({ limit: 20, unreadOnly: false });
         setItems((prev) => mergeItemsById(prev, list.notifications.map(mapNotificationToItem)));
+        void syncUnreadCount();
       } catch (e) {
         console.error('읽음 처리 실패:', e);
         alert('읽음 처리에 실패했습니다.');
       }
     },
-    [],
+    [syncUnreadCount],
   );
 
   const markAllRead = useCallback(async () => {
@@ -101,23 +101,12 @@ function Notification() {
       }
       const list = await fetchNotifications({ limit: 20, unreadOnly: false });
       setItems((prev) => mergeItemsById(prev, list.notifications.map(mapNotificationToItem)));
+      void syncUnreadCount();
     } catch (e) {
       console.error('모두 읽음 실패:', e);
       alert('모두 읽음 처리에 실패했습니다.');
     }
-  }, []);
-
-  const handleRowNavigate = useCallback(
-    async (item: INotificationItem) => {
-      const href = item.payload?.href;
-      if (typeof href !== 'string' || !href.trim()) return;
-      if (item.readAt === null) {
-        await markRead(item.id);
-      }
-      navigate(href.trim());
-    },
-    [navigate, markRead],
-  );
+  }, [syncUnreadCount]);
 
   const showLoginStyleBanner = unreadCount > 0 && !loginBannerDismissed;
 
@@ -184,7 +173,7 @@ function Notification() {
           />
         </div>
       ) : (
-        <NotificationList items={visibleItems} onMove={handleRowNavigate} onMarkRead={markRead} />
+        <NotificationList items={visibleItems} onMarkRead={markRead} />
       )}
     </div>
   );
