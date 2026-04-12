@@ -14,37 +14,45 @@ const ResumeFormExperience = () => {
   });
 
   return (
-    <div className="w-full mt-20 z-0">
-      <label className="text-xl ml-2">경험 / 경력</label>
+    <div className="w-full mt-8 z-0">
+      <div className="px-4 mb-2">
+        <label className="text-base font-black text-gray-700 tracking-tight">경험 / 경력</label>
+        <div className="w-full mt-2 h-px bg-gray-100" />
+      </div>
       {fields.map((field, index) => {
         const isCurrent = watch(`experience.${index}.isCurrent`);
         return (
           <div
             key={field.id}
-            className="w-full relative flex mt-5 group has-focus:outline-2 outline-btn-point rounded-lg p-3 hover:outline-2"
+            className="w-full relative flex mt-3 group rounded-2xl p-4 hover:bg-gray-50 transition-colors border border-transparent hover:border-border-light"
           >
             <div className="flex-1">
               <input
                 {...register(`experience.${index}.name`)}
                 type="text"
                 placeholder="경험 / 회사 명"
-                className="w-full outline-none resize-none"
+                className="w-full outline-none resize-none text-sm font-bold text-gray-800 placeholder:text-gray-300 bg-transparent"
               />
-              <div className="w-full flex gap-3 max-md:flex-col">
-                <div className="w-fit flex gap-1">
+              <div className="w-full flex gap-3 mt-1 max-md:flex-col">
+                <div className="w-fit flex gap-1 items-center">
                   <ResumeFormDatePicker
                     name={`experience.${index}.period.startDate`}
                     control={control}
                     disabled={false}
                   />
-                  <p>-</p>
+                  <p className="text-gray-300 text-sm">-</p>
                   <ResumeFormDatePicker
                     name={`experience.${index}.period.endDate`}
                     control={control}
                     disabled={isCurrent}
                   />
-                  <label className="flex items-center justify-center gap-1">
-                    <span className={clsx(!isCurrent ? 'text-black/40' : 'text-black')}>
+                  <label className="flex items-center justify-center gap-1 ml-1">
+                    <span
+                      className={clsx(
+                        'text-xs font-semibold',
+                        !isCurrent ? 'text-gray-300' : 'text-btn-point',
+                      )}
+                    >
                       현재 진행 중
                     </span>
                     <input
@@ -61,19 +69,19 @@ const ResumeFormExperience = () => {
                     />
                   </label>
                 </div>
-                <p className="max-md:hidden">|</p>
+                <p className="text-gray-200 max-md:hidden">|</p>
                 <input
                   {...register(`experience.${index}.position`)}
                   type="text"
                   placeholder="포지션"
-                  className="w-40"
+                  className="w-40 text-sm text-gray-600 placeholder:text-gray-300 outline-none bg-transparent"
                 />
               </div>
               <TextAreaAutosize
                 {...register(`experience.${index}.description`)}
                 maxLength={5000}
-                placeholder="description"
-                className="w-full outline-none mt-5 resize-none"
+                placeholder="주요 역할 및 성과를 작성해보세요."
+                className="w-full outline-none mt-4 resize-none text-sm text-gray-700 placeholder:text-gray-300 bg-transparent"
               />
               <CharacterCounter
                 control={control}
@@ -81,7 +89,7 @@ const ResumeFormExperience = () => {
                 limit={5000}
               />
             </div>
-            <div className="absolute -bottom-14 left-[48%] w-14 h-14 p-2 z-20">
+            <div className="absolute -bottom-5 left-[48%] w-10 h-10 p-1.5 z-20">
               <button
                 type="button"
                 onClick={() => {
@@ -93,7 +101,7 @@ const ResumeFormExperience = () => {
                     isCurrent: false,
                   });
                 }}
-                className="w-full h-full rounded-full bg-purple-50 text-outline-point text-3xl text-center justify-center hidden group-hover:flex hover:bg-purple-100 cursor-pointer"
+                className="w-full h-full rounded-full bg-white border border-border-light text-btn-point text-xl shadow-sm text-center justify-center hidden group-hover:flex hover:bg-purple-50 hover:border-btn-point cursor-pointer transition-all"
               >
                 +
               </button>
@@ -112,9 +120,9 @@ const ResumeFormExperience = () => {
                   });
                 }
               }}
-              className="absolute top-4 right-4 w-8 h-8 p-1.5 hidden group-hover:flex items-center justify-center bg-purple-50 rounded-sm hover:bg-purple-100 cursor-pointer"
+              className="absolute top-3 right-3 w-7 h-7 p-1.5 hidden group-hover:flex items-center justify-center bg-white border border-border-light rounded-lg shadow-sm hover:bg-red-50 hover:border-red-200 cursor-pointer transition-all"
             >
-              <Trash2 className="text-outline-point" />
+              <Trash2 size={14} className="text-gray-400 hover:text-red-400" />
             </button>
           </div>
         );

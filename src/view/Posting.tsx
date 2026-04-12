@@ -8,6 +8,8 @@ import PostingDetailModal from '@/components/Posting/PostingDetailModal';
 import { Briefcase } from 'lucide-react';
 import { incrementViewCount } from '@/api/Posting';
 import type { ExtendedJobPosting } from '@/store/usePostingStore';
+import { useAuthStore } from '@/store/useAuthStore';
+import { useStatusStore } from '@/store/useStatusStore';
 
 const Posting = () => {
   const {
@@ -15,11 +17,16 @@ const Posting = () => {
     isLoading,
     fetchPostings,
     totalPages,
+    totalCount,
     currentPage,
     selectedSite,
+    sourceType,
     toggleScrapStatus,
     updateViewCount,
   } = usePostingStore();
+  const isLoggedIn = useAuthStore((state) => state.isLoggedIn);
+  const isManualWithoutLogin = !isLoggedIn && sourceType === 'manual';
+  const { fetchData } = useStatusStore();
 
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
   // 💡 데이터 객체 대신 ID만 저장하여 스토어와 실시간 동기화 유도
@@ -27,8 +34,11 @@ const Posting = () => {
 
   useEffect(() => {
     fetchPostings(currentPage, selectedSite);
+    if (isLoggedIn) {
+      fetchData();
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [isLoggedIn]);
 
   const handlePageChange = (page: number) => {
     const mainElement = document.querySelector('main');
@@ -62,7 +72,7 @@ const Posting = () => {
 
   return (
     <div className="flex flex-col gap-8">
-      <PostingFilter totalCount={postings.length} />
+      <PostingFilter totalCount={totalCount} />
 
       <div className="w-full">
         {isLoading ? (
@@ -91,6 +101,12 @@ const Posting = () => {
                   />
                 </div>
               </>
+            ) : isManualWithoutLogin ? (
+              <div className="flex items-center justify-center py-40">
+                <p className="text-gray-400 font-medium text-lg text-center">
+                  로그인이 필요한 서비스입니다.
+                </p>
+              </div>
             ) : (
               <div className="flex items-center justify-center py-32 bg-white rounded-4xl border border-border-light shadow-sm">
                 <EmptyState

@@ -39,11 +39,11 @@ const UpdateTitleForm = ({ id, title, setIsFormOpen }: UpdateTitleFormProps) => 
         type="text"
         placeholder="새 제목"
         {...register('title', { required: true })}
-        className="text-2xl bg-white p-2 shadow-inner rounded-lg"
+        className="w-full bg-white border-[1.5px] border-border-light rounded-lg px-3.5 py-2.5 text-sm font-bold outline-none transition-all focus:border-btn-point focus:ring-2 focus:ring-purple-100 placeholder:text-gray-400 shadow-inner"
       />
       <button
         type="submit"
-        className="mt-2 w-fit rounded-lg px-2 py-1 text-white bg-btn-point hover:bg-[#4338ca]"
+        className="mt-2 w-fit rounded-lg px-3 py-1.5 text-sm font-bold text-white bg-btn-point hover:scale-105 hover:shadow-md transition-all active:scale-95"
       >
         제목 변경
       </button>

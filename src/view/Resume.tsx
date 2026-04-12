@@ -23,9 +23,18 @@ const Resume = () => {
         </p>
       </div>
       {isAnyMenuOpen && <div className="absolute w-full h-full bg-black z-10 opacity-0" />}
-      {isLoading && <p>로딩중...</p>}
+      {isLoading && (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+          {[...Array(4)].map((_, i) => (
+            <div
+              key={i}
+              className="h-64 xl:h-75 bg-white animate-pulse rounded-3xl border border-border-light shadow-sm"
+            />
+          ))}
+        </div>
+      )}
       {!isLoading && lists && lists.length > 0 ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
           <CreateButton
             icon="+"
             title="새 이력서 작성"
@@ -37,24 +46,26 @@ const Resume = () => {
           ))}
         </div>
       ) : (
-        <div className="flex flex-col items-center justify-center py-32 bg-white rounded-4xl border border-border-light shadow-sm">
-          <EmptyState
-            icon={<FileText size={48} className="text-gray-300" />}
-            title="등록된 이력서가 없습니다"
-            description="새로운 이력서를 작성하고 취업 성공에 한 발짝 더 다가가세요!"
-            action={
-              <div className="w-120 h-30">
-                <CreateButton
-                  icon="+"
-                  title="첫 이력서 만들기"
-                  sub="클릭하여 시작하기"
-                  path="/resume/write"
-                />
-              </div>
-            }
-            className="h-120"
-          />
-        </div>
+        !isLoading && (
+          <div className="flex flex-col items-center justify-center py-32 bg-white rounded-4xl border border-border-light shadow-sm">
+            <EmptyState
+              icon={<FileText size={48} className="text-gray-300" />}
+              title="등록된 이력서가 없습니다"
+              description="새로운 이력서를 작성하고 취업 성공에 한 발짝 더 다가가세요!"
+              action={
+                <div className="w-120 h-30">
+                  <CreateButton
+                    icon="+"
+                    title="첫 이력서 만들기"
+                    sub="클릭하여 시작하기"
+                    path="/resume/write"
+                  />
+                </div>
+              }
+              className="h-120"
+            />
+          </div>
+        )
       )}
     </div>
   );
