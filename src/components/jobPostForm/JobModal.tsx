@@ -19,8 +19,8 @@ interface JobModalProps {
 const JobModal = ({ isOpen, onClose, mode = 'create', initialData }: JobModalProps) => {
   const { createJob, updateJob, parseJobUrl } = usePostingStore();
 
-  const [crawlUrl, setCrawlUrl] = useState(''); // 상단 파싱 바 전용 상태
-  const [url, setUrl] = useState(''); // 실제 저장될 공고 링크 상태
+  const [crawlUrl, setCrawlUrl] = useState('');
+  const [url, setUrl] = useState('');
   const [title, setTitle] = useState('');
   const [companyName, setCompanyName] = useState('');
   const [location, setLocation] = useState('');
@@ -34,7 +34,6 @@ const JobModal = ({ isOpen, onClose, mode = 'create', initialData }: JobModalPro
   const [isParsing, setIsParsing] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // ESC 키로 닫기 및 초기 데이터 설정
   useEffect(() => {
     const handleEsc = (e: KeyboardEvent) => {
       if (e.key === 'Escape') onClose();
@@ -85,8 +84,6 @@ const JobModal = ({ isOpen, onClose, mode = 'create', initialData }: JobModalPro
   const handleParse = async () => {
     if (!crawlUrl.trim()) return;
     setIsParsing(true);
-
-    // 💡 파싱하기 버튼 클릭 시 하단 공고 링크 칸도 같이 채워줌
     setUrl(crawlUrl);
 
     try {
@@ -101,7 +98,6 @@ const JobModal = ({ isOpen, onClose, mode = 'create', initialData }: JobModalPro
           setExternalId((data.externalId as string) || undefined);
         }
 
-        // 1. 날짜 및 상시채용 여부 설정
         const deadlineVal = (data.deadline as string) || '';
         const isAlways = data.deadlineText === '상시채용';
 
@@ -112,7 +108,6 @@ const JobModal = ({ isOpen, onClose, mode = 'create', initialData }: JobModalPro
           setDeadline(deadlineVal.split('T')[0]);
         }
 
-        // 2. 상세 내용 추출 (지원자격/우대사항 등)
         const content = data.content as {
           requirements?: string;
           preferred?: string;
@@ -150,9 +145,6 @@ const JobModal = ({ isOpen, onClose, mode = 'create', initialData }: JobModalPro
 
     setIsSubmitting(true);
     try {
-      // 새 공고 등록 시 파싱된 externalId를 그대로 보내면
-      // 크롤러가 수집한 'auto' 공고의 ID와 충돌하여 500 에러(Unique 제약 조건 위반)가 발생.
-      // 따라서 수정 모드가 아닐 때는 externalId를 페이로드에서 제외하여 백엔드에서 새 UUID를 생성.
       const payload: DirectJobRequest = {
         title,
         companyName,
@@ -184,43 +176,43 @@ const JobModal = ({ isOpen, onClose, mode = 'create', initialData }: JobModalPro
 
   return (
     <div
-      className="fixed inset-0 z-1200 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-in fade-in duration-200"
+      className="fixed inset-0 z-1200 flex items-center justify-center p-3 sm:p-4 bg-black/50 backdrop-blur-sm animate-in fade-in duration-200"
       onClick={(e) => {
         if (e.target === e.currentTarget) onClose();
       }}
     >
       <form
         onSubmit={(e: React.FormEvent) => handleRegister(e)}
-        className="bg-white w-full max-w-2xl rounded-4xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh] animate-in slide-in-from-bottom-8 duration-300"
+        // ✨ 모바일에서 둥근 정도(rounded-3xl)와 최대 높이 조절
+        className="bg-white w-full max-w-2xl rounded-3xl sm:rounded-4xl shadow-2xl overflow-hidden flex flex-col max-h-[95vh] sm:max-h-[90vh] animate-in slide-in-from-bottom-8 duration-300"
       >
-        <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between bg-white sticky top-0 z-10">
-          <h2 className="text-xl font-bold text-slate-800">
+        {/* 헤더: 모바일에서 높이 및 패딩 축소 */}
+        <div className="px-5 sm:px-6 py-3.5 sm:py-4 border-b border-gray-100 flex items-center justify-between bg-white sticky top-0 z-10">
+          <h2 className="text-lg sm:text-xl font-bold text-slate-800">
             {mode === 'edit' ? '공고 수정하기' : '새 공고 등록'}
           </h2>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1.5 sm:gap-2">
             <button
               type="button"
               onClick={() => handleReset()}
-              title="입력 내용 초기화"
-              className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-all"
+              className="flex items-center gap-1 px-2.5 py-1.5 text-[11px] sm:text-xs font-bold text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-all"
             >
-              <RotateCcw size={14} />
+              <RotateCcw size={13} className="sm:w-3.5 sm:h-3.5" />
               초기화
             </button>
-            <div className="w-px h-4 bg-gray-100 mx-1" />
+            <div className="w-px h-3.5 bg-gray-100 mx-0.5" />
             <button
               type="button"
               onClick={onClose}
-              aria-label="닫기"
-              className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+              className="p-1.5 sm:p-2 hover:bg-gray-100 rounded-full transition-colors"
             >
-              <X size={20} className="text-gray-400" />
+              <X size={18} className="text-gray-400 sm:w-5 sm:h-5" />
             </button>
           </div>
         </div>
 
-        {/* 본문 */}
-        <div className="flex-1 overflow-y-auto p-6 space-y-6">
+        {/* 본문: 모바일 패딩 축소(p-5) 및 요소 간격 조절 */}
+        <div className="flex-1 overflow-y-auto p-5 sm:p-6 space-y-5 sm:space-y-6 custom-scrollbar">
           {mode !== 'edit' && (
             <CrawlBar
               url={crawlUrl}
@@ -230,8 +222,8 @@ const JobModal = ({ isOpen, onClose, mode = 'create', initialData }: JobModalPro
             />
           )}
 
-          <div className="flex flex-col md:flex-row gap-6">
-            <div className="flex-1 space-y-6">
+          <div className="flex flex-col md:flex-row gap-5 sm:gap-6">
+            <div className="flex-1 space-y-5 sm:space-y-6 order-2 md:order-1">
               <TextInput
                 label="회사명"
                 placeholder="회사 이름을 입력하세요"
@@ -251,7 +243,8 @@ const JobModal = ({ isOpen, onClose, mode = 'create', initialData }: JobModalPro
                 onChange={(e) => setUrl(e.target.value)}
               />
             </div>
-            <div className="w-full md:w-48 shrink-0">
+            {/* ✨ 모바일에서 로고 업로드 중앙 정렬 */}
+            <div className="w-full md:w-48 shrink-0 flex justify-center md:block order-1 md:order-2">
               <LogoUpload value={logo} onChange={setLogo} />
             </div>
           </div>
@@ -275,7 +268,7 @@ const JobModal = ({ isOpen, onClose, mode = 'create', initialData }: JobModalPro
             isAlwaysRecruit={isAlwaysRecruit}
             onAlwaysRecruitChange={(checked) => {
               setIsAlwaysRecruit(checked);
-              setDeadline(''); // 상시 모집을 누르거나 취소할 때 날짜 초기화
+              setDeadline('');
             }}
             value={deadline}
             onChange={(e) => setDeadline(e.target.value)}
@@ -289,20 +282,21 @@ const JobModal = ({ isOpen, onClose, mode = 'create', initialData }: JobModalPro
           />
         </div>
 
-        <div className="px-6 py-4 border-t border-gray-100 bg-gray-50 flex items-center justify-end">
-          <div className="flex gap-3">
+        {/* 푸터: 모바일 버튼 높이 및 패딩 축소 */}
+        <div className="px-5 sm:px-6 py-3.5 sm:py-4 border-t border-gray-100 bg-gray-50 flex items-center justify-end shrink-0">
+          <div className="flex gap-2.5 sm:gap-3 w-full sm:w-auto">
             <Button
               type="button"
               variant="outline"
               onClick={onClose}
-              className="px-6 py-2.5 rounded-xl font-bold transition-transform hover:scale-105 active:scale-[0.98]"
+              className="flex-1 sm:flex-none px-5 sm:px-6 py-2 sm:py-2.5 rounded-xl font-bold text-sm sm:text-base"
             >
               취소
             </Button>
             <Button
               type="submit"
               variant="primary"
-              className="px-8 py-2.5 rounded-xl font-bold shadow-lg shadow-blue-500/20 flex items-center justify-center min-w-35 transition-transform hover:scale-105 active:scale-[0.98]"
+              className="flex-[2] sm:flex-none px-6 sm:px-8 py-2 sm:py-2.5 rounded-xl font-bold text-sm sm:text-base min-w-[120px]"
               disabled={isSubmitting || isParsing}
             >
               {isSubmitting ? (
@@ -310,7 +304,7 @@ const JobModal = ({ isOpen, onClose, mode = 'create', initialData }: JobModalPro
               ) : mode === 'edit' ? (
                 '수정 완료'
               ) : (
-                '공고 등록하기'
+                '등록하기'
               )}
             </Button>
           </div>
