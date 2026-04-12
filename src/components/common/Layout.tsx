@@ -11,6 +11,7 @@ import { SOCKET_EVENT } from '@/socket/events';
 const Layout = () => {
   const location = useLocation();
   const isLoggedIn = useAuthStore((state) => state.isLoggedIn);
+  const userId = useAuthStore((state) => state.userInfo?.id ?? state.user?.id);
 
   const syncUnreadCount = useNotificationStore((state) => state.syncUnreadCount);
   const increaseUnreadCount = useNotificationStore((state) => state.increaseUnreadCount);
@@ -27,24 +28,39 @@ const Layout = () => {
     void syncUnreadCount();
   }, [isLoggedIn, syncUnreadCount, resetUnreadCount]);
 
-  // 어느 화면에 있든 notification:new 반영 (소켓 이벤트 기반 증분)
+  // 어느 화면에 있든 소켓 1개: subscribe 후 user 룸으로만 notification:new 수신
   useEffect(() => {
-    if (!isLoggedIn) return;
+    if (!isLoggedIn || userId == null || userId === '') return;
+
     const socket = createNotificationSocket();
+
+    const subscribe = () => {
+      socket.emit(SOCKET_EVENT.CLIENT.NOTIFICATION_SUBSCRIBE, userId);
+    };
+
+    socket.on('connect', subscribe);
+
     socket.on(SOCKET_EVENT.SERVER.NOTIFICATION_NEW, (payload) => {
-      // 신규 알림 이벤트는 보통 unread 상태로 오며, 필드가 없으면 unread로 간주
-      const isUnread = payload.read_at == null;
+      const notification = payload?.notification;
+      if (!notification) return;
+      const isUnread = notification.read_at == null;
       if (isUnread) {
         increaseUnreadCount(1);
       }
       notifySocketNew();
     });
+
     socket.connect();
+    if (socket.connected) {
+      subscribe();
+    }
+
     return () => {
+      socket.off('connect', subscribe);
       socket.off(SOCKET_EVENT.SERVER.NOTIFICATION_NEW);
       socket.disconnect();
     };
-  }, [isLoggedIn, increaseUnreadCount, notifySocketNew]);
+  }, [isLoggedIn, userId, increaseUnreadCount, notifySocketNew]);
 
   const getTopbarConfig = () => {
     const baseConfig = { showSearch: true, showAddButton: true };

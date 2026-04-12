@@ -71,11 +71,18 @@ export interface INotificationReadEvent {
 export interface ISystemPongEvent {
   at: string;
 }
+
+/** 서버 → 클라이언트: notification:new (목록 API와 동일 스네이크 케이스 단건을 감쌈) */
+export interface INotificationNewEventPayload {
+  notification: INotification;
+}
+
 export interface ISocketServerToClientEvents {
-  'notification:new': (payload: INotification) => void;
+  'notification:new': (payload: INotificationNewEventPayload) => void;
   'notification:read': (payload: INotificationReadEvent) => void;
   'system:pong': (payload: ISystemPongEvent) => void;
 }
 export interface ISocketClientToServerEvents {
   ping: (payload: { from: string; at: number }) => void;
+  'notification:subscribe': (userId: string | number) => void;
 }

@@ -1,6 +1,7 @@
 import React, { useEffect } from 'react';
 import { DragDropContext, type DropResult } from '@hello-pangea/dnd';
 import { useStatusStore } from '@/store/useStatusStore';
+import { useNotificationStore } from '@/store/useNotificationStore';
 import { updateApplication } from '@/api/Status';
 import StatusList from './StatusList';
 
@@ -22,6 +23,8 @@ const StatusBoard: React.FC = () => {
     try {
       await updateApplication(draggableId, { statusId: destination.droppableId });
       await fetchData();
+      // 백엔드가 상태 변경 시 알림 로그를 남기면 unread-count가 갱신됨. 사이드바/탑바 배지 동기화.
+      void useNotificationStore.getState().syncUnreadCount();
     } catch (error) {
       console.error('상태 업데이트 실패:', error);
     }
