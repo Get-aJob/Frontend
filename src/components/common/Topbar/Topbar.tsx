@@ -1,39 +1,38 @@
 import { useState, useRef, useEffect } from 'react';
 import JobModal from '@/components/jobPostForm/JobModal';
 import { useAuthStore } from '@/store/useAuthStore';
-import LoginToast from './LoginToast'; // 💡 올바른 상대 경로로 수정됨
+import Toast from '@/components/common/UI/Toast';
+import Button from '@/components/common/UI/Button';
+import Badge from '@/components/common/UI/Badge';
+import { MenuIcon } from 'lucide-react';
+import { useMobilesidebarStore } from '@/store/useMobileSidebarStore';
 
 export interface TopbarProps {
   title?: string;
   badge?: string;
-  showSearch?: boolean;
   showAddButton?: boolean;
+  unreadCount?: number;
 }
 
-const Topbar = ({
-  title = '페이지 제목',
-  badge,
-  showSearch = false,
-  showAddButton = false,
-}: TopbarProps) => {
+const Topbar = ({ title, badge, showAddButton, unreadCount = 0 }: TopbarProps) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [showLoginToast, setShowLoginToast] = useState(false);
+  const [showToast, setShowToast] = useState(false);
   const isLoggedIn = useAuthStore((state) => state.isLoggedIn);
-
   const toastTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const toggle = useMobilesidebarStore((state) => state.toggle);
 
   useEffect(() => {
     return () => {
-      if (toastTimeoutRef.current) {
-        clearTimeout(toastTimeoutRef.current);
-      }
+      if (toastTimeoutRef.current) clearTimeout(toastTimeoutRef.current);
     };
   }, []);
 
   const handleAddButtonClick = () => {
     if (!isLoggedIn) {
-      setShowLoginToast(true);
-      toastTimeoutRef.current = setTimeout(() => setShowLoginToast(false), 3000);
+      setShowToast(true);
+      if (toastTimeoutRef.current) clearTimeout(toastTimeoutRef.current);
+      toastTimeoutRef.current = setTimeout(() => setShowToast(false), 3000);
       return;
     }
     setIsModalOpen(true);
@@ -41,44 +40,48 @@ const Topbar = ({
 
   return (
     <>
-      <header className="flex items-center px-6 gap-3 min-h-20 w-full py-4 bg-white border-b border-[#e8eaf0] z-100 shrink-0">
-        <div className="flex items-center gap-2 text-lg font-extrabold text-[#111827]">
-          <span>{title}</span>
+      {/* ✨ 모바일에서 px-4로 여백을 줄여 아이콘을 왼쪽 끝에 더 밀착, 높이(h-16) 축소 */}
+      <header className="flex items-center px-4 sm:px-8 gap-2 sm:gap-4 h-16 sm:h-20 w-full bg-white border-b border-border-light shrink-0 sticky top-0 z-30 shadow-none">
+        <div className="flex items-center gap-1 sm:gap-3 text-lg sm:text-[1.35rem] font-black text-slate-800 tracking-tight">
+          <button
+            onClick={() => {
+              toggle();
+            }}
+            /* ✨ 패딩을 p-1.5로 줄여서 여백 최소화 */
+            className="lg:hidden cursor-pointer p-1.5 rounded-xl text-gray-500 hover:text-gray-900 hover:bg-gray-100 transition-all"
+          >
+            <MenuIcon size={22} />
+          </button>
+          <span className="ml-1">{title}</span>
           {badge && (
-            <span className="text-[10px] font-bold px-2.25 py-0.75 rounded-[5px] bg-[#eef2ff] text-[#4f46e5]">
+            <Badge variant="point" className="px-2 py-0.5 text-[9px] sm:text-[11px] font-bold">
               {badge}
-            </span>
+            </Badge>
+          )}
+          {isLoggedIn && unreadCount > 0 && (
+            <Badge variant="error" className="px-2 py-0.5 text-[9px] sm:text-[11px] font-bold">
+              {unreadCount}
+            </Badge>
           )}
         </div>
-        <div className="flex items-center gap-2.5 ml-auto">
-          {showSearch && (
-            <div className="flex items-center gap-1.75 w-55 px-3.5 py-2 bg-[#f8f9fc] border-[1.5px] border-[#e8eaf0] rounded-[10px]">
-              <label htmlFor="topbar-search" className="sr-only">
-                공고 검색
-              </label>
-              <span aria-hidden="true">🔍</span>
-              <input
-                id="topbar-search"
-                aria-label="공고 검색"
-                className="w-full bg-transparent border-none outline-none text-[13px] focus-visible:ring-2 focus-visible:ring-[#4f46e5] rounded-sm"
-                placeholder="검색어를 입력하세요..."
-              />
-            </div>
-          )}
 
+        <div className="flex items-center gap-4 ml-auto">
           {showAddButton && (
-            <button
+            <Button
+              variant="primary"
               onClick={handleAddButtonClick}
-              className="px-4 py-2 text-[13px] font-bold text-white bg-[#4f46e5] rounded-[10px] hover:bg-[#4338ca] transition-colors"
+              className="px-3.5 py-1.5 h-9 sm:h-10.5 rounded-lg sm:rounded-xl font-bold text-body sm:text-sm"
             >
               ＋ 공고 등록
-            </button>
+            </Button>
           )}
         </div>
       </header>
-
-      <LoginToast visible={showLoginToast} />
-
+      <Toast
+        visible={showToast}
+        message="공고 등록은 로그인 후 이용할 수 있어요."
+        showLoginButton
+      />
       <JobModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} />
     </>
   );

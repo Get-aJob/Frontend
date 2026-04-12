@@ -19,22 +19,26 @@ const ResumeFormAdditionalInfo = () => {
   ];
 
   return (
-    <div className="w-full mt-20">
-      <label className="text-xl ml-2">수상/자격증/기타</label>
-      <div className="w-full mt-3 ml-2 h-px bg-black/40" />
+    <div className="flex-1 mt-8">
+      <div className="px-4 mb-2">
+        <label className="text-base font-black text-gray-700 tracking-tight">
+          수상/자격증/기타
+        </label>
+        <div className="w-full mt-2 h-px bg-gray-100" />
+      </div>
       {fields.map((field, index) => (
         <div
           key={field.id}
-          className="w-full relative flex mt-5 group has-focus:outline-2 outline-blue-200 rounded-lg p-3 hover:outline-2"
+          className="w-full relative flex mt-3 group rounded-2xl p-4 hover:bg-gray-50 transition-colors border border-transparent hover:border-border-light"
         >
           <div className="flex-1">
             <input
               {...register(`additionalInfo.${index}.name`)}
               type="text"
               placeholder="활동명"
-              className="w-full outline-none resize-none"
+              className="w-full outline-none resize-none text-sm font-bold text-gray-800 placeholder:text-gray-300 bg-transparent"
             />
-            <div className="w-full flex gap-3 items-center">
+            <div className="w-full flex gap-3 items-center mt-1">
               <ResumeFormDatePicker
                 name={`additionalInfo.${index}.date`}
                 control={control}
@@ -43,7 +47,7 @@ const ResumeFormAdditionalInfo = () => {
               <select
                 {...register(`additionalInfo.${index}.type`)}
                 defaultValue=""
-                className="py-2 px-1 rounded-md bg-white hover:bg-black/10 appearance-none focus:outline-none [text-align-last:center]"
+                className="py-1.5 px-2 rounded-lg bg-white border border-border-light text-xs font-bold text-gray-600 hover:border-btn-point appearance-none focus:outline-none focus:ring-2 focus:ring-purple-100 [text-align-last:center] transition-all cursor-pointer"
               >
                 <option value="" disabled hidden>
                   타입
@@ -58,8 +62,8 @@ const ResumeFormAdditionalInfo = () => {
             <TextAreaAutosize
               {...register(`additionalInfo.${index}.description`)}
               maxLength={1000}
-              placeholder="description"
-              className="w-full outline-none mt-5 resize-none"
+              placeholder="상세 내용을 입력하세요."
+              className="w-full outline-none mt-4 resize-none text-sm text-gray-700 placeholder:text-gray-300 bg-transparent"
             />
             <CharacterCounter
               control={control}
@@ -67,7 +71,7 @@ const ResumeFormAdditionalInfo = () => {
               limit={1000}
             />
           </div>
-          <div className="absolute -bottom-14 left-[48%] w-14 h-14 p-2">
+          <div className="absolute -bottom-5 left-[48%] w-10 h-10 p-1.5">
             <button
               type="button"
               onClick={() => {
@@ -78,7 +82,7 @@ const ResumeFormAdditionalInfo = () => {
                   description: '',
                 });
               }}
-              className="w-full h-full rounded-full bg-blue-100 text-blue-500 text-3xl text-center justify-center hidden group-hover:flex hover:bg-blue-200"
+              className="w-full h-full rounded-full bg-white border border-border-light text-btn-point text-xl shadow-sm text-center justify-center hidden group-hover:flex hover:bg-purple-50 hover:border-btn-point cursor-pointer transition-all"
             >
               +
             </button>
@@ -96,9 +100,9 @@ const ResumeFormAdditionalInfo = () => {
               }
               remove(index);
             }}
-            className="absolute top-4 right-4 w-8 h-8 p-1.5 hidden group-hover:flex items-center justify-center bg-blue-100 rounded-sm hover:bg-blue-200"
+            className="absolute top-3 right-3 w-7 h-7 p-1.5 hidden group-hover:flex items-center justify-center bg-white border border-border-light rounded-lg shadow-sm hover:bg-red-50 hover:border-red-200 cursor-pointer transition-all"
           >
-            <Trash2 className="text-blue-600" />
+            <Trash2 size={14} className="text-gray-400 hover:text-red-400" />
           </button>
         </div>
       ))}

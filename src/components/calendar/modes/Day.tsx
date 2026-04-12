@@ -1,86 +1,57 @@
+import React from 'react';
 import type { ScheduleEvent } from '@/types/Calendar';
 
-interface Props {
+interface DayProps {
   currentDate: Date;
   events: ScheduleEvent[];
-  onEventClick: (e: ScheduleEvent) => void;
+  onEventClick: (event: ScheduleEvent) => void;
 }
 
-const Day = ({ currentDate, events, onEventClick }: Props) => {
-  const dayStr = currentDate.toISOString().split('T')[0];
-  const dayEvents = events.filter((e) => e.date === dayStr);
+const Day: React.FC<DayProps> = ({ currentDate, events, onEventClick }) => {
+  const dateStr = currentDate.toISOString().split('T')[0];
+  const dayEvents = events.filter((e) => e.date === dateStr);
+
+  const weekDay = ['일요일', '월요일', '화요일', '수요일', '목요일', '금요일', '토요일'][
+    currentDate.getDay()
+  ];
 
   return (
-    <div className="max-w-4xl mx-auto space-y-6">
-      <div className="flex items-center gap-6 mb-12">
-        <div className="w-20 h-20 bg-gray-900 rounded-[28px] flex flex-col items-center justify-center text-white shadow-xl">
-          <span className="text-xs font-black opacity-50 uppercase">
-            {['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'][currentDate.getDay()]}
-          </span>
-          <span className="text-3xl font-black">{currentDate.getDate()}</span>
-        </div>
-        <div>
-          <h2 className="text-3xl font-black text-gray-900">오늘의 채용 일정</h2>
-          <p className="text-gray-400 font-bold tracking-widest mt-1">{dayStr}</p>
-        </div>
+    <div className="flex flex-col h-full p-4 sm:p-8">
+      <div className="mb-6">
+        <div className="text-blue-600 font-black text-sm sm:text-base mb-1">{weekDay}</div>
+        <h3 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">
+          {currentDate.getDate()}일 일정
+        </h3>
       </div>
 
-      {dayEvents.length > 0 ? (
-        dayEvents.map((e, idx) => (
-          <div
-            key={idx}
-            onClick={() => onEventClick(e)}
-            className="bg-white p-8 rounded-4xl border border-gray-100 shadow-sm hover:shadow-md transition-all cursor-pointer flex items-center justify-between"
-          >
-            <div className="flex items-center gap-6">
-              <div
-                className={`w-14 h-14 rounded-2xl flex items-center justify-center text-white text-xl font-black shrink-0 overflow-hidden ${
-                  e.companyLogo
-                    ? 'bg-white border border-gray-100'
-                    : e.eventType === 'deadline'
-                      ? 'bg-rose-500'
-                      : 'bg-emerald-500'
-                }`}
-              >
-                {e.companyLogo ? (
-                  <img
-                    src={e.companyLogo}
-                    alt={`${e.companyName} 로고`}
-                    className="w-full h-full object-contain p-1"
-                    onError={(ev) => {
-                      ev.currentTarget.style.display = 'none';
-                      const parent = ev.currentTarget.parentElement;
-                      if (parent) {
-                        parent.classList.remove('bg-white', 'border', 'border-gray-100');
-                        parent.classList.add(
-                          e.eventType === 'deadline' ? 'bg-rose-500' : 'bg-emerald-500',
-                        );
-                        parent.innerText = e.companyName[0];
-                      }
-                    }}
-                  />
-                ) : (
-                  e.companyName[0]
-                )}
-              </div>
-
-              <div>
-                <h4 className="text-xl font-black text-gray-900">{e.companyName}</h4>
-                <p className="text-gray-400 font-bold">{e.title}</p>
-              </div>
-            </div>
-            <span
-              className={`px-5 py-2 rounded-full text-[11px] font-black tracking-widest ${e.eventType === 'deadline' ? 'bg-rose-50 text-rose-600' : 'bg-emerald-50 text-emerald-600'}`}
+      <div className="flex-1 space-y-4">
+        {dayEvents.length > 0 ? (
+          dayEvents.map((event, idx) => (
+            <button
+              key={idx}
+              onClick={() => onEventClick(event)}
+              className="w-full flex flex-col p-5 rounded-2xl border border-slate-100 bg-white shadow-sm hover:border-blue-400 hover:shadow-md transition-all text-left group"
             >
-              {e.eventType.toUpperCase()}
-            </span>
+              <div className="flex justify-between items-start mb-2">
+                <span className="text-[10px] sm:text-xs font-black text-blue-500 bg-blue-50 px-2.5 py-1 rounded-full uppercase tracking-widest">
+                  {event.companyName}
+                </span>
+                <span className="text-[10px] font-bold text-slate-400">
+                  {event.eventType === 'applied' ? '지원 상태' : '공고 마감'}
+                </span>
+              </div>
+              <h4 className="text-base sm:text-lg font-bold text-slate-800 group-hover:text-blue-600 transition-colors">
+                {event.title}
+              </h4>
+            </button>
+          ))
+        ) : (
+          <div className="flex flex-col items-center justify-center py-20 text-slate-300">
+            <div className="text-4xl mb-4">📅</div>
+            <p className="font-bold text-sm">해당 날짜에 등록된 일정이 없어요.</p>
           </div>
-        ))
-      ) : (
-        <div className="text-center py-20 bg-gray-50/50 rounded-4xl border-2 border-dashed border-gray-200">
-          <p className="text-gray-400 font-bold">등록된 일정이 없습니다.</p>
-        </div>
-      )}
+        )}
+      </div>
     </div>
   );
 };

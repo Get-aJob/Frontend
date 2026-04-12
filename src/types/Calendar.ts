@@ -1,4 +1,5 @@
 export type ViewType = 'month' | 'week' | 'day';
+export type EventFilterType = 'all' | 'manual' | 'auto' | 'applied';
 
 export interface ScheduleEvent {
   jobPostingId: string;
@@ -10,6 +11,7 @@ export interface ScheduleEvent {
   companyLogo?: string;
   date: string;
   isApplied: boolean;
+  statusName?: string;
 }
 
 export interface GetSchedulesParams {

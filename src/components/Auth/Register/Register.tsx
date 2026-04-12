@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import axios from 'axios';
 import RegisterForm from './RegisterForm';
 import { joinApi } from '@/api/Auth';
@@ -9,12 +9,15 @@ interface RegisterProps {
 }
 
 const Register: React.FC<RegisterProps> = ({ onSwitchLogin }) => {
+  const [isLoading, setIsLoading] = useState(false);
+  const [errorMsg, setErrorMsg] = useState('');
+
   const handleRegister = async (data: JoinField) => {
+    setIsLoading(true);
+    setErrorMsg('');
+
     try {
-      const response = await joinApi(data);
-
-      alert(response.message || '회원가입에 성공했습니다.');
-
+      await joinApi(data);
       onSwitchLogin();
     } catch (error: unknown) {
       let errorMessage = '회원가입 중 오류가 발생했습니다.';
@@ -23,22 +26,28 @@ const Register: React.FC<RegisterProps> = ({ onSwitchLogin }) => {
         errorMessage = error.response?.data?.error || errorMessage;
       }
 
-      alert(errorMessage);
+      setErrorMsg(errorMessage);
       console.error('회원가입 실패', {
         status: axios.isAxiosError(error) ? error.response?.status : undefined,
         message: errorMessage,
       });
+    } finally {
+      setIsLoading(false);
     }
   };
 
   return (
     <div className="flex flex-col animate-[fadeUp_0.3s_ease]">
-      <div className="mb-6">
-        <h2 className="text-xl font-bold text-[#111827]">회원가입</h2>
-        <p className="text-sm text-[#9ca3af] mt-1">Job-Moa와 함께 취업 준비를 시작해 보세요.</p>
+      <div className="mb-6 text-center">
+        <h2 className="text-title font-bold text-gray-900">회원가입</h2>
       </div>
 
-      <RegisterForm onSwitchLogin={onSwitchLogin} onSubmit={handleRegister} />
+      <RegisterForm
+        onSwitchLogin={onSwitchLogin}
+        onSubmit={handleRegister}
+        isLoading={isLoading}
+        errorMsg={errorMsg}
+      />
     </div>
   );
 };

@@ -1,4 +1,9 @@
-import type { GetResumeById, ResumeFormData, ResumeInfo } from '@/types/ResumeFormType';
+import type {
+  GetResumeById,
+  ResumeFormData,
+  ResumeInfo,
+  UploadResult,
+} from '@/types/ResumeFormType';
 import api from './Axios';
 
 export const createResume = async (data: ResumeFormData): Promise<ResumeInfo> => {
@@ -23,5 +28,21 @@ export const updateResume = async (resumeId: string, data: ResumeFormData) => {
 
 export const deleteResume = async (resumeId: string) => {
   const response = await api.delete(`/resumes/${resumeId}`);
+  return response.data;
+};
+
+export const duplicateResume = async (resumeId: string) => {
+  const response = await api.post(`/resumes/${resumeId}/duplicate`);
+  return response.data;
+};
+
+export const uploadPortfolio = async (file: File): Promise<UploadResult> => {
+  const formData = new FormData();
+  formData.append('file', file);
+  const response = await api.post('/portfolios/upload', formData, {
+    headers: {
+      'Content-Type': 'multipart/form-data',
+    },
+  });
   return response.data;
 };

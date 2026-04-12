@@ -47,9 +47,13 @@ export interface Language {
   test: Test[];
 }
 
-export interface Portfolio {
+export interface PortfolioPayload {
   name: string;
   url?: string;
+  fileUrl?: string;
+}
+
+export interface Portfolio extends PortfolioPayload {
   file: File | null;
   type: uploadType; // ui를 위한 임시 속성
 }
@@ -72,18 +76,19 @@ interface ResumeFormPayload {
   skill: string;
   additionalInfo: AdditionalInfo[];
   language: Language[];
-  portfolio: Omit<Portfolio, 'type'>[];
+  portfolio: PortfolioPayload[];
 }
 
 export interface ResumeFormData {
   title: string;
-  resume: ResumeFormPayload;
+  resume?: ResumeFormPayload;
 }
 
 export interface ResumeInfo {
   id: string;
   title: string;
   createdAt: string;
+  content?: ResumeFormPayload;
 }
 
 export interface GetResumeById {
@@ -92,3 +97,10 @@ export interface GetResumeById {
   content: ResumeFormPayload;
   createdAt: string;
 }
+
+export interface UploadResult {
+  message: string;
+  fileUrl: string;
+}
+
+export type pdfType = File | string | null | undefined;
