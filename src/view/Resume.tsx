@@ -53,7 +53,7 @@ const Resume = () => {
               title="등록된 이력서가 없습니다"
               description="새로운 이력서를 작성하고 취업 성공에 한 발짝 더 다가가세요!"
               action={
-                <div className="w-120 h-30">
+                <div className="w-90 h-40">
                   <CreateButton
                     icon="+"
                     title="첫 이력서 만들기"

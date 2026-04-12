@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 interface CreateButtonProps {
   icon?: string | React.ReactNode;
   title: string;
-  sub: string;
+  sub?: string;
   path: string;
 }
 
@@ -20,7 +20,7 @@ const CreateButton = ({ icon, title, sub, path }: CreateButtonProps) => {
               {title}
             </p>
           </div>
-          <div className="absolute items-center justify-center left-0 bottom-0 w-full h-1/4 hidden lg:flex">
+          <div className="absolute items-center justify-center left-0 bottom-0 w-full hidden lg:flex">
             <p className="text-xs font-semibold text-gray-300">{sub}</p>
           </div>
         </div>
