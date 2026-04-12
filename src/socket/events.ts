@@ -7,6 +7,8 @@ export const SOCKET_EVENT = {
   },
   CLIENT: {
     PING: 'ping',
+    /** 로그인 userId 전달 → 서버에서 user:${userId} 룸 join */
+    NOTIFICATION_SUBSCRIBE: 'notification:subscribe',
   },
 } as const;
 export type ServerSocketEvent = (typeof SOCKET_EVENT.SERVER)[keyof typeof SOCKET_EVENT.SERVER];
