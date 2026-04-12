@@ -26,18 +26,14 @@ const Scrap = () => {
     fetchScraps();
   }, []);
 
-  // 💡 수정된 부분: alert와 confirm을 제거했습니다.
-  // 이제 ScrapCard에서 처리된 후 데이터만 갱신하는 역할을 합니다.
   const handleUnscrap = async (id: string) => {
     try {
       await toggleScrap(id);
-      // 낙관적 업데이트: 서버 응답을 기다리지 않고 리스트에서 즉시 제거하여 반응 속도를 높임
       setScraps((prev) => prev.filter((item) => item.jobPostingId !== id));
     } catch (error: unknown) {
       console.error('스크랩 해제 실패:', error);
-      // 실패 시 목록을 다시 불러와 상태를 동기화
       fetchScraps();
-      throw error; // 에러를 던져서 ScrapCard의 catch 문이 모달 메시지를 띄우게 함
+      throw error;
     }
   };
 
@@ -57,9 +53,29 @@ const Scrap = () => {
       return list.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
     } else {
       return list.sort((a, b) => {
-        if (a.deadline === '상시채용' || a.deadline.includes('상시')) return 1;
-        if (b.deadline === '상시채용' || b.deadline.includes('상시')) return -1;
-        return new Date(a.deadline).getTime() - new Date(b.deadline).getTime();
+        // ✨ 에러 방지: deadline이 없는 경우 빈 문자열 처리
+        const deadlineA = a.deadline || '';
+        const deadlineB = b.deadline || '';
+
+        const isAlwaysA = deadlineA === '상시채용' || deadlineA.includes('상시');
+        const isAlwaysB = deadlineB === '상시채용' || deadlineB.includes('상시');
+
+        // ✨ 핵심 수정: 두 항목이 모두 상시채용일 경우 순서를 유지(0)
+        if (isAlwaysA && isAlwaysB) return 0;
+        if (isAlwaysA) return 1; // A가 상시채용이면 뒤로 보냄
+        if (isAlwaysB) return -1; // B가 상시채용이면 뒤로 보냄
+
+        // 정상적인 날짜 비교
+        const timeA = new Date(deadlineA).getTime();
+        const timeB = new Date(deadlineB).getTime();
+
+        // 날짜 파싱이 불가능한 예외 케이스 처리 (NaN)
+        if (isNaN(timeA) && isNaN(timeB)) return 0;
+        if (isNaN(timeA)) return 1;
+        if (isNaN(timeB)) return -1;
+
+        // 마감일이 가까운 순(오름차순) 정렬
+        return timeA - timeB;
       });
     }
   }, [scraps, sortBy]);

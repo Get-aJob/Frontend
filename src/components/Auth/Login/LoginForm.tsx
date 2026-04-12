@@ -1,6 +1,6 @@
 import React from 'react';
 import { useForm } from 'react-hook-form';
-import { GoogleLogin } from '@react-oauth/google';
+import { GoogleLogin } from '@react-oauth/google'; // ✨ 다시 공식 컴포넌트 사용
 import type { LoginField } from '@/types/Auth';
 import Input from '@/components/common/UI/Input';
 import Button from '@/components/common/UI/Button';
@@ -26,9 +26,7 @@ const LoginForm: React.FC<LoginFormProps> = ({
     register,
     handleSubmit,
     formState: { errors },
-  } = useForm<LoginField>({
-    mode: 'onChange',
-  });
+  } = useForm<LoginField>({ mode: 'onChange' });
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4 w-85 mx-auto">
@@ -44,7 +42,6 @@ const LoginForm: React.FC<LoginFormProps> = ({
           type="email"
           placeholder="example@email.com"
           disabled={isLoading}
-          className={errors.email ? 'border-status-error focus:ring-red-100' : ''}
           {...register('email', { required: '이메일을 입력해주세요.' })}
         />
         {errors.email && (
@@ -58,8 +55,7 @@ const LoginForm: React.FC<LoginFormProps> = ({
           <button
             type="button"
             onClick={onForgotPassword}
-            disabled={isLoading}
-            className="text-body font-medium text-btn-point hover:text-purple-700 transition-colors cursor-pointer disabled:opacity-50"
+            className="text-body font-medium text-btn-point"
           >
             비밀번호를 잊으셨나요?
           </button>
@@ -68,7 +64,6 @@ const LoginForm: React.FC<LoginFormProps> = ({
           type="password"
           placeholder="비밀번호를 입력해주세요"
           disabled={isLoading}
-          className={errors.password ? 'border-status-error focus:ring-red-100' : ''}
           {...register('password', { required: '비밀번호를 입력해주세요.' })}
         />
         {errors.password && (
@@ -76,26 +71,28 @@ const LoginForm: React.FC<LoginFormProps> = ({
         )}
       </div>
 
-      <div className="flex flex-col gap-3 mt-2">
-        <Button type="submit" className="w-full py-2.5" isLoading={isLoading}>
+      <div className="flex flex-col gap-3 mt-4">
+        {/* ✨ 핵심: 일반 로그인 버튼의 높이를 구글 버튼(large)의 기본 높이인 40px(h-10)에 정확히 맞춤 */}
+        <Button type="submit" className="w-full h-10" isLoading={isLoading}>
           {isLoading ? '로그인 중...' : '로그인'}
         </Button>
 
-        <div
-          className={`flex justify-center w-full transition-opacity ${isLoading ? 'opacity-50 pointer-events-none' : ''}`}
-        >
+        {/* ✨ 구글 공식 버튼 복구 (백엔드 정상 작동) */}
+        <div className="w-full flex justify-center [&>div]:w-full">
           <GoogleLogin
-            onSuccess={(res) => onGoogleLogin(res.credential)}
+            onSuccess={(credentialResponse) => {
+              onGoogleLogin(credentialResponse.credential);
+            }}
             onError={() => onGoogleLogin(undefined)}
-            text="continue_with"
+            size="large" // large 사이즈는 높이가 딱 40px 입니다.
+            text="signin_with"
             shape="rectangular"
-            logo_alignment="center"
-            width="340"
+            width="100%"
           />
         </div>
       </div>
 
-      <div className="relative my-2">
+      <div className="relative my-4">
         <div className="absolute inset-0 flex items-center">
           <div className="w-full border-t border-border-light"></div>
         </div>
@@ -106,12 +103,7 @@ const LoginForm: React.FC<LoginFormProps> = ({
 
       <div className="text-center text-sm text-gray-500">
         계정이 없으신가요?
-        <button
-          type="button"
-          onClick={onSwitchRegister}
-          disabled={isLoading}
-          className="font-bold text-btn-point ml-2 hover:underline cursor-pointer disabled:opacity-50"
-        >
+        <button type="button" onClick={onSwitchRegister} className="font-bold text-btn-point ml-2">
           지금 가입하기
         </button>
       </div>
