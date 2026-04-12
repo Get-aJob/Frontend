@@ -5,9 +5,9 @@ import Topbar from './Topbar/Topbar';
 import { PATH } from '@/router/Path';
 import { useAuthStore } from '@/store/useAuthStore';
 import { useNotificationStore } from '@/store/useNotificationStore';
-import { useMobilesidebarStore } from '@/store/useMobileSidebarStore'; // ✨ 사이드바 스토어 추가
+import { useMobilesidebarStore } from '@/store/useMobileSidebarStore';
 import { createNotificationSocket } from '@/socket/SocketClient';
-import { SOCKET_EVENT } from '@/socket/events';
+import { SOCKET_EVENT, type INotificationNewEventPayload } from '@/socket/events'; // ✨ 타입 임포트
 
 const Layout = () => {
   const location = useLocation();
@@ -19,16 +19,14 @@ const Layout = () => {
   const resetUnreadCount = useNotificationStore((state) => state.resetUnreadCount);
   const unreadCount = useNotificationStore((state) => state.unreadCount);
 
-  const closeSidebar = useMobilesidebarStore((state) => state.close); // ✨ 닫기 함수 가져오기
+  const closeSidebar = useMobilesidebarStore((state) => state.close);
 
-  // 로그인 직후/앱 초기 unread count 동기화 및 사이드바 닫기
   useEffect(() => {
     if (!isLoggedIn) {
       resetUnreadCount();
       return;
     }
 
-    // ✨ 로그인이 확인되면 모바일 사이드바를 확실히 닫아줍니다.
     closeSidebar();
     void syncUnreadCount();
   }, [isLoggedIn, syncUnreadCount, resetUnreadCount, closeSidebar]);
@@ -37,13 +35,18 @@ const Layout = () => {
   useEffect(() => {
     if (!isLoggedIn) return;
     const socket = createNotificationSocket();
-    socket.on(SOCKET_EVENT.SERVER.NOTIFICATION_NEW, (payload) => {
-      const isUnread = payload.read_at == null;
+
+    // ✨ payload에 타입을 지정하여 read_at 접근 에러를 해결합니다.
+    socket.on(SOCKET_EVENT.SERVER.NOTIFICATION_NEW, (payload: INotificationNewEventPayload) => {
+      // read_at과 readAt 중 하나라도 null이면 읽지 않은 알림으로 처리
+      const isUnread = payload.read_at == null && payload.readAt == null;
+
       if (isUnread) {
         increaseUnreadCount(1);
       }
       notifySocketNew();
     });
+
     socket.connect();
     return () => {
       socket.off(SOCKET_EVENT.SERVER.NOTIFICATION_NEW);
