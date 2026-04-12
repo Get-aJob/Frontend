@@ -187,7 +187,7 @@ const PostingCard = ({ posting, isScrapped, onScrap, onDetail }: PostingCardProp
               )}
             </div>
             <div>
-              <h3 className="text-xs font-black text-gray-400 tracking-tight mb-1">
+              <h3 className="text-xs font-black text-gray-700 tracking-tight mb-1">
                 {posting.companyName}
               </h3>
               <Badge variant={ddayVariant(dday)}>{dday}</Badge>
@@ -200,7 +200,7 @@ const PostingCard = ({ posting, isScrapped, onScrap, onDetail }: PostingCardProp
               className={`p-1.5 rounded-lg transition-colors flex items-center justify-center bg-white border shadow-sm ${
                 isScrapped
                   ? 'text-btn-point border-btn-point bg-blue-50'
-                  : 'text-gray-300 border-gray-100 hover:text-btn-point hover:bg-blue-50'
+                  : 'text-gray-400 border-gray-100 hover:text-btn-point hover:bg-blue-50'
               }`}
               title={isScrapped ? '스크랩 취소' : '스크랩'}
             >
@@ -212,7 +212,7 @@ const PostingCard = ({ posting, isScrapped, onScrap, onDetail }: PostingCardProp
               <>
                 <button
                   onClick={handleEdit}
-                  className="p-1.5 text-gray-300 hover:text-blue-500 hover:bg-blue-50 rounded-lg transition-colors flex items-center justify-center bg-white border border-gray-100 shadow-sm"
+                  className="p-1.5 text-gray-400 hover:text-blue-500 hover:bg-blue-50 rounded-lg transition-colors flex items-center justify-center bg-white border border-gray-100 shadow-sm"
                   title="수정"
                   aria-label="수정"
                 >
@@ -220,7 +220,7 @@ const PostingCard = ({ posting, isScrapped, onScrap, onDetail }: PostingCardProp
                 </button>
                 <button
                   onClick={handleDelete}
-                  className="p-1.5 text-gray-300 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors flex items-center justify-center bg-white border border-gray-100 shadow-sm"
+                  className="p-1.5 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors flex items-center justify-center bg-white border border-gray-100 shadow-sm"
                   title="삭제"
                   aria-label="삭제"
                 >
@@ -236,17 +236,17 @@ const PostingCard = ({ posting, isScrapped, onScrap, onDetail }: PostingCardProp
             {posting.title}
           </h4>
           <div className="flex flex-wrap gap-1.5">
-            <span className="text-[10px] font-bold text-gray-400 bg-gray-50 px-2 py-0.5 rounded-md border border-gray-100">
+            <span className="text-[10px] font-bold text-gray-600 bg-gray-100/50 px-2 py-0.5 rounded-md border border-gray-200">
               #{posting.location || '전국'}
             </span>
-            <span className="text-[10px] font-bold text-gray-400 bg-gray-50 px-2 py-0.5 rounded-md border border-gray-100">
+            <span className="text-[10px] font-bold text-gray-600 bg-gray-100/50 px-2 py-0.5 rounded-md border border-gray-200">
               #{posting.site || '채용공고'}
             </span>
           </div>
         </div>
 
         {posting.sourceType !== 'manual' && (
-          <div className="flex items-center gap-4 text-gray-300 text-[11px] font-black pt-4 border-t border-gray-50">
+          <div className="flex items-center gap-4 text-gray-500 text-[11px] font-black pt-4 border-t border-gray-100">
             <span className="flex items-center gap-1.5">
               <Eye size={14} strokeWidth={3} /> {posting.viewCount || 0}
             </span>

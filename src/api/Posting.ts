@@ -12,6 +12,7 @@ export const getPostings = async (
   limit: number,
   sourceType: string,
   site?: string,
+  keyword?: string,
 ): Promise<PostingResponse> => {
   const params = new URLSearchParams({
     limit: String(limit),
@@ -19,6 +20,7 @@ export const getPostings = async (
   });
 
   if (site) params.append('sourceSite', site);
+  if (keyword) params.append('keyword', keyword);
   if (sourceType === 'auto') params.append('sourceType', 'auto');
 
   // sourceType이 manual이면 본인 공고만 가져오는 엔드포인트(/jobs/manual) 호출
