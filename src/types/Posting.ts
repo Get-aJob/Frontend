@@ -22,6 +22,10 @@ export interface BackendJob {
   sourceSiteName?: string;
   created_at?: string;
   createdAt?: string;
+  commentCount?: number;
+  viewCount?: number;
+  comment_count?: number;
+  view_count?: number;
 }
 
 export interface JobPosting {

@@ -5,6 +5,7 @@ import Topbar from './Topbar/Topbar';
 import { PATH } from '@/router/Path';
 import { useAuthStore } from '@/store/useAuthStore';
 import { useNotificationStore } from '@/store/useNotificationStore';
+import { useMobilesidebarStore } from '@/store/useMobileSidebarStore'; // ✨ 사이드바 스토어 추가
 import { createNotificationSocket } from '@/socket/SocketClient';
 import { SOCKET_EVENT } from '@/socket/events';
 
@@ -18,21 +19,25 @@ const Layout = () => {
   const resetUnreadCount = useNotificationStore((state) => state.resetUnreadCount);
   const unreadCount = useNotificationStore((state) => state.unreadCount);
 
-  // 로그인 직후/앱 초기 unread count 동기화
+  const closeSidebar = useMobilesidebarStore((state) => state.close); // ✨ 닫기 함수 가져오기
+
+  // 로그인 직후/앱 초기 unread count 동기화 및 사이드바 닫기
   useEffect(() => {
     if (!isLoggedIn) {
       resetUnreadCount();
       return;
     }
+
+    // ✨ 로그인이 확인되면 모바일 사이드바를 확실히 닫아줍니다.
+    closeSidebar();
     void syncUnreadCount();
-  }, [isLoggedIn, syncUnreadCount, resetUnreadCount]);
+  }, [isLoggedIn, syncUnreadCount, resetUnreadCount, closeSidebar]);
 
   // 어느 화면에 있든 notification:new 반영 (소켓 이벤트 기반 증분)
   useEffect(() => {
     if (!isLoggedIn) return;
     const socket = createNotificationSocket();
     socket.on(SOCKET_EVENT.SERVER.NOTIFICATION_NEW, (payload) => {
-      // 신규 알림 이벤트는 보통 unread 상태로 오며, 필드가 없으면 unread로 간주
       const isUnread = payload.read_at == null;
       if (isUnread) {
         increaseUnreadCount(1);
@@ -47,7 +52,7 @@ const Layout = () => {
   }, [isLoggedIn, increaseUnreadCount, notifySocketNew]);
 
   const getTopbarConfig = () => {
-    const baseConfig = { showSearch: true, showAddButton: true };
+    const baseConfig = { showAddButton: true };
     switch (location.pathname) {
       case PATH.ROOT:
         return { ...baseConfig, title: '캘린더', badge: 'CALENDAR' };
@@ -82,11 +87,9 @@ const Layout = () => {
           title={config.title}
           badge={config.badge}
           unreadCount={unreadCount}
-          showSearch={config.showSearch}
           showAddButton={config.showAddButton}
         />
 
-        {/* ✨ 모든 페이지에 공통 적용되는 스크롤 영역과 여백 */}
         <main className="flex-1 overflow-y-auto bg-bg-view scroll-smooth">
           <div className="max-w-360 mx-auto p-8 animate-in fade-in slide-in-from-bottom-2 duration-300">
             {!isLoggedIn && !isPublicPath ? (
