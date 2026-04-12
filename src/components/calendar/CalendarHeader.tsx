@@ -103,7 +103,7 @@ const CalendarHeader: React.FC<CalendarHeaderProps> = ({
             {f === 'all'
               ? '전체'
               : f === 'applied'
-                ? '지원중'
+                ? '지원현황'
                 : f === 'manual'
                   ? '수동공고'
                   : '자동공고'}
