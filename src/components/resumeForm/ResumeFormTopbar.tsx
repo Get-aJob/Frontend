@@ -72,6 +72,7 @@ const ResumeFormTopbar = () => {
       if (response.id && !resumeId) {
         setFormId(response.id);
       }
+      navigate('/');
     } catch (error) {
       console.error(`저장 중 에러가 발생했습니다: ${error}`);
     }

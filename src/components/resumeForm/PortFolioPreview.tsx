@@ -1,4 +1,5 @@
 import { usePreviewStore } from '@/store/usePdfPreviewStore';
+import { X } from 'lucide-react';
 import { useEffect, useRef } from 'react';
 import { useShallow } from 'zustand/react/shallow';
 
@@ -37,7 +38,18 @@ const PortFolioPreview = ({ name }: PortFolioPreviewProps) => {
         onClick={(e) => e.stopPropagation()}
         className="bg-white p-8 w-fit h-fit rounded-4xl shadow-2xl border border-border-light"
       >
-        <h1 className="text-base font-black text-gray-800 mb-4">{name}</h1>
+        <div className="flex w-full h-fit items-center justify-between p-3">
+          <h1 className="text-base font-black w-fit h-10 text-gray-800 p-2">{name}</h1>
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              closePreview();
+            }}
+            className="p-2 mx-1 rounded-xl text-gray-500 hover:text-gray-900 hover:bg-gray-100 transition-all"
+          >
+            <X />
+          </button>
+        </div>
         <embed
           key={previewUrl}
           src={`${previewUrl}#toolbar=0&navpanes=0&scrollbar=0`}
