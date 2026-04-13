@@ -168,25 +168,8 @@ export const usePostingStore = create<PostingState>()(
           const mappedJobs: ExtendedJobPosting[] = sortedJobs.map((j: BackendJob) => {
             const jobData = j as ExtendedBackendJob;
 
-            let finalDeadline = '상시채용';
             const deadline = jobData.deadline;
             const deadlineText = jobData.deadline_text || jobData.deadlineText;
-
-            if (deadline) {
-              const today = new Date();
-              today.setHours(0, 0, 0, 0);
-              const targetDate = new Date(deadline);
-              targetDate.setHours(0, 0, 0, 0);
-
-              const diffTime = targetDate.getTime() - today.getTime();
-              const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-
-              if (diffDays === 0) finalDeadline = 'D-Day';
-              else if (diffDays > 0) finalDeadline = `D-${diffDays}`;
-              else finalDeadline = `마감 (D+${Math.abs(diffDays)})`;
-            } else if (deadlineText) {
-              finalDeadline = deadlineText.includes('상시') ? '상시채용' : deadlineText;
-            }
 
             const sourceType = jobData.source_type || jobData.sourceType || 'manual';
             const finalSourceType = sourceType === 'auto' ? 'auto' : 'manual';
@@ -203,7 +186,7 @@ export const usePostingStore = create<PostingState>()(
                   : '수동등록',
               location: jobData.location || '전국',
               experienceLevel: jobData.experience || '경력무관',
-              deadline: finalDeadline,
+              deadline: deadline || deadlineText || '상시채용',
               rawDeadline: deadline ? formatLocalDate(deadline) : undefined,
               isScrapped: scrappedIds.has(String(jobData.id)),
               sourceType: finalSourceType,

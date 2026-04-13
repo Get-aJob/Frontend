@@ -4,7 +4,7 @@ import Badge from '@/components/common/UI/Badge';
 import { MessageSquare, Eye, Edit2, Trash2, Bookmark } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import JobModal from '@/components/jobPostForm/JobModal';
-import { ddayVariant } from '@/utils/statusUtils';
+import { ddayVariant, toDday, isExpired } from '@/utils/statusUtils';
 import { getJobComments } from '@/api/Comment';
 import type { RawCommentData } from './Comment/useJobComment';
 import { usePostingStore } from '@/store/usePostingStore';
@@ -20,7 +20,8 @@ interface PostingCardProps {
 }
 
 const PostingCard = ({ posting, isScrapped, onScrap, onDetail }: PostingCardProps) => {
-  const dday = posting.deadline || '상시채용';
+  const displayDday = toDday(posting.deadline);
+  const expired = isExpired(posting.deadline);
 
   // 💡 삭제 로직 및 수정 모달 상태 추가
   const navigate = useNavigate();
@@ -165,13 +166,17 @@ const PostingCard = ({ posting, isScrapped, onScrap, onDetail }: PostingCardProp
   return (
     <>
       <article
-        className="group relative bg-white border border-border-light rounded-3xl p-6 transition-all hover:border-btn-point hover:shadow-md cursor-pointer flex flex-col h-full"
+        className={`group relative bg-white border border-border-light rounded-3xl p-6 transition-all hover:border-btn-point hover:shadow-md cursor-pointer flex flex-col h-full ${
+          expired ? 'opacity-70' : ''
+        }`}
         onClick={handleCardClick}
       >
         <div className="flex justify-between items-start mb-5">
           <div className="flex items-center gap-4">
             <div
-              className="w-14 h-14 rounded-2xl bg-gray-50 border border-border-light overflow-hidden flex items-center justify-center shadow-sm cursor-default"
+              className={`w-14 h-14 rounded-2xl bg-gray-50 border border-border-light overflow-hidden flex items-center justify-center shadow-sm cursor-default ${
+                expired ? 'grayscale' : ''
+              }`}
               onClick={(e) => e.stopPropagation()}
             >
               {posting.companyLogo ? (
@@ -190,7 +195,7 @@ const PostingCard = ({ posting, isScrapped, onScrap, onDetail }: PostingCardProp
               <h3 className="text-xs font-black text-gray-700 tracking-tight mb-1">
                 {posting.companyName}
               </h3>
-              <Badge variant={ddayVariant(dday)}>{dday}</Badge>
+              <Badge variant={ddayVariant(displayDday)}>{displayDday}</Badge>
             </div>
           </div>
           <div className="flex items-center gap-1.5 shrink-0 ml-4">
@@ -232,7 +237,11 @@ const PostingCard = ({ posting, isScrapped, onScrap, onDetail }: PostingCardProp
         </div>
 
         <div className="flex-1">
-          <h4 className="text-subtitle font-black text-gray-900 mb-3 line-clamp-1 group-hover:text-btn-point transition-colors">
+          <h4
+            className={`text-subtitle font-black mb-3 line-clamp-1 group-hover:text-btn-point transition-colors ${
+              expired ? 'text-gray-400' : 'text-gray-900'
+            }`}
+          >
             {posting.title}
           </h4>
           <div className="flex flex-wrap gap-1.5">
