@@ -66,38 +66,28 @@ const Sidebar = () => {
     <aside
       ref={sidebarRef}
       className={clsx(
-        'flex flex-col w-64 h-full bg-white border-r border-border-light shrink-0 z-40 transition-all max-lg:fixed max-lg:shadow-lg',
+        // ✨ 모바일 너비를 w-56(224px)으로 줄이고, 데스크톱은 w-64 유지
+        'flex flex-col w-56 sm:w-64 h-full bg-white border-r border-border-light shrink-0 z-40 transition-all max-lg:fixed max-lg:shadow-lg',
         isOpen || !isMobile ? '' : '-translate-x-full',
       )}
     >
       <SidebarLogo />
 
-      <nav className="flex-1 px-4 py-6 space-y-8 overflow-y-auto custom-scrollbar">
+      {/* ✨ 패딩 축소 */}
+      <nav className="flex-1 px-3 sm:px-4 py-4 sm:py-6 space-y-6 sm:space-y-8 overflow-y-auto custom-scrollbar">
         {navSections.map((section: NavSectionType) => (
-          <div key={section.title} className="space-y-2">
-            <h3 className="px-3 text-[11px] font-bold text-gray-400 uppercase tracking-wider">
+          <div key={section.title} className="space-y-1.5 sm:space-y-2">
+            {/* ✨ 제목 글씨 축소 */}
+            <h3 className="px-3 text-[10px] sm:text-[11px] font-bold text-gray-400 uppercase tracking-wider">
               {section.title}
             </h3>
-            <div className="space-y-1">
+            <div className="space-y-0.5 sm:space-y-1">
               {section.items.map((item: NavItemType) => (
                 <SidebarNavItem key={item.id} item={item} />
               ))}
             </div>
           </div>
         ))}
-        {/* {NAV_SECTIONS.map((section: NavSectionType) => (
-          <div key={section.title} className="space-y-2">
-            <h3 className="px-3 text-[11px] font-bold text-gray-400 uppercase tracking-wider">
-              {section.title}
-            </h3>
-
-            <div className="space-y-1">
-              {section.items.map((item: NavItemType) => (
-                <SidebarNavItem key={item.id} item={item} />
-              ))}
-            </div>
-          </div>
-        ))} */}
       </nav>
       <SidebarAuth />
     </aside>

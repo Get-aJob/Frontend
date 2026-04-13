@@ -28,9 +28,12 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
         className={clsx(
           'inline-flex items-center justify-center font-bold transition-all duration-200',
           'active:scale-95 disabled:opacity-50 disabled:pointer-events-none cursor-pointer',
-          size === 'sm' && 'px-3 py-1.5 text-body rounded-md',
-          size === 'md' && 'px-4 py-2 text-subtitle rounded-lg',
-          size === 'lg' && 'px-6 py-3 text-title rounded-xl',
+
+          /* ✨ 모바일 환경을 고려한 초소형 텍스트 및 패딩 적용 */
+          size === 'sm' && 'px-2 py-0.5 text-[9px] sm:text-[11px] rounded-md',
+          size === 'md' && 'px-3 py-1 text-[10px] sm:text-subtitle rounded-lg',
+          size === 'lg' && 'px-4 py-2 text-[12px] sm:text-title rounded-xl',
+
           variant === 'primary' &&
             'bg-btn-point text-white shadow-sm hover:scale-105 hover:shadow-md',
           variant === 'outline' &&
@@ -40,7 +43,7 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
         )}
         {...props}
       >
-        {isLoading && <Loader2 className="mr-2 animate-spin" size={18} />}
+        {isLoading && <Loader2 className="mr-1.5 animate-spin" size={12} />}
         {children}
       </button>
     );

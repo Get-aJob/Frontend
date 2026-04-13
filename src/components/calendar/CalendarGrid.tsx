@@ -1,33 +1,42 @@
+import React from 'react';
+import Month from './modes/Month';
+import Week from './modes/Week';
+import Day from './modes/Day';
 import type { ScheduleEvent, ViewType } from '@/types/Calendar';
-import MonthMode from '@/components/calendar/modes/Month';
-import WeekMode from '@/components/calendar/modes/Week';
-import DayMode from '@/components/calendar/modes/Day';
 
-interface Props {
+interface CalendarGridProps {
   view: ViewType;
   currentDate: Date;
   events: ScheduleEvent[];
-  onEventClick: (e: ScheduleEvent) => void;
-  onMoreClick?: (dateStr: string) => void;
+  onEventClick: (event: ScheduleEvent) => void;
+  onMoreClick: (date: string) => void;
 }
 
-const CalendarGrid = ({ view, currentDate, events, onEventClick, onMoreClick }: Props) => {
-  if (view === 'month') {
-    return (
-      <MonthMode
-        currentDate={currentDate}
-        events={events}
-        onEventClick={onEventClick}
-        onMoreClick={onMoreClick}
-      />
-    );
-  }
-
-  if (view === 'week') {
-    return <WeekMode currentDate={currentDate} events={events} onEventClick={onEventClick} />;
-  }
-
-  return <DayMode currentDate={currentDate} events={events} onEventClick={onEventClick} />;
+const CalendarGrid: React.FC<CalendarGridProps> = ({
+  view,
+  currentDate,
+  events,
+  onEventClick,
+  onMoreClick,
+}) => {
+  return (
+    <div className="flex-1 bg-white border border-slate-100 rounded-3xl overflow-hidden shadow-inner-sm">
+      {view === 'month' && (
+        <Month
+          currentDate={currentDate}
+          events={events}
+          onEventClick={onEventClick}
+          onMoreClick={onMoreClick}
+        />
+      )}
+      {view === 'week' && (
+        <Week currentDate={currentDate} events={events} onEventClick={onEventClick} />
+      )}
+      {view === 'day' && (
+        <Day currentDate={currentDate} events={events} onEventClick={onEventClick} />
+      )}
+    </div>
+  );
 };
 
 export default CalendarGrid;

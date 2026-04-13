@@ -35,4 +35,6 @@ export interface CreateApplicationPayload {
 export interface UpdateApplicationPayload {
   statusId?: number | string;
   notes?: string;
+  appliedAt?: string;
+  statusChangedAt?: string;
 }

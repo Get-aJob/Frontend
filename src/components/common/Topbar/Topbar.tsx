@@ -31,7 +31,6 @@ const Topbar = ({ title, badge, showAddButton, unreadCount = 0 }: TopbarProps) =
   const handleAddButtonClick = () => {
     if (!isLoggedIn) {
       setShowToast(true);
-      // 기존 타이머가 있다면 초기화하여 토스트가 조기에 닫히는 것을 방지
       if (toastTimeoutRef.current) clearTimeout(toastTimeoutRef.current);
       toastTimeoutRef.current = setTimeout(() => setShowToast(false), 3000);
       return;
@@ -41,25 +40,27 @@ const Topbar = ({ title, badge, showAddButton, unreadCount = 0 }: TopbarProps) =
 
   return (
     <>
-      <header className="flex items-center px-8 gap-4 h-20 w-full bg-white border-b border-border-light shrink-0 sticky top-0 z-30 shadow-none">
-        <div className="flex items-center gap-3 text-[1.35rem] font-black text-slate-800 tracking-tight">
+      {/* ✨ 모바일에서 px-4로 여백을 줄여 아이콘을 왼쪽 끝에 더 밀착, 높이(h-16) 축소 */}
+      <header className="flex items-center px-4 sm:px-8 gap-2 sm:gap-4 h-16 sm:h-20 w-full bg-white border-b border-border-light shrink-0 sticky top-0 z-30 shadow-none">
+        <div className="flex items-center gap-1 sm:gap-3 text-lg sm:text-[1.35rem] font-black text-slate-800 tracking-tight">
           <button
             onClick={() => {
               toggle();
             }}
-            className="lg:hidden cursor-pointer p-2 mx-1 rounded-xl text-gray-500 hover:text-gray-900 hover:bg-gray-100 transition-all"
+            /* ✨ 패딩을 p-1.5로 줄여서 여백 최소화 */
+            className="lg:hidden cursor-pointer p-1.5 rounded-xl text-gray-500 hover:text-gray-900 hover:bg-gray-100 transition-all"
           >
-            <MenuIcon />
+            <MenuIcon size={22} />
           </button>
-          <span>{title}</span>
+          <span className="ml-1">{title}</span>
           {badge && (
-            <Badge variant="point" className="px-2.5 py-1 text-[11px] font-bold">
+            <Badge variant="point" className="px-2 py-0.5 text-[9px] sm:text-[11px] font-bold">
               {badge}
             </Badge>
           )}
           {isLoggedIn && unreadCount > 0 && (
-            <Badge variant="error" className="px-2.5 py-1 text-[11px] font-bold">
-              미확인 {unreadCount}
+            <Badge variant="error" className="px-2 py-0.5 text-[9px] sm:text-[11px] font-bold">
+              {unreadCount}
             </Badge>
           )}
         </div>
@@ -69,7 +70,7 @@ const Topbar = ({ title, badge, showAddButton, unreadCount = 0 }: TopbarProps) =
             <Button
               variant="primary"
               onClick={handleAddButtonClick}
-              className="px-6 py-2.5 h-10.5 rounded-xl font-bold text-sm"
+              className="px-3.5 py-1.5 h-9 sm:h-10.5 rounded-lg sm:rounded-xl font-bold text-body sm:text-sm"
             >
               ＋ 공고 등록
             </Button>

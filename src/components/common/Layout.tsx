@@ -5,8 +5,9 @@ import Topbar from './Topbar/Topbar';
 import { PATH } from '@/router/Path';
 import { useAuthStore } from '@/store/useAuthStore';
 import { useNotificationStore } from '@/store/useNotificationStore';
+import { useMobilesidebarStore } from '@/store/useMobileSidebarStore';
 import { createNotificationSocket } from '@/socket/SocketClient';
-import { SOCKET_EVENT } from '@/socket/events';
+import { SOCKET_EVENT, type INotificationNewEventPayload } from '@/socket/events'; // ✨ 타입 임포트
 
 const Layout = () => {
   const location = useLocation();
@@ -18,27 +19,34 @@ const Layout = () => {
   const resetUnreadCount = useNotificationStore((state) => state.resetUnreadCount);
   const unreadCount = useNotificationStore((state) => state.unreadCount);
 
-  // 로그인 직후/앱 초기 unread count 동기화
+  const closeSidebar = useMobilesidebarStore((state) => state.close);
+
   useEffect(() => {
     if (!isLoggedIn) {
       resetUnreadCount();
       return;
     }
+
+    closeSidebar();
     void syncUnreadCount();
-  }, [isLoggedIn, syncUnreadCount, resetUnreadCount]);
+  }, [isLoggedIn, syncUnreadCount, resetUnreadCount, closeSidebar]);
 
   // 어느 화면에 있든 notification:new 반영 (소켓 이벤트 기반 증분)
   useEffect(() => {
     if (!isLoggedIn) return;
     const socket = createNotificationSocket();
-    socket.on(SOCKET_EVENT.SERVER.NOTIFICATION_NEW, (payload) => {
-      // 신규 알림 이벤트는 보통 unread 상태로 오며, 필드가 없으면 unread로 간주
-      const isUnread = payload.read_at == null;
+
+    // ✨ payload에 타입을 지정하여 read_at 접근 에러를 해결합니다.
+    socket.on(SOCKET_EVENT.SERVER.NOTIFICATION_NEW, (payload: INotificationNewEventPayload) => {
+      // read_at과 readAt 중 하나라도 null이면 읽지 않은 알림으로 처리
+      const isUnread = payload.read_at == null && payload.readAt == null;
+
       if (isUnread) {
         increaseUnreadCount(1);
       }
       notifySocketNew();
     });
+
     socket.connect();
     return () => {
       socket.off(SOCKET_EVENT.SERVER.NOTIFICATION_NEW);
@@ -47,7 +55,7 @@ const Layout = () => {
   }, [isLoggedIn, increaseUnreadCount, notifySocketNew]);
 
   const getTopbarConfig = () => {
-    const baseConfig = { showSearch: true, showAddButton: true };
+    const baseConfig = { showAddButton: true };
     switch (location.pathname) {
       case PATH.ROOT:
         return { ...baseConfig, title: '캘린더', badge: 'CALENDAR' };
@@ -85,7 +93,6 @@ const Layout = () => {
           showAddButton={config.showAddButton}
         />
 
-        {/* ✨ 모든 페이지에 공통 적용되는 스크롤 영역과 여백 */}
         <main className="flex-1 overflow-y-auto bg-bg-view scroll-smooth">
           <div className="max-w-360 mx-auto p-8 animate-in fade-in slide-in-from-bottom-2 duration-300">
             {!isLoggedIn && !isPublicPath ? (
