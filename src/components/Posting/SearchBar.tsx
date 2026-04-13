@@ -1,9 +1,11 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Search, X } from 'lucide-react';
+import { useSearchParams } from 'react-router-dom';
 import { usePostingStore } from '@/store/usePostingStore';
 
 const SearchBar = () => {
   const { searchKeyword, setSearchKeyword, fetchPostings, selectedSite } = usePostingStore();
+  const [searchParams, setSearchParams] = useSearchParams();
   const [inputValue, setInputValue] = useState(searchKeyword);
   const [isFocused, setIsFocused] = useState(false);
   const [prevSearchKeyword, setPrevSearchKeyword] = useState(searchKeyword);
@@ -19,7 +21,15 @@ const SearchBar = () => {
     const timer = setTimeout(() => {
       if (inputValue !== searchKeyword) {
         setSearchKeyword(inputValue);
-        fetchPostings(1, selectedSite, inputValue);
+
+        // URL 파라미터 업데이트
+        const params = new URLSearchParams(searchParams);
+        if (inputValue) {
+          params.set('keyword', inputValue);
+        } else {
+          params.delete('keyword');
+        }
+        setSearchParams(params, { replace: true });
       }
     }, 500);
 
@@ -29,8 +39,7 @@ const SearchBar = () => {
   const handleClear = useCallback(() => {
     setInputValue('');
     setSearchKeyword('');
-    fetchPostings(1, selectedSite, '');
-  }, [setSearchKeyword, fetchPostings, selectedSite]);
+  }, [setSearchKeyword]);
 
   return (
     <div className="relative z-[10] w-full py-2">

@@ -1,4 +1,5 @@
 import { useEffect, useState, useMemo } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { usePostingStore } from '@/store/usePostingStore';
 import PostingList from '@/components/Posting/PostingList';
 import PostingFilter from '@/components/Posting/PostingFilter';
@@ -26,7 +27,14 @@ const Posting = () => {
     toggleScrapStatus,
     updateViewCount,
     resetFilters,
+    setSearchKeyword,
+    setSourceType,
+    setSelectedSite,
   } = usePostingStore();
+  const [searchParams] = useSearchParams();
+  const keywordFromUrl = searchParams.get('keyword') || '';
+  const sourceFromUrl = searchParams.get('source');
+  const siteFromUrl = searchParams.get('site') || '';
   const isLoggedIn = useAuthStore((state) => state.isLoggedIn);
   const isManualWithoutLogin = !isLoggedIn && sourceType === 'manual';
   const { fetchData } = useStatusStore();
@@ -34,10 +42,37 @@ const Posting = () => {
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
   const [selectedJobId, setSelectedJobId] = useState<string | number | null>(null);
 
-  // 페이지 진입 시 항상 자동 수집 모드로 초기화 (fetchPostings를 트리거하지 않는 무성 리셋 사용)
+  // 페이지 진입 시 필터 초기화 및 URL 데이터 동기화
   useEffect(() => {
-    resetFilters();
-  }, [resetFilters]);
+    // URL 파라미터가 하나라도 있으면 해당 값들로 스토어 업데이트
+    if (sourceFromUrl || siteFromUrl || keywordFromUrl) {
+      if (sourceFromUrl === 'auto' || sourceFromUrl === 'manual') {
+        setSourceType(sourceFromUrl);
+      }
+      if (siteFromUrl) {
+        setSelectedSite(siteFromUrl);
+      }
+      if (keywordFromUrl) {
+        setSearchKeyword(keywordFromUrl);
+      }
+    } else {
+      // URL 파라미터가 없으면 전체 초기화
+      resetFilters();
+    }
+
+    // 페이지를 벗어날 때 상태를 리셋하여 다시 돌아올 때 이전 상태가 남지 않도록 함
+    return () => {
+      resetFilters();
+    };
+  }, [
+    keywordFromUrl,
+    sourceFromUrl,
+    siteFromUrl,
+    resetFilters,
+    setSearchKeyword,
+    setSourceType,
+    setSelectedSite,
+  ]);
 
   useEffect(() => {
     fetchPostings(currentPage, selectedSite, searchKeyword);
@@ -45,14 +80,15 @@ const Posting = () => {
       fetchData();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isLoggedIn, searchKeyword, sourceType, selectedSite]);
+  }, [isLoggedIn, searchKeyword, sourceType, selectedSite, currentPage]);
 
   const handlePageChange = (page: number) => {
     const mainElement = document.querySelector('main');
     if (mainElement) {
       mainElement.scrollTo({ top: 0, behavior: 'smooth' });
     }
-    fetchPostings(page, selectedSite, searchKeyword);
+    // currentPage가 바뀌면 하단 useEffect가 실질적인 fetch를 수행합니다.
+    usePostingStore.setState({ currentPage: page });
   };
 
   const selectedJob = useMemo(() => {

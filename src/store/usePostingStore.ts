@@ -115,12 +115,10 @@ export const usePostingStore = create<PostingState>()(
 
       setSourceType: (type) => {
         set({ sourceType: type, currentPage: 1, selectedSite: '' });
-        get().fetchPostings(1);
       },
 
       setSelectedSite: (site) => {
         set({ selectedSite: site, currentPage: 1 });
-        get().fetchPostings(1, site);
       },
 
       fetchPostings: async (page: number, site?: string, keyword?: string) => {
@@ -226,7 +224,6 @@ export const usePostingStore = create<PostingState>()(
         set({ isLoading: true });
         try {
           await createDirectJob(data);
-          await get().fetchPostings(1);
         } catch (err) {
           set({ error: (err as Error).message });
           throw err;
@@ -239,7 +236,6 @@ export const usePostingStore = create<PostingState>()(
         set({ isLoading: true });
         try {
           await updateDirectJob(externalId, data);
-          await get().fetchPostings(get().currentPage);
         } catch (err) {
           set({ error: (err as Error).message });
           throw err;
@@ -261,7 +257,6 @@ export const usePostingStore = create<PostingState>()(
             // 자동 수집 공고 삭제(현재 지원되지 않으나 확장을 위해 분리)
             await deleteDirectJob(externalId);
           }
-          await get().fetchPostings(get().currentPage);
         } catch (err) {
           set({ error: (err as Error).message });
           throw err;
@@ -287,7 +282,6 @@ export const usePostingStore = create<PostingState>()(
         set({ isLoading: true });
         try {
           await manualSave(data);
-          await get().fetchPostings(1);
         } catch (err) {
           set({ error: (err as Error).message });
           throw err;

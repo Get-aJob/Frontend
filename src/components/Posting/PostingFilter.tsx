@@ -1,5 +1,6 @@
 import { Info, Layers } from 'lucide-react';
 import { usePostingStore } from '@/store/usePostingStore';
+import { useSearchParams } from 'react-router-dom';
 import clsx from 'clsx';
 
 interface PostingFilterProps {
@@ -9,6 +10,26 @@ interface PostingFilterProps {
 const PostingFilter = ({ totalCount }: PostingFilterProps) => {
   const { sourceType, setSourceType, sourceSites, selectedSite, setSelectedSite } =
     usePostingStore();
+  const [searchParams, setSearchParams] = useSearchParams();
+
+  const handleSourceTypeChange = (type: 'auto' | 'manual') => {
+    setSourceType(type);
+    const params = new URLSearchParams(searchParams);
+    params.set('source', type);
+    params.delete('site'); // 출처 변경 시 사이트 필터 초기화
+    setSearchParams(params, { replace: true });
+  };
+
+  const handleSiteChange = (site: string) => {
+    setSelectedSite(site);
+    const params = new URLSearchParams(searchParams);
+    if (site) {
+      params.set('site', site);
+    } else {
+      params.delete('site');
+    }
+    setSearchParams(params, { replace: true });
+  };
 
   const filterOptions: { id: 'auto' | 'manual'; label: string }[] = [
     { id: 'auto', label: '자동 공고' },
@@ -25,7 +46,7 @@ const PostingFilter = ({ totalCount }: PostingFilterProps) => {
             {filterOptions.map((type) => (
               <button
                 key={type.id}
-                onClick={() => setSourceType(type.id)}
+                onClick={() => handleSourceTypeChange(type.id)}
                 className={`px-4 py-1.5 rounded-lg text-xs font-bold transition-all duration-200 border border-transparent ${
                   sourceType === type.id
                     ? 'bg-white shadow-sm text-btn-point'
@@ -43,7 +64,7 @@ const PostingFilter = ({ totalCount }: PostingFilterProps) => {
           {sourceType === 'auto' ? (
             <div className="flex items-center gap-2 overflow-x-auto pb-0.5 scrollbar-hide flex-1">
               <button
-                onClick={() => setSelectedSite('')}
+                onClick={() => handleSiteChange('')}
                 className={clsx(
                   'shrink-0 px-4 py-1.5 rounded-full text-xs font-extrabold transition-all duration-200 border',
                   selectedSite === ''
@@ -59,7 +80,7 @@ const PostingFilter = ({ totalCount }: PostingFilterProps) => {
                   return (
                     <button
                       key={site}
-                      onClick={() => setSelectedSite(site)}
+                      onClick={() => handleSiteChange(site)}
                       className={clsx(
                         'shrink-0 flex items-center gap-1.5 px-4 py-1.5 rounded-full text-xs font-extrabold transition-all duration-200 border',
                         isActive
