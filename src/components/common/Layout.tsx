@@ -82,7 +82,6 @@ const Layout = () => {
           title={config.title}
           badge={config.badge}
           unreadCount={unreadCount}
-          showSearch={config.showSearch}
           showAddButton={config.showAddButton}
         />
 

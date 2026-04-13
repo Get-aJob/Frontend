@@ -9,6 +9,8 @@ interface ResumeFormDatePickerProps<T extends FieldValues> {
   control: Control<T>;
   disabled: boolean;
   placeholder?: string;
+  minDate?: Date | null;
+  maxDate?: Date | null;
 }
 
 const ResumeFormDatePicker = <T extends FieldValues>({
@@ -16,6 +18,8 @@ const ResumeFormDatePicker = <T extends FieldValues>({
   control,
   disabled,
   placeholder,
+  minDate,
+  maxDate,
 }: ResumeFormDatePickerProps<T>) => {
   const [isOpen, setIsOpen] = useState(false);
   const calendarRef = useRef<HTMLDivElement | null>(null);
@@ -74,6 +78,8 @@ const ResumeFormDatePicker = <T extends FieldValues>({
                     onChange(null);
                   }
                 }}
+                minDate={minDate ?? undefined}
+                maxDate={maxDate ?? undefined}
                 disabled={disabled}
                 dateFormat="yyyyMM.dd"
                 onKeyDown={(e) => {
