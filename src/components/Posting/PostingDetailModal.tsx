@@ -129,7 +129,7 @@ const PostingDetailModal = ({ isOpen, onClose, job }: PostingDetailModalProps) =
                 {
                   icon: Globe,
                   label: '수집 경로',
-                  value: job.sourceType === 'auto' ? '자동 수집' : '사용자 등록',
+                  value: job.sourceType === 'auto' ? '자동 공고' : '수동 공고',
                 },
               ].map((item, idx) => (
                 <div

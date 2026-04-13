@@ -182,8 +182,8 @@ export const usePostingStore = create<PostingState>()(
               url: jobData.source_url || jobData.sourceUrl,
               site:
                 finalSourceType === 'auto'
-                  ? jobData.source_site_name || jobData.sourceSiteName || '자동크롤링'
-                  : '수동등록',
+                  ? jobData.source_site_name || jobData.sourceSiteName || '자동 공고'
+                  : '수동 공고',
               location: jobData.location || '전국',
               experienceLevel: jobData.experience || '경력무관',
               deadline: deadline || deadlineText || '상시채용',

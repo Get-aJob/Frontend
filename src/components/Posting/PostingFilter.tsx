@@ -11,8 +11,8 @@ const PostingFilter = ({ totalCount }: PostingFilterProps) => {
     usePostingStore();
 
   const filterOptions: { id: 'auto' | 'manual'; label: string }[] = [
-    { id: 'auto', label: '자동 수집' },
-    { id: 'manual', label: '수동 등록' },
+    { id: 'auto', label: '자동 공고' },
+    { id: 'manual', label: '수동 공고' },
   ];
 
   return (
