@@ -317,7 +317,7 @@ export const usePostingStore = create<PostingState>()(
       },
 
       resetFilters: () => {
-        set({ sourceType: 'auto', selectedSite: '', currentPage: 1 });
+        set({ sourceType: 'auto', selectedSite: '', currentPage: 1, searchKeyword: '' });
       },
     }),
     {
