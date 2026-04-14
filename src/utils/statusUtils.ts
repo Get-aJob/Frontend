@@ -43,11 +43,9 @@ export const toDday = (deadline?: string): string => {
     case 'CLOSED':
       return '공고 마감';
     case 'DATE': {
-      const diffDays = differenceInCalendarDays(
-        startOfDay(new Date(deadline)),
-        startOfDay(new Date()),
-      );
-      if (diffDays === 0) return 'D-Day';
+      const targetDate = new Date(deadline);
+      const diffDays = differenceInCalendarDays(startOfDay(targetDate), startOfDay(new Date()));
+      if (diffDays === 0) return '오늘 마감';
       if (diffDays > 0) return `D-${diffDays}`;
       return '공고 마감';
     }
@@ -61,10 +59,7 @@ export const formatFullDate = (deadline?: string): string => {
   if (!deadline) return '상시 채용';
   const category = getStatusCategory(deadline);
 
-  // 만료되었거나 명시적으로 마감된 경우
-  if (category === 'CLOSED' || isExpired(deadline)) return '공고 마감';
-
-  // 특수 상태의 경우 상세 페이지용 문구 반환 (나중에 필요하면 더 길게 가능)
+  // 특수 상태의 경우 상세 페이지용 문구 반환
   if (category === 'ALWAYS') return '상시 채용';
   if (category === 'ROLLING') return '채용 시 마감';
 
@@ -72,17 +67,26 @@ export const formatFullDate = (deadline?: string): string => {
   if (category === 'DATE') {
     const target = new Date(deadline);
     const dateStr = format(target, 'yyyy.MM.dd');
+    const isPast = isExpired(deadline);
+
+    if (isPast) {
+      return dateStr;
+    }
+
     const weekDay = format(target, 'eee', { locale: ko });
     return `${dateStr} (${weekDay})`;
   }
+
+  // 명시적으로 마감된 경우
+  if (category === 'CLOSED') return '공고 마감';
 
   // 그 외 정해지지 않은 상세 문구는 그대로 보여줌
   return deadline;
 };
 
 export function ddayVariant(dday: string): BadgeVariant {
-  if (dday === '공고 마감') return 'default';
-  if (dday === 'D-Day' || dday === '오늘마감') return 'warning';
+  if (dday.includes('공고 마감')) return 'error';
+  if (dday === '오늘 마감' || dday === '오늘마감') return 'warning';
   if (dday === '상시 채용' || dday === '채용 시 마감') return 'success';
   return 'point';
 }
