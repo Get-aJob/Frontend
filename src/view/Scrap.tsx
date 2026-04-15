@@ -1,30 +1,43 @@
-import { useEffect, useState, useMemo } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import type { ChangeEvent } from 'react';
 import { getMyScraps, toggleScrap, type ScrapItem } from '@/api/Scrap';
 import ScrapHeader from '@/components/scrap/ScrapHeader';
 import ScrapList from '@/components/scrap/ScrapList';
 import { LoaderCircle, Bookmark } from 'lucide-react';
 import EmptyState from '@/components/common/UI/EmptyState';
+import Pagination from '@/components/Posting/Pagination';
 
 const Scrap = () => {
   const [scraps, setScraps] = useState<ScrapItem[]>([]);
   const [sortBy, setSortBy] = useState<'latest' | 'deadline'>('latest');
   const [isLoading, setIsLoading] = useState(true);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalCount, setTotalCount] = useState(0);
+  const [totalPages, setTotalPages] = useState(0);
+  const PAGE_SIZE = 29;
 
-  const fetchScraps = async () => {
+  const fetchScraps = useCallback(async () => {
+    setIsLoading(true);
     try {
-      const data = await getMyScraps();
-      setScraps(data);
+      const data = await getMyScraps(currentPage, PAGE_SIZE, sortBy);
+      setScraps(data.scraps);
+      setTotalCount(data.pagination.totalCount);
+      const totalPages = Math.ceil(data.pagination.totalCount / PAGE_SIZE) || 1;
+      setTotalPages(totalPages);
     } catch (error: unknown) {
       console.error('스크랩 목록 로드 실패:', error);
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [currentPage, sortBy]);
 
   useEffect(() => {
     fetchScraps();
-  }, []);
+  }, [fetchScraps]);
+
+  const handlePageChange = async (page: number) => {
+    setCurrentPage(page);
+  };
 
   const handleUnscrap = async (id: string) => {
     try {
@@ -47,43 +60,9 @@ const Scrap = () => {
     setSortBy(e.target.value as 'latest' | 'deadline');
   };
 
-  const sortedScraps = useMemo(() => {
-    const list = [...scraps];
-    if (sortBy === 'latest') {
-      return list.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
-    } else {
-      return list.sort((a, b) => {
-        // ✨ 에러 방지: deadline이 없는 경우 빈 문자열 처리
-        const deadlineA = a.deadline || '';
-        const deadlineB = b.deadline || '';
-
-        const isAlwaysA = deadlineA === '상시채용' || deadlineA.includes('상시');
-        const isAlwaysB = deadlineB === '상시채용' || deadlineB.includes('상시');
-
-        // ✨ 핵심 수정: 두 항목이 모두 상시채용일 경우 순서를 유지(0)
-        if (isAlwaysA && isAlwaysB) return 0;
-        if (isAlwaysA) return 1; // A가 상시채용이면 뒤로 보냄
-        if (isAlwaysB) return -1; // B가 상시채용이면 뒤로 보냄
-
-        // 정상적인 날짜 비교
-        const timeA = new Date(deadlineA).getTime();
-        const timeB = new Date(deadlineB).getTime();
-
-        // 날짜 파싱이 불가능한 예외 케이스 처리 (NaN)
-        if (isNaN(timeA) && isNaN(timeB)) return 0;
-        if (isNaN(timeA)) return 1;
-        if (isNaN(timeB)) return -1;
-
-        // 마감일이 가까운 순(오름차순) 정렬
-        return timeA - timeB;
-      });
-    }
-  }, [scraps, sortBy]);
-
   return (
     <div className="flex flex-col gap-8">
-      <ScrapHeader count={scraps.length} sortBy={sortBy} onSortChange={handleSortChange} />
-
+      <ScrapHeader count={totalCount} sortBy={sortBy} onSortChange={handleSortChange} />
       {isLoading ? (
         <div className="flex flex-col items-center justify-center py-40 text-gray-400">
           <LoaderCircle size={36} className="animate-spin text-btn-point mb-4" />
@@ -92,9 +71,14 @@ const Scrap = () => {
       ) : scraps.length > 0 ? (
         <div className="w-full">
           <ScrapList
-            scraps={sortedScraps}
+            scraps={scraps}
             onUnscrap={handleUnscrap}
             onApplySuccess={handleApplySuccess}
+          />
+          <Pagination
+            currentPage={currentPage}
+            totalPages={totalPages}
+            onPageChange={handlePageChange}
           />
         </div>
       ) : (

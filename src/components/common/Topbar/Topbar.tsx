@@ -54,12 +54,12 @@ const Topbar = ({ title, badge, showAddButton, unreadCount = 0 }: TopbarProps) =
           </button>
           <span className="ml-1">{title}</span>
           {badge && (
-            <Badge variant="point" className="px-2 py-0.5 text-[9px] sm:text-[11px] font-bold">
+            <Badge variant="point" className="px-2 py-0.5 text-[9px] sm:text-body font-bold">
               {badge}
             </Badge>
           )}
           {isLoggedIn && unreadCount > 0 && (
-            <Badge variant="error" className="px-2 py-0.5 text-[9px] sm:text-[11px] font-bold">
+            <Badge variant="error" className="px-2 py-0.5 text-[9px] sm:text-body font-bold">
               {unreadCount}
             </Badge>
           )}

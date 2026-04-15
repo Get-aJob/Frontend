@@ -13,9 +13,33 @@ export interface ScrapItem {
   createdAt: string;
 }
 
-export const getMyScraps = async (): Promise<ScrapItem[]> => {
-  const response = await api.get('/scraps');
-  return response.data.scraps;
+export interface Pagination {
+  totalCount: number;
+  hasNext: boolean;
+  nextOffset: number;
+  limit: number;
+  offset: number;
+}
+
+export interface Scrap {
+  scraps: ScrapItem[];
+  pagination: Pagination;
+}
+
+export type ScrapSortType = 'latest' | 'deadline';
+
+export const getMyScraps = async (
+  page?: number,
+  limit?: number,
+  sortBy?: ScrapSortType,
+): Promise<Scrap> => {
+  const PAGE = page ?? 1;
+  const LIMIT = limit ?? 30;
+  const OFFSET = (PAGE - 1) * LIMIT;
+  const response = await api.get(
+    `/scraps?limit=${LIMIT}&offset=${OFFSET}&sortBy=${sortBy ?? 'latest'}`,
+  );
+  return response.data;
 };
 
 export const toggleScrap = async (jobPostingId: string): Promise<{ added: boolean }> => {
