@@ -27,7 +27,7 @@ const ScrapList: React.FC<ScrapListProps> = ({ scraps, onUnscrap, onApplySuccess
 
       <div
         onClick={() => navigate(PATH.POSTING)}
-        className="border-2 border-dashed border-gray-200 bg-transparent rounded-2xl flex flex-col items-center justify-center gap-3 text-gray-400 min-h-35 cursor-pointer hover:border-btn-point hover:bg-purple-50/50 hover:text-btn-point transition-all group"
+        className="border-2 border-dashed border-gray-200 bg-transparent rounded-2xl flex flex-col items-center justify-center gap-3 text-gray-400 min-h-[140px] cursor-pointer hover:border-btn-point hover:bg-purple-50/50 hover:text-btn-point transition-all group"
       >
         <div className="text-3xl group-hover:scale-110 transition-transform">🔍</div>
         <div className="text-[14px] font-bold">새로운 공고 탐색하러 가기</div>
