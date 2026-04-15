@@ -11,8 +11,12 @@ import { incrementViewCount } from '@/api/Posting';
 import type { ExtendedJobPosting } from '@/store/usePostingStore';
 import { useAuthStore } from '@/store/useAuthStore';
 import { useStatusStore } from '@/store/useStatusStore';
+import { useGetAllScraps } from '@/hooks/scraps';
 
 const Posting = () => {
+  const isLoggedIn = useAuthStore((state) => state.isLoggedIn);
+
+  const { data: scrapData } = useGetAllScraps(isLoggedIn);
   const {
     postings,
     isLoading,
@@ -27,7 +31,6 @@ const Posting = () => {
     updateViewCount,
     resetFilters,
   } = usePostingStore();
-  const isLoggedIn = useAuthStore((state) => state.isLoggedIn);
   const isManualWithoutLogin = !isLoggedIn && sourceType === 'manual';
   const { fetchData } = useStatusStore();
 
@@ -40,19 +43,27 @@ const Posting = () => {
   }, [resetFilters]);
 
   useEffect(() => {
-    fetchPostings(currentPage, selectedSite, searchKeyword);
+    fetchPostings(currentPage, selectedSite, searchKeyword, scrapData);
     if (isLoggedIn) {
       fetchData();
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isLoggedIn, searchKeyword, sourceType, selectedSite]);
+  }, [
+    isLoggedIn,
+    searchKeyword,
+    sourceType,
+    selectedSite,
+    scrapData,
+    fetchPostings,
+    currentPage,
+    fetchData,
+  ]);
 
   const handlePageChange = (page: number) => {
     const mainElement = document.querySelector('main');
     if (mainElement) {
       mainElement.scrollTo({ top: 0, behavior: 'smooth' });
     }
-    fetchPostings(page, selectedSite, searchKeyword);
+    fetchPostings(page, selectedSite, searchKeyword, scrapData);
   };
 
   const selectedJob = useMemo(() => {
@@ -82,7 +93,7 @@ const Posting = () => {
       </section>
 
       {/* 공고 콘텐츠 영역 */}
-      <div className="w-full min-h-[500px]">
+      <div className="w-full min-h-125">
         {isLoading ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {[...Array(6)].map((_, i) => (

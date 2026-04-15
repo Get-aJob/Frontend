@@ -9,7 +9,7 @@ import {
   manualPreview,
   manualSave,
 } from '@/api/Posting';
-import { getMyScraps, type ScrapItem } from '@/api/Scrap';
+import { type ScrapItem } from '@/api/Scrap';
 import { useAuthStore } from '@/store/useAuthStore';
 import type {
   JobPosting,
@@ -83,7 +83,12 @@ interface PostingState {
   setSearchKeyword: (keyword: string) => void;
   setSourceType: (type: 'auto' | 'manual') => void;
   setSelectedSite: (site: string) => void;
-  fetchPostings: (page: number, site?: string, keyword?: string) => Promise<void>;
+  fetchPostings: (
+    page: number,
+    site?: string,
+    keyword?: string,
+    scrapData?: ScrapItem[],
+  ) => Promise<void>;
   toggleScrapStatus: (jobId: string | number) => void;
   createJob: (data: DirectJobRequest) => Promise<void>;
   updateJob: (externalId: string, data: Partial<DirectJobRequest>, type?: string) => Promise<void>;
@@ -123,7 +128,12 @@ export const usePostingStore = create<PostingState>()(
         get().fetchPostings(1, site);
       },
 
-      fetchPostings: async (page: number, site?: string, keyword?: string) => {
+      fetchPostings: async (
+        page: number,
+        site?: string,
+        keyword?: string,
+        scrapData?: ScrapItem[],
+      ) => {
         set({ isLoading: true, error: null });
         try {
           const PAGE_SIZE = 30;
@@ -148,11 +158,8 @@ export const usePostingStore = create<PostingState>()(
           } else {
             data = await getPostings(page, PAGE_SIZE, 'manual', undefined, currentKeyword);
           }
-
-          const scrapData: ScrapItem[] = useAuthStore.getState().isLoggedIn
-            ? await getMyScraps().catch(() => [])
-            : [];
-          const scrappedIds = new Set(scrapData.map((s: ScrapItem) => String(s.jobPostingId)));
+          const scrapItem: ScrapItem[] = scrapData ?? [];
+          const scrappedIds = new Set(scrapItem.map((s: ScrapItem) => String(s.jobPostingId)));
 
           const rawJobs = data.jobs || [];
           const totalCount = data.totalCount || rawJobs.length;
