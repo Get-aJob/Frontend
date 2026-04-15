@@ -28,7 +28,7 @@ function NotificationHeader({
             type="button"
             onClick={() => onToggleUnreadOnly(false)}
             className={clsx(
-              'px-4 py-1.5 text-sm font-medium rounded-full transition-colors',
+              'cursor-pointer px-4 py-1.5 text-sm font-medium rounded-full transition-colors',
               !unreadOnly ? 'bg-gray-900 text-white' : 'text-gray-600 hover:bg-gray-50',
             )}
           >
@@ -38,7 +38,7 @@ function NotificationHeader({
             type="button"
             onClick={() => onToggleUnreadOnly(true)}
             className={clsx(
-              'px-4 py-1.5 text-sm font-medium rounded-full transition-colors',
+              'cursor-pointer px-4 py-1.5 text-sm font-medium rounded-full transition-colors',
               unreadOnly ? 'bg-gray-900 text-white' : 'text-gray-600 hover:bg-gray-50',
             )}
           >
@@ -57,7 +57,7 @@ function NotificationHeader({
             'inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-semibold border transition-colors',
             unreadCount === 0
               ? 'border-gray-200 text-gray-400 cursor-not-allowed bg-gray-50'
-              : 'border-border-light bg-white text-gray-800 hover:bg-gray-50 shadow-sm',
+              : 'cursor-pointer border-border-light bg-white text-gray-800 hover:bg-gray-50 shadow-sm',
           )}
         >
           <CheckCheck size={18} className="text-btn-point" />
