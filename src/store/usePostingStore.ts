@@ -91,7 +91,7 @@ interface PostingState {
   parseJobUrl: (url: string) => Promise<Record<string, unknown>>;
   saveParsedJob: (data: ManualSaveRequest) => Promise<void>;
   updateCommentCount: (jobId: string | number, delta: number) => void;
-  updateViewCount: (jobId: string | number) => void;
+  updateViewCount: (jobId: string | number, viewCount: number) => void;
   resetFilters: () => void;
 }
 
@@ -323,12 +323,10 @@ export const usePostingStore = create<PostingState>()(
         }));
       },
 
-      updateViewCount: (jobId: string | number) => {
+      updateViewCount: (jobId: string | number, viewCount: number) => {
         set((state) => ({
           postings: state.postings.map((job) =>
-            String(job.id) === String(jobId)
-              ? { ...job, viewCount: (job.viewCount || 0) + 1 }
-              : job,
+            String(job.id) === String(jobId) ? { ...job, viewCount } : job,
           ),
         }));
       },
