@@ -36,6 +36,7 @@ function Notification() {
 
   const unreadCount = useMemo(() => items.filter((n) => n.readAt === null).length, [items]);
   const socketEventVersion = useNotificationStore((state) => state.socketEventVersion);
+  const setGlobalUnreadCount = useNotificationStore((state) => state.setUnreadCount);
 
   const visibleItems = useMemo(() => {
     const sorted = [...items].sort(
@@ -72,6 +73,10 @@ function Notification() {
     if (socketEventVersion === 0) return;
     void loadInitialNotifications();
   }, [socketEventVersion, loadInitialNotifications]);
+
+  useEffect(() => {
+    setGlobalUnreadCount(unreadCount);
+  }, [unreadCount, setGlobalUnreadCount]);
 
   const markRead = useCallback(
     async (id: string) => {
