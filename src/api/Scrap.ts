@@ -15,7 +15,7 @@ export interface ScrapItem {
 
 export interface Pagination {
   totalCount: number;
-  hasNext: true;
+  hasNext: boolean;
   nextOffset: number;
   limit: number;
   offset: number;

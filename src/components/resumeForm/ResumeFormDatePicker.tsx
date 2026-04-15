@@ -9,8 +9,8 @@ interface ResumeFormDatePickerProps<T extends FieldValues> {
   control: Control<T>;
   disabled: boolean;
   placeholder?: string;
-  minDate?: Date | null;
-  maxDate?: Date | null;
+  minDate?: Date | string | null;
+  maxDate?: Date | string | null;
 }
 
 const ResumeFormDatePicker = <T extends FieldValues>({
@@ -24,6 +24,13 @@ const ResumeFormDatePicker = <T extends FieldValues>({
   const [isOpen, setIsOpen] = useState(false);
   const calendarRef = useRef<HTMLDivElement | null>(null);
   const buttonRef = useRef<HTMLButtonElement | null>(null);
+
+  const toDateOrUndefined = (value: Date | string | null | undefined) => {
+    if (!value) return undefined;
+    if (value instanceof Date) return value;
+    const parsed = new Date(`${value}T00:00:00`);
+    return Number.isNaN(parsed.getTime()) ? undefined : parsed;
+  };
 
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
@@ -78,8 +85,8 @@ const ResumeFormDatePicker = <T extends FieldValues>({
                     onChange(null);
                   }
                 }}
-                minDate={minDate ?? undefined}
-                maxDate={maxDate ?? undefined}
+                minDate={toDateOrUndefined(minDate)}
+                maxDate={toDateOrUndefined(maxDate)}
                 disabled={disabled}
                 dateFormat="yyyyMM.dd"
                 onKeyDown={(e) => {
