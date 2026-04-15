@@ -59,11 +59,13 @@ const Posting = () => {
     return postings.find((job) => String(job.id) === String(selectedJobId)) || null;
   }, [postings, selectedJobId]);
 
-  const handleDetailOpen = (job: ExtendedJobPosting) => {
+  const handleDetailOpen = async (job: ExtendedJobPosting) => {
     setSelectedJobId(job.id);
     setIsDetailModalOpen(true);
-    updateViewCount(job.id);
-    incrementViewCount(job.id);
+    const viewCount = await incrementViewCount(job.id);
+    if (viewCount !== null) {
+      updateViewCount(job.id, viewCount);
+    }
   };
 
   const handleDetailClose = () => {
