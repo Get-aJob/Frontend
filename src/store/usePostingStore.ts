@@ -120,12 +120,10 @@ export const usePostingStore = create<PostingState>()(
 
       setSourceType: (type) => {
         set({ sourceType: type, currentPage: 1, selectedSite: '' });
-        get().fetchPostings(1);
       },
 
       setSelectedSite: (site) => {
         set({ selectedSite: site, currentPage: 1 });
-        get().fetchPostings(1, site);
       },
 
       fetchPostings: async (
@@ -175,25 +173,8 @@ export const usePostingStore = create<PostingState>()(
           const mappedJobs: ExtendedJobPosting[] = sortedJobs.map((j: BackendJob) => {
             const jobData = j as ExtendedBackendJob;
 
-            let finalDeadline = '상시채용';
             const deadline = jobData.deadline;
             const deadlineText = jobData.deadline_text || jobData.deadlineText;
-
-            if (deadline) {
-              const today = new Date();
-              today.setHours(0, 0, 0, 0);
-              const targetDate = new Date(deadline);
-              targetDate.setHours(0, 0, 0, 0);
-
-              const diffTime = targetDate.getTime() - today.getTime();
-              const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-
-              if (diffDays === 0) finalDeadline = 'D-Day';
-              else if (diffDays > 0) finalDeadline = `D-${diffDays}`;
-              else finalDeadline = `마감 (D+${Math.abs(diffDays)})`;
-            } else if (deadlineText) {
-              finalDeadline = deadlineText.includes('상시') ? '상시채용' : deadlineText;
-            }
 
             const sourceType = jobData.source_type || jobData.sourceType || 'manual';
             const finalSourceType = sourceType === 'auto' ? 'auto' : 'manual';
@@ -206,11 +187,11 @@ export const usePostingStore = create<PostingState>()(
               url: jobData.source_url || jobData.sourceUrl,
               site:
                 finalSourceType === 'auto'
-                  ? jobData.source_site_name || jobData.sourceSiteName || '자동크롤링'
-                  : '수동등록',
+                  ? jobData.source_site_name || jobData.sourceSiteName || '자동 공고'
+                  : '수동 공고',
               location: jobData.location || '전국',
               experienceLevel: jobData.experience || '경력무관',
-              deadline: finalDeadline,
+              deadline: deadline || deadlineText || '상시채용',
               rawDeadline: deadline ? formatLocalDate(deadline) : undefined,
               isScrapped: scrappedIds.has(String(jobData.id)),
               sourceType: finalSourceType,
@@ -250,7 +231,7 @@ export const usePostingStore = create<PostingState>()(
         set({ isLoading: true });
         try {
           await createDirectJob(data);
-          await get().fetchPostings(1);
+          await get().fetchPostings(get().currentPage);
         } catch (err) {
           set({ error: (err as Error).message });
           throw err;
@@ -311,7 +292,7 @@ export const usePostingStore = create<PostingState>()(
         set({ isLoading: true });
         try {
           await manualSave(data);
-          await get().fetchPostings(1);
+          await get().fetchPostings(get().currentPage);
         } catch (err) {
           set({ error: (err as Error).message });
           throw err;
@@ -339,7 +320,7 @@ export const usePostingStore = create<PostingState>()(
       },
 
       resetFilters: () => {
-        set({ sourceType: 'auto', selectedSite: '', currentPage: 1 });
+        set({ sourceType: 'auto', selectedSite: '', currentPage: 1, searchKeyword: '' });
       },
     }),
     {

@@ -8,6 +8,7 @@ import LogoUpload from './LogoUpload';
 import CrawlBar from './CrawlBar';
 import { usePostingStore, type ExtendedJobPosting } from '@/store/usePostingStore';
 import type { DirectJobRequest } from '@/types/Posting';
+import { useToastStore } from '@/store/useToastStore';
 
 interface JobModalProps {
   isOpen: boolean;
@@ -125,21 +126,23 @@ const JobModal = ({ isOpen, onClose, mode = 'create', initialData }: JobModalPro
         }
       }
     } catch {
-      alert('공고 정보를 가져오는데 실패했습니다.');
+      showToast('❌ 공고 정보를 가져오는데 실패했습니다.');
     } finally {
       setIsParsing(false);
     }
   };
 
+  const { showToast } = useToastStore();
+
   const handleRegister = async (e?: React.FormEvent) => {
     if (e) e.preventDefault();
     if (!title.trim() || !companyName.trim()) {
-      alert('회사명과 직무는 필수 입력 항목입니다.');
+      showToast('⚠️ 회사명과 직무는 필수 입력 항목입니다.');
       return;
     }
 
     if (!isAlwaysRecruit && !deadline) {
-      alert('마감일을 선택하거나 상시 모집을 체크해주세요.');
+      showToast('⚠️ 마감일을 선택하거나 상시 모집을 체크해주세요.');
       return;
     }
 
@@ -160,13 +163,15 @@ const JobModal = ({ isOpen, onClose, mode = 'create', initialData }: JobModalPro
       if (mode === 'edit' && (initialData?.externalId || externalId)) {
         const idToUpdate = (initialData?.externalId || externalId) as string;
         await updateJob(idToUpdate, payload);
+        showToast('공고가 수정되었습니다.');
       } else {
         await createJob(payload);
+        showToast('공고가 등록되었습니다.');
       }
 
       onClose();
     } catch {
-      alert('저장에 실패했습니다. 네트워크 상태나 입력 정보를 확인해주세요.');
+      showToast('❌ 저장에 실패했습니다. 네트워크 상태나 입력 정보를 확인해주세요.');
     } finally {
       setIsSubmitting(false);
     }
