@@ -13,8 +13,9 @@ const Scrap = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalCount, setTotalCount] = useState(0);
-  const [totalPages, setTotalPages] = useState(0);
-  const PAGE_SIZE = 29;
+  const [totalPage, setTotalPage] = useState(0);
+
+  const PAGE_SIZE = 30;
 
   const fetchScraps = useCallback(async () => {
     setIsLoading(true);
@@ -23,7 +24,7 @@ const Scrap = () => {
       setScraps(data.scraps);
       setTotalCount(data.pagination.totalCount);
       const totalPages = Math.ceil(data.pagination.totalCount / PAGE_SIZE) || 1;
-      setTotalPages(totalPages);
+      setTotalPage(totalPages);
     } catch (error: unknown) {
       console.error('스크랩 목록 로드 실패:', error);
     } finally {
@@ -63,6 +64,7 @@ const Scrap = () => {
   return (
     <div className="flex flex-col gap-8">
       <ScrapHeader count={totalCount} sortBy={sortBy} onSortChange={handleSortChange} />
+
       {isLoading ? (
         <div className="flex flex-col items-center justify-center py-40 text-gray-400">
           <LoaderCircle size={36} className="animate-spin text-btn-point mb-4" />
@@ -74,10 +76,11 @@ const Scrap = () => {
             scraps={scraps}
             onUnscrap={handleUnscrap}
             onApplySuccess={handleApplySuccess}
+            setScraps={setScraps}
           />
           <Pagination
             currentPage={currentPage}
-            totalPages={totalPages}
+            totalPages={totalPage}
             onPageChange={handlePageChange}
           />
         </div>

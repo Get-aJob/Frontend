@@ -10,9 +10,10 @@ interface ScrapListProps {
   scraps: ScrapItem[];
   onUnscrap: (id: string) => void;
   onApplySuccess: (id: string) => void; // ✨ 추가
+  setScraps: React.Dispatch<React.SetStateAction<ScrapItem[]>>;
 }
 
-const ScrapList: React.FC<ScrapListProps> = ({ scraps, onUnscrap, onApplySuccess }) => {
+const ScrapList: React.FC<ScrapListProps> = ({ scraps, onUnscrap, onApplySuccess, setScraps }) => {
   const navigate = useNavigate();
   const [job, setJob] = useState<ExtendedJobPosting | null>(null);
   const [isOpen, setIsOpen] = useState(false);
@@ -20,6 +21,12 @@ const ScrapList: React.FC<ScrapListProps> = ({ scraps, onUnscrap, onApplySuccess
   const onClose = () => {
     setJob(null);
     setIsOpen(false);
+    setScraps((prev) =>
+      prev.filter((item) => {
+        if (!job) return false;
+        return item.jobPostingId !== job.id;
+      }),
+    );
   };
 
   return (

@@ -53,6 +53,7 @@ const PostingDetailModal = ({ isOpen, onClose, job }: PostingDetailModalProps) =
 
   const isApplied =
     isLoggedIn && applications.some((app) => String(app.jobPostingId) === String(job.id));
+  const isScrapped = scrapData?.some((data) => String(data.jobPostingId) === String(job.id));
 
   const handleGoToSite = () => {
     if (job.url) {
@@ -221,18 +222,8 @@ const PostingDetailModal = ({ isOpen, onClose, job }: PostingDetailModalProps) =
                     : 'text-gray-400 border-gray-100',
                 )}
               >
-                <Bookmark
-                  size={15}
-                  fill={
-                    !scrapData?.findIndex((data) => data.jobPostingId === job.id)
-                      ? 'currentColor'
-                      : 'none'
-                  }
-                  strokeWidth={2.5}
-                />
-                {scrapData?.findIndex((data) => data.jobPostingId === job.id)
-                  ? '스크랩 하기'
-                  : '스크랩 해제'}
+                <Bookmark size={15} fill={isScrapped ? 'currentColor' : 'none'} strokeWidth={2.5} />
+                {!isScrapped ? '스크랩 하기' : '스크랩 해제'}
               </Button>
             )}
 
