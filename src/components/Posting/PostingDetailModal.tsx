@@ -123,13 +123,29 @@ const PostingDetailModal = ({ isOpen, onClose, job }: PostingDetailModalProps) =
           <div className="flex-1 overflow-y-auto p-6 sm:p-10 space-y-8 sm:space-y-12 custom-scrollbar bg-gray-50/30">
             <div className="grid grid-cols-2 gap-3 sm:gap-4">
               {[
-                { icon: MapPin, label: '근무 지역', value: job.location || '정보 없음' },
-                { icon: Briefcase, label: '경력 요구', value: job.experienceLevel || '경력 무관' },
-                { icon: Calendar, label: '마감 기한', value: job.deadline },
+                {
+                  icon: MapPin,
+                  label: '근무 지역',
+                  value: job.location || '정보 없음',
+                  raw: job.location,
+                },
+                {
+                  icon: Briefcase,
+                  label: '경력 요구',
+                  value: job.experienceLevel || '경력 무관',
+                  raw: job.experienceLevel,
+                },
+                {
+                  icon: Calendar,
+                  label: '마감 기한',
+                  value: job.deadline ? formatFullDate(job.deadline) : '정보 없음',
+                  raw: job.deadline,
+                },
                 {
                   icon: Globe,
                   label: '수집 경로',
                   value: job.sourceType === 'auto' ? '자동 공고' : '수동 공고',
+                  raw: job.sourceType,
                 },
               ].map((item, idx) => (
                 <div
@@ -146,13 +162,13 @@ const PostingDetailModal = ({ isOpen, onClose, job }: PostingDetailModalProps) =
                     </p>
                     <p
                       className={`text-[13px] sm:text-[15px] font-black break-words line-clamp-2 sm:line-clamp-3 ${
-                        item.label === '마감 기한' && isExpired(job.deadline)
+                        item.label === '마감 기한' && isExpired(item.raw)
                           ? 'text-red-500'
                           : 'text-gray-800'
                       }`}
                       title={String(item.value)}
                     >
-                      {item.label === '마감 기한' ? formatFullDate(job.deadline) : item.value}
+                      {item.value}
                     </p>
                   </div>
                 </div>

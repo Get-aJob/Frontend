@@ -111,6 +111,8 @@ const PostingCard = ({ posting, isScrapped, isApplied, onScrap, onDetail }: Post
       showToast('공고가 삭제되었습니다.');
     } catch {
       showToast('❌ 삭제 중 오류가 발생했습니다.');
+    } finally {
+      setIsDeleteModalOpen(false);
     }
   };
 
