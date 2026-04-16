@@ -78,7 +78,7 @@ const Sidebar = () => {
         {navSections.map((section: NavSectionType) => (
           <div key={section.title} className="space-y-1.5 sm:space-y-2">
             {/* ✨ 제목 글씨 축소 */}
-            <h3 className="px-3 text-[10px] sm:text-[11px] font-bold text-gray-400 uppercase tracking-wider">
+            <h3 className="px-3 text-[10px] sm:text-body font-bold text-gray-400 uppercase tracking-wider">
               {section.title}
             </h3>
             <div className="space-y-0.5 sm:space-y-1">

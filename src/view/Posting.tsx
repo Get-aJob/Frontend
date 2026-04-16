@@ -17,6 +17,12 @@ import { useToastStore } from '@/store/useToastStore';
 
 const Posting = () => {
   const { visible: toastVisible, message: toastMessage } = useToastStore();
+import { useGetAllScraps } from '@/hooks/scraps';
+
+const Posting = () => {
+  const isLoggedIn = useAuthStore((state) => state.isLoggedIn);
+
+  const { data: scrapData } = useGetAllScraps(isLoggedIn);
   const {
     postings,
     isLoading,
@@ -78,12 +84,22 @@ const Posting = () => {
   }, [resetFilters]);
 
   useEffect(() => {
-    fetchPostings(currentPage, selectedSite, searchKeyword);
+    fetchPostings(currentPage, selectedSite, searchKeyword, scrapData);
     if (isLoggedIn) {
       fetchData();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isLoggedIn, searchKeyword, sourceType, selectedSite, currentPage]);
+  }, [
+    isLoggedIn,
+    searchKeyword,
+    sourceType,
+    selectedSite,
+    scrapData,
+    fetchPostings,
+    currentPage,
+    fetchData,
+  ]);
 
   const handlePageChange = (page: number) => {
     const mainElement = document.querySelector('main');
@@ -92,17 +108,20 @@ const Posting = () => {
     }
     // currentPage가 바뀌면 하단 useEffect가 실질적인 fetch를 수행합니다.
     usePostingStore.setState({ currentPage: page });
+    fetchPostings(page, selectedSite, searchKeyword, scrapData);
   };
 
   const selectedJob = useMemo(() => {
     return postings.find((job) => String(job.id) === String(selectedJobId)) || null;
   }, [postings, selectedJobId]);
 
-  const handleDetailOpen = (job: ExtendedJobPosting) => {
+  const handleDetailOpen = async (job: ExtendedJobPosting) => {
     setSelectedJobId(job.id);
     setIsDetailModalOpen(true);
-    updateViewCount(job.id);
-    incrementViewCount(job.id);
+    const viewCount = await incrementViewCount(job.id);
+    if (viewCount !== null) {
+      updateViewCount(job.id, viewCount);
+    }
   };
 
   const handleDetailClose = () => {
@@ -121,7 +140,7 @@ const Posting = () => {
       </section>
 
       {/* 공고 콘텐츠 영역 */}
-      <div className="w-full min-h-[500px]">
+      <div className="w-full min-h-125">
         {isLoading ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {[...Array(6)].map((_, i) => (

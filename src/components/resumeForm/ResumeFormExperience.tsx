@@ -21,6 +21,8 @@ const ResumeFormExperience = () => {
       </div>
       {fields.map((field, index) => {
         const isCurrent = watch(`experience.${index}.isCurrent`);
+        const startDate = watch(`experience.${index}.period.startDate`);
+        const endDate = watch(`experience.${index}.period.endDate`);
         return (
           <div
             key={field.id}
@@ -39,12 +41,14 @@ const ResumeFormExperience = () => {
                     name={`experience.${index}.period.startDate`}
                     control={control}
                     disabled={false}
+                    maxDate={endDate}
                   />
                   <p className="text-gray-300 text-sm">-</p>
                   <ResumeFormDatePicker
                     name={`experience.${index}.period.endDate`}
                     control={control}
                     disabled={isCurrent}
+                    minDate={startDate}
                   />
                   <label className="flex items-center justify-center gap-1 ml-1">
                     <span
