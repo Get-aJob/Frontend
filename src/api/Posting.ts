@@ -92,11 +92,13 @@ export const manualSave = async (data: ManualSaveRequest): Promise<{ job: Backen
 };
 
 // 조회수 증가 API
-export const incrementViewCount = async (jobId: string | number): Promise<void> => {
+export const incrementViewCount = async (jobId: string | number): Promise<number | null> => {
   try {
-    await api.patch(`/jobs/${jobId}/view`);
+    const response = await api.patch(`/jobs/${jobId}/view`);
+    return response.data.viewCount;
   } catch (error: unknown) {
     console.error('조회수 증가 실패:', error);
+    return null;
   }
 };
 

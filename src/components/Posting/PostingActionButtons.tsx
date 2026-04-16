@@ -101,7 +101,7 @@ const PostingActionButtons: React.FC<PostingActionButtonsProps> = ({
         <Button
           variant="outline"
           size="sm"
-          className="flex-1 h-10 gap-1.5 text-[11px] font-black border-btn-point text-btn-point"
+          className="flex-1 h-10 gap-1.5 text-body font-black border-btn-point text-btn-point"
           onClick={handleDetailClick}
         >
           <Search size={14} strokeWidth={3} /> 상세보기
@@ -110,7 +110,7 @@ const PostingActionButtons: React.FC<PostingActionButtonsProps> = ({
         <Button
           variant={job.isScrapped ? 'primary' : 'outline'}
           size="sm"
-          className={`flex-1 h-10 gap-1.5 text-[11px] font-black ${!job.isScrapped ? 'border-btn-point text-btn-point' : ''}`}
+          className={`flex-1 h-10 gap-1.5 text-body font-black ${!job.isScrapped ? 'border-btn-point text-btn-point' : ''}`}
           onClick={handleScrapClick}
         >
           <Bookmark size={14} fill={job.isScrapped ? 'currentColor' : 'none'} strokeWidth={3} />
@@ -120,7 +120,7 @@ const PostingActionButtons: React.FC<PostingActionButtonsProps> = ({
         <Button
           variant="primary"
           size="sm"
-          className="flex-1 h-10 gap-1.5 bg-gray-900 border-gray-900 hover:bg-black disabled:bg-gray-200 text-[11px] font-black"
+          className="flex-1 h-10 gap-1.5 bg-gray-900 border-gray-900 hover:bg-black disabled:bg-gray-200 text-body font-black"
           onClick={handleApplyClick}
           disabled={!job.url}
         >
