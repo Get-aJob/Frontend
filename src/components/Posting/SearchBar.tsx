@@ -4,7 +4,7 @@ import { useSearchParams } from 'react-router-dom';
 import { usePostingStore } from '@/store/usePostingStore';
 
 const SearchBar = () => {
-  const { searchKeyword, setSearchKeyword, fetchPostings, selectedSite } = usePostingStore();
+  const { searchKeyword, setSearchKeyword } = usePostingStore();
   const [searchParams, setSearchParams] = useSearchParams();
   const [inputValue, setInputValue] = useState(searchKeyword);
   const [isFocused, setIsFocused] = useState(false);
@@ -22,7 +22,7 @@ const SearchBar = () => {
       if (inputValue !== searchKeyword) {
         setSearchKeyword(inputValue);
 
-        // URL 파라미터 업데이트
+        // URL 파라미터 업데이트 - 가장 최신 상태의 searchParams를 기반으로 생성
         const params = new URLSearchParams(searchParams);
         if (inputValue) {
           params.set('keyword', inputValue);
@@ -34,7 +34,7 @@ const SearchBar = () => {
     }, 500);
 
     return () => clearTimeout(timer);
-  }, [inputValue, setSearchKeyword, fetchPostings, selectedSite, searchKeyword]);
+  }, [inputValue, searchKeyword, setSearchKeyword, searchParams, setSearchParams]);
 
   const handleClear = useCallback(() => {
     setInputValue('');

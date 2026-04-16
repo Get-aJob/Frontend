@@ -206,7 +206,7 @@ const PostingCard = ({ posting, isScrapped, isApplied, onScrap, onDetail }: Post
             {/* 공통 스크랩 버튼 */}
             <button
               onClick={handleScrapClick}
-              className={`p-1.5 rounded-lg transition-all duration-200 flex items-center justify-center bg-white border shadow-sm hover:scale-110 active:scale-95 hover:shadow-md ${
+              className={`p-1.5 rounded-lg transition-all duration-200 flex items-center justify-center bg-white border shadow-sm motion-safe:hover:scale-110 motion-safe:active:scale-95 motion-safe:hover:shadow-md ${
                 isScrapped
                   ? 'text-btn-point border-btn-point bg-blue-50'
                   : 'text-gray-400 border-gray-100 hover:text-btn-point hover:bg-purple-50 hover:border-btn-point'
@@ -221,7 +221,7 @@ const PostingCard = ({ posting, isScrapped, isApplied, onScrap, onDetail }: Post
               <>
                 <button
                   onClick={handleEdit}
-                  className="p-1.5 text-gray-400 hover:text-blue-500 hover:bg-blue-50 rounded-lg transition-all duration-200 flex items-center justify-center bg-white border border-gray-100 shadow-sm hover:scale-110 active:scale-95 hover:shadow-md"
+                  className="p-1.5 text-gray-400 hover:text-blue-500 hover:bg-blue-50 rounded-lg transition-all duration-200 flex items-center justify-center bg-white border border-gray-100 shadow-sm motion-safe:hover:scale-110 motion-safe:active:scale-95 motion-safe:hover:shadow-md"
                   title="수정"
                   aria-label="수정"
                 >
@@ -229,7 +229,7 @@ const PostingCard = ({ posting, isScrapped, isApplied, onScrap, onDetail }: Post
                 </button>
                 <button
                   onClick={handleDelete}
-                  className="p-1.5 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-all duration-200 flex items-center justify-center bg-white border border-gray-100 shadow-sm hover:scale-110 active:scale-95 hover:shadow-md"
+                  className="p-1.5 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-all duration-200 flex items-center justify-center bg-white border border-gray-100 shadow-sm motion-safe:hover:scale-110 motion-safe:active:scale-95 motion-safe:hover:shadow-md"
                   title="삭제"
                   aria-label="삭제"
                 >
@@ -242,8 +242,8 @@ const PostingCard = ({ posting, isScrapped, isApplied, onScrap, onDetail }: Post
 
         <div className="flex-1">
           <h4
-            className={`text-subtitle font-black mb-3 line-clamp-1 group-hover:text-btn-point transition-colors ${
-              expired ? 'text-gray-400' : 'text-gray-900'
+            className={`text-subtitle font-black mb-3 line-clamp-1 transition-colors ${
+              expired ? 'text-gray-400' : 'text-gray-900 group-hover:text-btn-point'
             }`}
           >
             {posting.title}

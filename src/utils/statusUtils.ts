@@ -11,6 +11,20 @@ const STATUS_KEYWORDS = {
   CLOSED: ['마감됨', '종료', '만료', '마감한'],
 };
 
+// 로컬 시간대 오차 방지를 위해 날짜 문자열을 로컬 객체로 변환하는 헬퍼 함수
+const parseLocalDate = (text: string): Date => {
+  if (!text) return new Date();
+
+  // YYYY-MM-DD 또는 YYYY-MM-DDTHH:mm:ss 형식 처리
+  const datePart = text.split('T')[0];
+  const [year, month, day] = datePart.split(/[-./]/).map(Number);
+
+  if (year && month && day) {
+    return new Date(year, month - 1, day);
+  }
+  return new Date(text);
+};
+
 // 문자열을 분석하여 상태 카테고리를 반환하는 유틸리티
 const getStatusCategory = (text: string): 'ALWAYS' | 'ROLLING' | 'CLOSED' | 'DATE' | 'UNKNOWN' => {
   if (!text) return 'UNKNOWN';
@@ -18,7 +32,7 @@ const getStatusCategory = (text: string): 'ALWAYS' | 'ROLLING' | 'CLOSED' | 'DAT
   if (STATUS_KEYWORDS.ROLLING.some((k) => text.includes(k))) return 'ROLLING';
   if (STATUS_KEYWORDS.CLOSED.some((k) => text.includes(k))) return 'CLOSED';
 
-  const date = new Date(text);
+  const date = parseLocalDate(text);
   return isNaN(date.getTime()) ? 'UNKNOWN' : 'DATE';
 };
 
@@ -28,7 +42,7 @@ export const isExpired = (deadline?: string): boolean => {
   if (category === 'CLOSED') return true;
   if (category !== 'DATE') return false;
 
-  return isBefore(startOfDay(new Date(deadline)), startOfDay(new Date()));
+  return isBefore(startOfDay(parseLocalDate(deadline)), startOfDay(new Date()));
 };
 
 export const toDday = (deadline?: string): string => {
@@ -43,7 +57,7 @@ export const toDday = (deadline?: string): string => {
     case 'CLOSED':
       return '공고 마감';
     case 'DATE': {
-      const targetDate = new Date(deadline);
+      const targetDate = parseLocalDate(deadline);
       const diffDays = differenceInCalendarDays(startOfDay(targetDate), startOfDay(new Date()));
       if (diffDays === 0) return '오늘 마감';
       if (diffDays > 0) return `D-${diffDays}`;
@@ -65,7 +79,7 @@ export const formatFullDate = (deadline?: string): string => {
 
   // 날짜 형식인 경우
   if (category === 'DATE') {
-    const target = new Date(deadline);
+    const target = parseLocalDate(deadline);
     const dateStr = format(target, 'yyyy.MM.dd');
     const isPast = isExpired(deadline);
 

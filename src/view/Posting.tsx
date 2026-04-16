@@ -46,37 +46,33 @@ const Posting = () => {
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
   const [selectedJobId, setSelectedJobId] = useState<string | number | null>(null);
 
-  // 페이지 진입 시 필터 초기화 및 URL 데이터 동기화
+  // 페이지 진입 및 URL 데이터 동기화 관리
   useEffect(() => {
-    // URL 파라미터가 하나라도 있으면 해당 값들로 스토어 업데이트
-    if (sourceFromUrl || siteFromUrl || keywordFromUrl) {
-      if (sourceFromUrl === 'auto' || sourceFromUrl === 'manual') {
-        setSourceType(sourceFromUrl);
-      }
-      if (siteFromUrl) {
-        setSelectedSite(siteFromUrl);
-      }
-      if (keywordFromUrl) {
-        setSearchKeyword(keywordFromUrl);
-      }
-    } else {
-      // URL 파라미터가 없으면 전체 초기화
-      resetFilters();
+    // 1. URL 파라미터가 있으면 스토어 상태 동기화
+    if (sourceFromUrl === 'auto' || sourceFromUrl === 'manual') {
+      setSourceType(sourceFromUrl);
     }
-
-    // 페이지를 벗어날 때 상태를 리셋하여 다시 돌아올 때 이전 상태가 남지 않도록 함
-    return () => {
-      resetFilters();
-    };
+    if (siteFromUrl) {
+      setSelectedSite(siteFromUrl);
+    }
+    if (keywordFromUrl) {
+      setSearchKeyword(keywordFromUrl);
+    }
   }, [
     keywordFromUrl,
     sourceFromUrl,
     siteFromUrl,
-    resetFilters,
     setSearchKeyword,
     setSourceType,
     setSelectedSite,
   ]);
+
+  // 2. 컴포넌트 언마운트 시에만 필터 초기화 수행
+  useEffect(() => {
+    return () => {
+      resetFilters();
+    };
+  }, [resetFilters]);
 
   useEffect(() => {
     fetchPostings(currentPage, selectedSite, searchKeyword);

@@ -194,7 +194,7 @@ const PostingDetailModal = ({ isOpen, onClose, job }: PostingDetailModalProps) =
             </Button>
             <div className="flex-[2]">
               <Button
-                disabled={isExpired(job.deadline)}
+                disabled={isExpired(job.deadline) && !isApplied}
                 className={`w-full h-12 sm:h-14 rounded-xl sm:rounded-2xl font-black text-base sm:text-lg ${
                   isApplied
                     ? 'bg-blue-50 text-blue-600 border border-blue-100 shadow-none'
