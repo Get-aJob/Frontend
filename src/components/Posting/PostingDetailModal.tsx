@@ -20,10 +20,12 @@ import ApplyModal from '@/components/status/ApplyModal';
 import { useStatusStore } from '@/store/useStatusStore';
 import { useAuthStore } from '@/store/useAuthStore';
 import Toast from '@/components/common/UI/Toast';
+
 import { toggleScrap } from '@/api/Scrap';
 import { useGetAllScraps } from '@/hooks/scraps';
 import { useQueryClient } from '@tanstack/react-query';
 import clsx from 'clsx';
+import { formatFullDate, isExpired } from '@/utils/statusUtils';
 
 interface PostingDetailModalProps {
   isOpen: boolean;
@@ -135,7 +137,7 @@ const PostingDetailModal = ({ isOpen, onClose, job }: PostingDetailModalProps) =
                 {
                   icon: Globe,
                   label: '수집 경로',
-                  value: job.sourceType === 'auto' ? '자동 수집' : '사용자 등록',
+                  value: job.sourceType === 'auto' ? '자동 공고' : '수동 공고',
                 },
               ].map((item, idx) => (
                 <div
@@ -151,10 +153,14 @@ const PostingDetailModal = ({ isOpen, onClose, job }: PostingDetailModalProps) =
                       {item.label}
                     </p>
                     <p
-                      className="text-[13px] sm:text-[15px] font-black text-gray-800 break-words line-clamp-2 sm:line-clamp-3"
+                      className={`text-[13px] sm:text-[15px] font-black break-words line-clamp-2 sm:line-clamp-3 ${
+                        item.label === '마감 기한' && isExpired(job.deadline)
+                          ? 'text-red-500'
+                          : 'text-gray-800'
+                      }`}
                       title={String(item.value)}
                     >
-                      {item.value}
+                      {item.label === '마감 기한' ? formatFullDate(job.deadline) : item.value}
                     </p>
                   </div>
                 </div>
@@ -232,10 +238,13 @@ const PostingDetailModal = ({ isOpen, onClose, job }: PostingDetailModalProps) =
 
             <div className="flex-2">
               <Button
+                disabled={isExpired(job.deadline) && !isApplied}
                 className={`w-full h-12 sm:h-14 rounded-xl sm:rounded-2xl font-black text-base sm:text-lg ${
                   isApplied
                     ? 'bg-blue-50 text-blue-600 border border-blue-100 shadow-none'
-                    : 'shadow-lg shadow-purple-100'
+                    : isExpired(job.deadline)
+                      ? 'bg-gray-200 text-gray-700 border-gray-300 cursor-not-allowed shadow-none !opacity-100'
+                      : 'shadow-lg shadow-purple-100'
                 }`}
                 onClick={handleApplyClick}
               >
@@ -243,6 +252,8 @@ const PostingDetailModal = ({ isOpen, onClose, job }: PostingDetailModalProps) =
                   <span className="flex items-center justify-center gap-1.5 sm:gap-2">
                     <Check size={18} strokeWidth={3} className="sm:w-5 sm:h-5" /> 지원 확인
                   </span>
+                ) : isExpired(job.deadline) ? (
+                  '지원이 마감되었습니다'
                 ) : (
                   '지원하기'
                 )}
