@@ -1,5 +1,6 @@
 import React from 'react';
 import type { ScheduleEvent } from '@/types/Calendar';
+import clsx from 'clsx';
 
 interface MonthProps {
   currentDate: Date;
@@ -96,20 +97,32 @@ const Month: React.FC<MonthProps> = ({ currentDate, events, onEventClick, onMore
 
               {/* 일정 목록 */}
               <div className="mt-1 space-y-0.5 overflow-hidden">
-                {dayEvents.slice(0, 3).map((event, idx) => (
-                  <button
-                    key={idx}
-                    onClick={() => onEventClick(event)}
-                    className={`w-full text-left truncate px-1.5 py-0.5 rounded-md text-[9px] sm:text-[10px] font-bold leading-tight transition-all active:scale-95 ${
-                      event.eventType === 'applied'
-                        ? 'bg-blue-100 text-blue-700 hover:bg-blue-200'
-                        : 'bg-indigo-50 text-indigo-600 hover:bg-indigo-100'
-                    }`}
-                  >
-                    <span className="sm:hidden">●</span>
-                    <span className="hidden sm:inline">{event.title}</span>
-                  </button>
-                ))}
+                {dayEvents.slice(0, 3).map((event, idx) => {
+                  const today = new Date();
+                  today.setHours(0, 0, 0, 0);
+                  const target = new Date(event.date);
+                  target.setHours(0, 0, 0, 0);
+                  const diffDays = Math.ceil(
+                    (target.getTime() - today.getTime()) / (1000 * 60 * 60 * 24),
+                  );
+                  return (
+                    <button
+                      key={idx}
+                      onClick={() => onEventClick(event)}
+                      className={clsx(
+                        `w-full text-left truncate px-1.5 py-0.5 rounded-md text-[9px] sm:text-[10px] font-bold leading-tight transition-all active:scale-95`,
+                        event.eventType === 'applied'
+                          ? 'bg-blue-100 text-blue-700 hover:bg-blue-200'
+                          : diffDays >= 0
+                            ? 'bg-indigo-50 text-indigo-600 hover:bg-indigo-100'
+                            : 'bg-gray-100',
+                      )}
+                    >
+                      <span className="sm:hidden">●</span>
+                      <span className="hidden sm:inline">{event.title}</span>
+                    </button>
+                  );
+                })}
                 {dayEvents.length > 3 && (
                   <button
                     onClick={() => onMoreClick(dateStr)}

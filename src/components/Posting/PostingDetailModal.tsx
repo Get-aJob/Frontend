@@ -20,12 +20,12 @@ import ApplyModal from '@/components/status/ApplyModal';
 import { useStatusStore } from '@/store/useStatusStore';
 import { useAuthStore } from '@/store/useAuthStore';
 import Toast from '@/components/common/UI/Toast';
+import { formatFullDate, isExpired } from '@/utils/statusUtils';
 
 import { toggleScrap } from '@/api/Scrap';
 import { useGetAllScraps } from '@/hooks/scraps';
 import { useQueryClient } from '@tanstack/react-query';
 import clsx from 'clsx';
-import { formatFullDate, isExpired } from '@/utils/statusUtils';
 
 interface PostingDetailModalProps {
   isOpen: boolean;

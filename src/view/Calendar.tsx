@@ -91,6 +91,7 @@ const Calendar = () => {
   }, [scheduleEvents, applications]);
 
   const filteredEvents = useMemo(() => {
+    /*
     const toLocalDateStr = (d: Date) => {
       const y = d.getFullYear();
       const m = String(d.getMonth() + 1).padStart(2, '0');
@@ -98,9 +99,9 @@ const Calendar = () => {
       return `${y}-${m}-${day}`;
     };
     const todayStr = toLocalDateStr(new Date());
+    */
 
     const validEvents = combinedEvents.filter((e) => {
-      if (e.eventType === 'deadline' && e.date < todayStr) return false;
       if (!isLoggedIn && e.sourceType === 'manual') return false;
       return true;
     });
