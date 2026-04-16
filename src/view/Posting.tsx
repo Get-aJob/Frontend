@@ -37,6 +37,7 @@ const Posting = () => {
     setSearchKeyword,
     setSourceType,
     setSelectedSite,
+    setCurrentPage,
   } = usePostingStore();
   const [searchParams] = useSearchParams();
   const keywordFromUrl = searchParams.get('keyword') || '';
@@ -102,8 +103,7 @@ const Posting = () => {
       mainElement.scrollTo({ top: 0, behavior: 'smooth' });
     }
     // currentPage가 바뀌면 하단 useEffect가 실질적인 fetch를 수행합니다.
-    usePostingStore.setState({ currentPage: page });
-    fetchPostings(page, selectedSite, searchKeyword, scrapData);
+    setCurrentPage(page);
   };
 
   const selectedJob = useMemo(() => {

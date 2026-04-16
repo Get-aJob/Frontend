@@ -19,6 +19,7 @@ interface JobModalProps {
 
 const JobModal = ({ isOpen, onClose, mode = 'create', initialData }: JobModalProps) => {
   const { createJob, updateJob, parseJobUrl } = usePostingStore();
+  const { showToast } = useToastStore();
 
   const [crawlUrl, setCrawlUrl] = useState('');
   const [url, setUrl] = useState('');
@@ -131,8 +132,6 @@ const JobModal = ({ isOpen, onClose, mode = 'create', initialData }: JobModalPro
       setIsParsing(false);
     }
   };
-
-  const { showToast } = useToastStore();
 
   const handleRegister = async (e?: React.FormEvent) => {
     if (e) e.preventDefault();
