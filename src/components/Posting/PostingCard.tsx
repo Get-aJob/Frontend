@@ -108,7 +108,7 @@ const PostingCard = ({ posting, isScrapped, isApplied, onScrap, onDetail }: Post
   const handleConfirmDelete = async () => {
     try {
       await deleteJob(posting.externalId!, 'manual');
-      showToast('🔔 공고가 삭제되었습니다.');
+      showToast('공고가 삭제되었습니다.');
     } catch {
       showToast('❌ 삭제 중 오류가 발생했습니다.');
     }
