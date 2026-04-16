@@ -14,12 +14,10 @@ import { useAuthStore } from '@/store/useAuthStore';
 import { useStatusStore } from '@/store/useStatusStore';
 import Toast from '@/components/common/UI/Toast';
 import { useToastStore } from '@/store/useToastStore';
-
-const Posting = () => {
-  const { visible: toastVisible, message: toastMessage } = useToastStore();
 import { useGetAllScraps } from '@/hooks/scraps';
 
 const Posting = () => {
+  const { visible: toastVisible, message: toastMessage } = useToastStore();
   const isLoggedIn = useAuthStore((state) => state.isLoggedIn);
 
   const { data: scrapData } = useGetAllScraps(isLoggedIn);
@@ -44,7 +42,6 @@ const Posting = () => {
   const keywordFromUrl = searchParams.get('keyword') || '';
   const sourceFromUrl = searchParams.get('source');
   const siteFromUrl = searchParams.get('site') || '';
-  const isLoggedIn = useAuthStore((state) => state.isLoggedIn);
   const isManualWithoutLogin = !isLoggedIn && sourceType === 'manual';
   const { fetchData, applications } = useStatusStore();
 
@@ -88,8 +85,6 @@ const Posting = () => {
     if (isLoggedIn) {
       fetchData();
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isLoggedIn, searchKeyword, sourceType, selectedSite, currentPage]);
   }, [
     isLoggedIn,
     searchKeyword,
