@@ -12,4 +12,5 @@ export const PATH = {
   NOTIFICATION: '/notification', // 알림
   SETTINGS: '/settings', // 계정 설정
   AUTH: '/auth', // 로그인
+  SIGN_IN: '/sign-in', // 회원가입
 } as const;

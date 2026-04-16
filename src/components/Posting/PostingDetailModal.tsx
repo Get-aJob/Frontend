@@ -9,6 +9,7 @@ import {
   Building2,
   MessageSquare,
   Check,
+  Bookmark,
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { PATH } from '@/router/Path';
@@ -20,6 +21,11 @@ import { useStatusStore } from '@/store/useStatusStore';
 import { useAuthStore } from '@/store/useAuthStore';
 import Toast from '@/components/common/UI/Toast';
 import { formatFullDate, isExpired } from '@/utils/statusUtils';
+
+import { toggleScrap } from '@/api/Scrap';
+import { useGetAllScraps } from '@/hooks/scraps';
+import { useQueryClient } from '@tanstack/react-query';
+import clsx from 'clsx';
 
 interface PostingDetailModalProps {
   isOpen: boolean;
@@ -34,6 +40,8 @@ const PostingDetailModal = ({ isOpen, onClose, job }: PostingDetailModalProps) =
   const isLoggedIn = useAuthStore((state) => state.isLoggedIn);
   const toastTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const navigate = useNavigate();
+  const { data: scrapData } = useGetAllScraps(isLoggedIn);
+  const queryClient = useQueryClient();
 
   useEffect(() => {
     return () => {
@@ -45,6 +53,7 @@ const PostingDetailModal = ({ isOpen, onClose, job }: PostingDetailModalProps) =
 
   const isApplied =
     isLoggedIn && applications.some((app) => String(app.jobPostingId) === String(job.id));
+  const isScrapped = scrapData?.some((data) => String(data.jobPostingId) === String(job.id));
 
   const handleGoToSite = () => {
     if (job.url) {
@@ -208,7 +217,33 @@ const PostingDetailModal = ({ isOpen, onClose, job }: PostingDetailModalProps) =
             >
               원문 <ExternalLink size={18} className="ml-1 sm:ml-2 sm:w-5 sm:h-5" />
             </Button>
-            <div className="flex-[2]">
+            {!isApplied && (
+              <Button
+                onClick={async () => {
+                  const result = await toggleScrap(String(job.id));
+                  queryClient.invalidateQueries({ queryKey: ['scraps', 'all'] });
+
+                  if (result.added) {
+                    window.alert('스크랩 완료');
+                    return;
+                  } else {
+                    window.alert('스크랩 해제');
+                    return;
+                  }
+                }}
+                className={clsx(
+                  'flex-1 h-12 sm:h-14 rounded-xl sm:rounded-2xl text-base sm:text-lg',
+                  scrapData?.findIndex((data) => data.jobPostingId === job.id)
+                    ? 'text-btn-point border-btn-point bg-blue-50'
+                    : 'text-gray-400 border-gray-100',
+                )}
+              >
+                <Bookmark size={15} fill={isScrapped ? 'currentColor' : 'none'} strokeWidth={2.5} />
+                {!isScrapped ? '스크랩 하기' : '스크랩 해제'}
+              </Button>
+            )}
+
+            <div className="flex-2">
               <Button
                 disabled={isExpired(job.deadline) && !isApplied}
                 className={`w-full h-12 sm:h-14 rounded-xl sm:rounded-2xl font-black text-base sm:text-lg ${
@@ -240,7 +275,11 @@ const PostingDetailModal = ({ isOpen, onClose, job }: PostingDetailModalProps) =
             companyName={job.companyName}
             title={job.title}
             onClose={() => setIsApplyModalOpen(false)}
-            onSuccess={() => setIsApplyModalOpen(false)}
+            onSuccess={() => {
+              window.alert('지원이 완료되었습니다.');
+              setIsApplyModalOpen(false);
+              navigate(PATH.STATUS);
+            }}
           />
         )}
       </div>

@@ -12,6 +12,7 @@ import { toggleScrap } from '@/api/Scrap';
 import { incrementViewCount } from '@/api/Posting';
 import ConfirmModal from '@/components/common/UI/ConfirmModal';
 import { useToastStore } from '@/store/useToastStore';
+import { useQueryClient } from '@tanstack/react-query';
 
 interface PostingCardProps {
   posting: JobPosting;
@@ -38,6 +39,8 @@ const PostingCard = ({ posting, isScrapped, isApplied, onScrap, onDetail }: Post
     message: '',
     confirmText: '',
   });
+
+  const queryClient = useQueryClient();
 
   const handleCardClick = () => {
     if (posting.sourceType !== 'manual') {
@@ -268,7 +271,7 @@ const PostingCard = ({ posting, isScrapped, isApplied, onScrap, onDetail }: Post
         </div>
 
         {posting.sourceType !== 'manual' && (
-          <div className="flex items-center gap-4 text-gray-500 text-[11px] font-black pt-4 border-t border-gray-100">
+          <div className="flex items-center gap-4 text-gray-500 text-body font-black pt-4 border-t border-gray-100">
             <span className="flex items-center gap-1.5">
               <Eye size={14} strokeWidth={3} /> {posting.viewCount || 0}
             </span>
@@ -321,7 +324,10 @@ const PostingCard = ({ posting, isScrapped, isApplied, onScrap, onDetail }: Post
             setIsModalOpen(false);
           }
         }}
-        onClose={() => setIsModalOpen(false)}
+        onClose={() => {
+          setIsModalOpen(false);
+          setTimeout(() => queryClient.invalidateQueries({ queryKey: ['scraps', 'all'] }), 50); // UI동작 처리를 기다림
+        }}
       />
     </>
   );

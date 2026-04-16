@@ -18,6 +18,7 @@ const Register: React.FC<RegisterProps> = ({ onSwitchLogin }) => {
 
     try {
       await joinApi(data);
+      window.alert('회원가입이 완료되었습니다!');
       onSwitchLogin();
     } catch (error: unknown) {
       let errorMessage = '회원가입 중 오류가 발생했습니다.';

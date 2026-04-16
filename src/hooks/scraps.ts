@@ -1,4 +1,4 @@
-import { getMyScraps, type ScrapItem } from '@/api/Scrap';
+import { getMyScraps, type ScrapItem, type ScrapSortType } from '@/api/Scrap';
 import { useQuery } from '@tanstack/react-query';
 
 export const useGetAllScraps = (isLoggedIn: boolean) => {
@@ -19,5 +19,23 @@ export const useGetAllScraps = (isLoggedIn: boolean) => {
     },
     placeholderData: [],
     enabled: isLoggedIn,
+  });
+};
+
+export const useMyScraps = (
+  currentPage: number,
+  pageSize: number,
+  sortBy: ScrapSortType | undefined,
+) => {
+  return useQuery({
+    // 💡 1. 쿼리 키 설정 (페이지와 정렬 기준이 바뀔 때마다 다시 호출)
+    queryKey: ['scraps', currentPage, sortBy],
+
+    // 💡 2. 데이터 페칭 함수
+    queryFn: () => getMyScraps(currentPage, pageSize, sortBy),
+
+    // 💡 3. 유용한 옵션들
+    placeholderData: (previousData) => previousData, // 페이지 전환 시 깜빡임 방지
+    staleTime: 5 * 60 * 1000, // 5분 동안은 신선한 데이터로 간주
   });
 };

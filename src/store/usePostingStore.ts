@@ -49,7 +49,7 @@ export interface ExtendedBackendJob extends BackendJob {
 }
 
 // 공고 상세 내용(JSON 또는 문자열)을 파싱하는 헬퍼 함수
-const parseDescription = (content: string | Record<string, unknown> | undefined): string => {
+export const parseDescription = (content: string | Record<string, unknown> | undefined): string => {
   if (!content) return '';
   if (typeof content === 'object') return (content.description as string) || '';
   try {
@@ -61,7 +61,7 @@ const parseDescription = (content: string | Record<string, unknown> | undefined)
 };
 
 // 로컬 날짜 포맷터 (YYYY-MM-DD)
-const formatLocalDate = (date: string | Date): string => {
+export const formatLocalDate = (date: string | Date): string => {
   const d = new Date(date);
   const year = d.getFullYear();
   const month = String(d.getMonth() + 1).padStart(2, '0');
