@@ -11,6 +11,7 @@ import { usePostingStore } from '@/store/usePostingStore';
 import { toggleScrap } from '@/api/Scrap';
 import { incrementViewCount } from '@/api/Posting';
 import ConfirmModal from '@/components/common/UI/ConfirmModal';
+import { useToastStore } from '@/store/useToastStore';
 
 interface PostingCardProps {
   posting: JobPosting;
@@ -92,18 +93,24 @@ const PostingCard = ({ posting, isScrapped, isApplied, onScrap, onDetail }: Post
     }
   };
 
-  const handleDelete = async (e: React.MouseEvent) => {
+  const { showToast } = useToastStore();
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+
+  const handleDeleteClick = (e: React.MouseEvent) => {
     e.stopPropagation();
     if (!posting.externalId) {
-      alert('오류: 공고 식별자가 없습니다.');
+      showToast('❌ 오류: 공고 식별자가 없습니다.');
       return;
     }
-    if (window.confirm('이 공고를 정말 삭제하시겠습니까?')) {
-      try {
-        await deleteJob(posting.externalId, 'manual');
-      } catch {
-        alert('삭제 중 오류가 발생했습니다.');
-      }
+    setIsDeleteModalOpen(true);
+  };
+
+  const handleConfirmDelete = async () => {
+    try {
+      await deleteJob(posting.externalId!, 'manual');
+      showToast('🔔 공고가 삭제되었습니다.');
+    } catch {
+      showToast('❌ 삭제 중 오류가 발생했습니다.');
     }
   };
 
@@ -228,7 +235,7 @@ const PostingCard = ({ posting, isScrapped, isApplied, onScrap, onDetail }: Post
                   <Edit2 size={15} strokeWidth={2.5} />
                 </button>
                 <button
-                  onClick={handleDelete}
+                  onClick={handleDeleteClick}
                   className="p-1.5 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-all duration-200 flex items-center justify-center bg-white border border-gray-100 shadow-sm motion-safe:hover:scale-110 motion-safe:active:scale-95 motion-safe:hover:shadow-md"
                   title="삭제"
                   aria-label="삭제"
@@ -279,6 +286,18 @@ const PostingCard = ({ posting, isScrapped, isApplied, onScrap, onDetail }: Post
           initialData={posting}
         />
       )}
+
+      {/* 수동 공고 삭제 확인 모달 */}
+      <ConfirmModal
+        isOpen={isDeleteModalOpen}
+        title="공고 삭제"
+        message="이 공고를 정말 삭제하시겠습니까?"
+        confirmText="삭제하기"
+        cancelText="취소"
+        isDanger={true}
+        onConfirm={handleConfirmDelete}
+        onClose={() => setIsDeleteModalOpen(false)}
+      />
 
       {/* 스크랩 확인/성공 모달 */}
       <ConfirmModal
