@@ -6,18 +6,22 @@ import { logoutApi } from '@/api/Auth';
 import Button from '@/components/common/UI/Button';
 import ConfirmModal from '@/components/common/UI/ConfirmModal';
 import { LogIn, Loader2 } from 'lucide-react';
+import { useQueryClient } from '@tanstack/react-query';
 
 const SidebarAuth = () => {
   const navigate = useNavigate();
   const { isLoggedIn, userInfo, logout } = useAuthStore();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
+  const queryClient = useQueryClient();
 
   const handleLogout = async () => {
     setIsLoggingOut(true);
     try {
       await logoutApi();
       logout();
+      queryClient.clear();
+
       navigate(PATH.POSTING);
     } catch (error) {
       console.error('로그아웃 실패:', error);

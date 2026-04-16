@@ -41,7 +41,7 @@ const Calendar = () => {
       let end = new Date(currentDate);
       if (view === 'month') {
         start = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1);
-        end = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0);
+        end = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 12); // 정오로 맞춤
       } else if (view === 'week') {
         const day = currentDate.getDay();
         start = new Date(currentDate);
