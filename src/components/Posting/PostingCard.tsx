@@ -15,11 +15,12 @@ import ConfirmModal from '@/components/common/UI/ConfirmModal';
 interface PostingCardProps {
   posting: JobPosting;
   isScrapped?: boolean;
+  isApplied?: boolean;
   onScrap: (id: string | number) => void;
   onDetail: (job: JobPosting) => void;
 }
 
-const PostingCard = ({ posting, isScrapped, onScrap, onDetail }: PostingCardProps) => {
+const PostingCard = ({ posting, isScrapped, isApplied, onScrap, onDetail }: PostingCardProps) => {
   const displayDday = toDday(posting.deadline);
   const expired = isExpired(posting.deadline);
 
@@ -195,7 +196,10 @@ const PostingCard = ({ posting, isScrapped, onScrap, onDetail }: PostingCardProp
               <h3 className="text-xs font-black text-gray-700 tracking-tight mb-1">
                 {posting.companyName}
               </h3>
-              <Badge variant={ddayVariant(displayDday)}>{displayDday}</Badge>
+              <div className="flex flex-wrap gap-1.5">
+                <Badge variant={ddayVariant(displayDday)}>{displayDday}</Badge>
+                {isApplied && <Badge variant="blue">지원완료</Badge>}
+              </div>
             </div>
           </div>
           <div className="flex items-center gap-1.5 shrink-0 ml-4">

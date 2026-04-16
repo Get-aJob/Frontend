@@ -37,7 +37,11 @@ const Posting = () => {
   const siteFromUrl = searchParams.get('site') || '';
   const isLoggedIn = useAuthStore((state) => state.isLoggedIn);
   const isManualWithoutLogin = !isLoggedIn && sourceType === 'manual';
-  const { fetchData } = useStatusStore();
+  const { fetchData, applications } = useStatusStore();
+
+  const appliedJobIds = useMemo(() => {
+    return new Set(applications.map((app) => String(app.jobPostingId)));
+  }, [applications]);
 
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
   const [selectedJobId, setSelectedJobId] = useState<string | number | null>(null);
@@ -134,6 +138,7 @@ const Posting = () => {
               <>
                 <PostingList
                   postings={postings}
+                  appliedJobIds={appliedJobIds}
                   onScrap={toggleScrapStatus}
                   onDetail={handleDetailOpen}
                 />

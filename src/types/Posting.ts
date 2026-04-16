@@ -39,6 +39,7 @@ export interface JobPosting {
   experienceLevel?: string;
   deadline: string;
   isScrapped?: boolean;
+  isApplied?: boolean;
   sourceType?: string;
   externalId?: string;
   description?: string;
