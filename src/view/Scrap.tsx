@@ -16,7 +16,7 @@ const Scrap = () => {
   const PAGE_SIZE = 30;
   const queryClient = useQueryClient();
   const { data, isLoading } = useMyScraps(currentPage, PAGE_SIZE, sortBy);
-  const { mutate } = useToggleScraps(currentPage, sortBy);
+  const { mutate } = useToggleScraps();
   const totalPage = data ? Math.ceil(data?.pagination.totalCount / PAGE_SIZE) : 1;
   const totalCount = data ? data.pagination.totalCount : 0;
 
@@ -25,7 +25,7 @@ const Scrap = () => {
   };
 
   const onClose = async () => {
-    queryClient.invalidateQueries({ queryKey: ['scraps', currentPage, sortBy] });
+    queryClient.invalidateQueries({ queryKey: ['scraps'] });
   };
 
   const handleUnscrap = async (id: string) => {

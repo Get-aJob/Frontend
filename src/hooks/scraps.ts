@@ -36,18 +36,19 @@ export const useMyScraps = (
 
     // 💡 3. 유용한 옵션들
     placeholderData: (previousData) => previousData, // 페이지 전환 시 깜빡임 방지
-    staleTime: 5 * 60 * 1000, // 5분 동안은 신선한 데이터로 간주
+    staleTime: 0, // 💡 즉각적인 반영을 위해 staleTime을 0으로 설정
   });
 };
 
-export const useToggleScraps = (currentPage: number, sortBy: ScrapSortType | undefined) => {
+export const useToggleScraps = () => {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async (id: string) => {
       await toggleScrap(id);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['scraps', currentPage, sortBy] });
+      // ✨ 페이지나 정렬에 상관없이 모든 스크랩 관련 데이터 동기화
+      queryClient.invalidateQueries({ queryKey: ['scraps'] });
     },
     onError: (error) => {
       console.error('저장 실패:', error);
