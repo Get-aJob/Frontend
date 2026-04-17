@@ -83,6 +83,7 @@ interface PostingState {
   setSearchKeyword: (keyword: string) => void;
   setSourceType: (type: 'auto' | 'manual') => void;
   setSelectedSite: (site: string) => void;
+  setCurrentPage: (page: number) => void;
   fetchPostings: (
     page: number,
     site?: string,
@@ -124,6 +125,10 @@ export const usePostingStore = create<PostingState>()(
 
       setSelectedSite: (site) => {
         set({ selectedSite: site, currentPage: 1 });
+      },
+
+      setCurrentPage: (page) => {
+        set({ currentPage: page });
       },
 
       fetchPostings: async (
@@ -266,7 +271,15 @@ export const usePostingStore = create<PostingState>()(
             // 자동 수집 공고 삭제(현재 지원되지 않으나 확장을 위해 분리)
             await deleteDirectJob(externalId);
           }
-          await get().fetchPostings(get().currentPage);
+
+          // 💡 삭제 후 현재 페이지가 빈 페이지가 될 가능성 체크 (마지막 아이템 삭제 시)
+          const PAGE_SIZE = 30;
+          const currentTotal = get().totalCount;
+          const currentPage = get().currentPage;
+          const newTotalPages = Math.ceil((currentTotal - 1) / PAGE_SIZE) || 1;
+          const pageToFetch = currentPage > newTotalPages ? newTotalPages : currentPage;
+
+          await get().fetchPostings(pageToFetch);
         } catch (err) {
           set({ error: (err as Error).message });
           throw err;

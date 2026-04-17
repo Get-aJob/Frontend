@@ -12,17 +12,22 @@ const STATUS_KEYWORDS = {
 };
 
 // 로컬 시간대 오차 방지를 위해 날짜 문자열을 로컬 객체로 변환하는 헬퍼 함수
-const parseLocalDate = (text: string): Date => {
-  if (!text) return new Date();
+const parseLocalDate = (text: string): Date | null => {
+  if (!text) return null;
 
   // YYYY-MM-DD 또는 YYYY-MM-DDTHH:mm:ss 형식 처리
   const datePart = text.split('T')[0];
-  const [year, month, day] = datePart.split(/[-./]/).map(Number);
+  const dateSegments = datePart.split(/[-./]/);
 
-  if (year && month && day) {
-    return new Date(year, month - 1, day);
+  if (dateSegments.length === 3) {
+    const [year, month, day] = dateSegments.map(Number);
+    if (!isNaN(year) && !isNaN(month) && !isNaN(day)) {
+      return new Date(year, month - 1, day);
+    }
   }
-  return new Date(text);
+
+  const date = new Date(text);
+  return isNaN(date.getTime()) ? null : date;
 };
 
 // 문자열을 분석하여 상태 카테고리를 반환하는 유틸리티
@@ -33,7 +38,7 @@ const getStatusCategory = (text: string): 'ALWAYS' | 'ROLLING' | 'CLOSED' | 'DAT
   if (STATUS_KEYWORDS.CLOSED.some((k) => text.includes(k))) return 'CLOSED';
 
   const date = parseLocalDate(text);
-  return isNaN(date.getTime()) ? 'UNKNOWN' : 'DATE';
+  return date === null ? 'UNKNOWN' : 'DATE';
 };
 
 export const isExpired = (deadline?: string): boolean => {
@@ -42,7 +47,9 @@ export const isExpired = (deadline?: string): boolean => {
   if (category === 'CLOSED') return true;
   if (category !== 'DATE') return false;
 
-  return isBefore(startOfDay(parseLocalDate(deadline)), startOfDay(new Date()));
+  const date = parseLocalDate(deadline);
+  if (!date) return false;
+  return isBefore(startOfDay(date), startOfDay(new Date()));
 };
 
 export const toDday = (deadline?: string): string => {
@@ -58,6 +65,7 @@ export const toDday = (deadline?: string): string => {
       return '공고 마감';
     case 'DATE': {
       const targetDate = parseLocalDate(deadline);
+      if (!targetDate) return deadline;
       const diffDays = differenceInCalendarDays(startOfDay(targetDate), startOfDay(new Date()));
       if (diffDays === 0) return '오늘 마감';
       if (diffDays > 0) return `D-${diffDays}`;
@@ -80,6 +88,7 @@ export const formatFullDate = (deadline?: string): string => {
   // 날짜 형식인 경우
   if (category === 'DATE') {
     const target = parseLocalDate(deadline);
+    if (!target) return deadline;
     const dateStr = format(target, 'yyyy.MM.dd');
     const isPast = isExpired(deadline);
 
@@ -100,7 +109,7 @@ export const formatFullDate = (deadline?: string): string => {
 
 export function ddayVariant(dday: string): BadgeVariant {
   if (dday.includes('공고 마감')) return 'error';
-  if (dday === '오늘 마감' || dday === '오늘마감') return 'warning';
+  if (dday === '오늘 마감') return 'warning';
   if (dday === '상시 채용' || dday === '채용 시 마감') return 'success';
   return 'point';
 }
