@@ -1,26 +1,116 @@
+import { differenceInCalendarDays, isBefore, format, startOfDay } from 'date-fns';
+import { ko } from 'date-fns/locale';
 import type { ApplicationRecord, JobPostingSummary } from '@/types/Status';
 
 export type BadgeVariant = 'error' | 'warning' | 'success' | 'point' | 'default';
 
+// 하드코딩된 문자열들을 유연하게 처리하기 위한 키워드 맵
+const STATUS_KEYWORDS = {
+  ALWAYS: ['상시', '항시', '365', '언제나'],
+  ROLLING: ['채용시', '채용 시', '수시', '적격자', '홈페이지 지원', '마감 전'],
+  CLOSED: ['마감됨', '종료', '만료', '마감한'],
+};
+
+// 로컬 시간대 오차 방지를 위해 날짜 문자열을 로컬 객체로 변환하는 헬퍼 함수
+const parseLocalDate = (text: string): Date | null => {
+  if (!text) return null;
+
+  // YYYY-MM-DD 또는 YYYY-MM-DDTHH:mm:ss 형식 처리
+  const datePart = text.split('T')[0];
+  const dateSegments = datePart.split(/[-./]/);
+
+  if (dateSegments.length === 3) {
+    const [year, month, day] = dateSegments.map(Number);
+    if (!isNaN(year) && !isNaN(month) && !isNaN(day)) {
+      return new Date(year, month - 1, day);
+    }
+  }
+
+  const date = new Date(text);
+  return isNaN(date.getTime()) ? null : date;
+};
+
+// 문자열을 분석하여 상태 카테고리를 반환하는 유틸리티
+const getStatusCategory = (text: string): 'ALWAYS' | 'ROLLING' | 'CLOSED' | 'DATE' | 'UNKNOWN' => {
+  if (!text) return 'UNKNOWN';
+  if (STATUS_KEYWORDS.ALWAYS.some((k) => text.includes(k))) return 'ALWAYS';
+  if (STATUS_KEYWORDS.ROLLING.some((k) => text.includes(k))) return 'ROLLING';
+  if (STATUS_KEYWORDS.CLOSED.some((k) => text.includes(k))) return 'CLOSED';
+
+  const date = parseLocalDate(text);
+  return date === null ? 'UNKNOWN' : 'DATE';
+};
+
+export const isExpired = (deadline?: string): boolean => {
+  if (!deadline) return false;
+  const category = getStatusCategory(deadline);
+  if (category === 'CLOSED') return true;
+  if (category !== 'DATE') return false;
+
+  const date = parseLocalDate(deadline);
+  if (!date) return false;
+  return isBefore(startOfDay(date), startOfDay(new Date()));
+};
+
 export const toDday = (deadline?: string): string => {
-  if (!deadline || deadline === '상시채용') return '상시채용';
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
-  const target = new Date(deadline);
-  if (isNaN(target.getTime())) return deadline;
+  if (!deadline) return '상시 채용';
+  const category = getStatusCategory(deadline);
 
-  const diffTime = target.getTime() - today.getTime();
-  const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+  switch (category) {
+    case 'ALWAYS':
+      return '상시 채용';
+    case 'ROLLING':
+      return '채용 시 마감';
+    case 'CLOSED':
+      return '공고 마감';
+    case 'DATE': {
+      const targetDate = parseLocalDate(deadline);
+      if (!targetDate) return deadline;
+      const diffDays = differenceInCalendarDays(startOfDay(targetDate), startOfDay(new Date()));
+      if (diffDays === 0) return '오늘 마감';
+      if (diffDays > 0) return `D-${diffDays}`;
+      return '공고 마감';
+    }
+    default:
+      // 정의되지 않은 긴 문구는 8자까지만 보여주고 자름
+      return deadline.length > 8 ? `${deadline.slice(0, 8)}...` : deadline;
+  }
+};
 
-  if (diffDays === 0) return 'D-Day';
-  if (diffDays > 0) return `D-${diffDays}`;
-  return `마감 (D+${Math.abs(diffDays)})`;
+export const formatFullDate = (deadline?: string): string => {
+  if (!deadline) return '상시 채용';
+  const category = getStatusCategory(deadline);
+
+  // 특수 상태의 경우 상세 페이지용 문구 반환
+  if (category === 'ALWAYS') return '상시 채용';
+  if (category === 'ROLLING') return '채용 시 마감';
+
+  // 날짜 형식인 경우
+  if (category === 'DATE') {
+    const target = parseLocalDate(deadline);
+    if (!target) return deadline;
+    const dateStr = format(target, 'yyyy.MM.dd');
+    const isPast = isExpired(deadline);
+
+    if (isPast) {
+      return dateStr;
+    }
+
+    const weekDay = format(target, 'eee', { locale: ko });
+    return `${dateStr} (${weekDay})`;
+  }
+
+  // 명시적으로 마감된 경우
+  if (category === 'CLOSED') return '공고 마감';
+
+  // 그 외 정해지지 않은 상세 문구는 그대로 보여줌
+  return deadline;
 };
 
 export function ddayVariant(dday: string): BadgeVariant {
-  if (!dday || dday.includes('마감') || dday.includes('+')) return 'error';
-  if (dday === 'D-Day' || dday === '오늘마감') return 'warning';
-  if (dday === '상시채용') return 'success';
+  if (dday.includes('공고 마감')) return 'error';
+  if (dday === '오늘 마감') return 'warning';
+  if (dday === '상시 채용' || dday === '채용 시 마감') return 'success';
   return 'point';
 }
 

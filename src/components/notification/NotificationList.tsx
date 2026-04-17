@@ -51,7 +51,9 @@ function NotificationList({ items, onMarkRead }: NotificationListProps) {
                     {item.title}
                   </h2>
 
-                  <p className="text-sm text-gray-600 mt-1 leading-relaxed line-clamp-2">{item.body}</p>
+                  <p className="text-sm text-gray-600 mt-1 leading-relaxed line-clamp-2">
+                    {item.body}
+                  </p>
 
                   <div className="flex flex-wrap gap-2 mt-4">
                     {unread && (

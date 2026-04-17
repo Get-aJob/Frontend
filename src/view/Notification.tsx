@@ -67,24 +67,21 @@ function Notification() {
     setGlobalUnreadCount(unreadCount);
   }, [unreadCount, setGlobalUnreadCount]);
 
-  const markRead = useCallback(
-    async (id: string) => {
-      try {
-        const res = await markNotificationOnlyOne(id);
-        if (res.success && res.notification) {
-          const updated = mapNotificationToItem(res.notification);
-          setItems((prev) => prev.map((n) => (n.id === id ? updated : n)));
-          return;
-        }
-        const list = await fetchNotifications({ limit: 20, unreadOnly: false });
-        setItems(list.notifications.map(mapNotificationToItem));
-      } catch (e) {
-        console.error('읽음 처리 실패:', e);
-        alert('읽음 처리에 실패했습니다.');
+  const markRead = useCallback(async (id: string) => {
+    try {
+      const res = await markNotificationOnlyOne(id);
+      if (res.success && res.notification) {
+        const updated = mapNotificationToItem(res.notification);
+        setItems((prev) => prev.map((n) => (n.id === id ? updated : n)));
+        return;
       }
-    },
-    [],
-  );
+      const list = await fetchNotifications({ limit: 20, unreadOnly: false });
+      setItems(list.notifications.map(mapNotificationToItem));
+    } catch (e) {
+      console.error('읽음 처리 실패:', e);
+      alert('읽음 처리에 실패했습니다.');
+    }
+  }, []);
 
   const markAllRead = useCallback(async () => {
     try {

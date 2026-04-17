@@ -1,4 +1,5 @@
 import { useEffect, useState, useMemo } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { usePostingStore } from '@/store/usePostingStore';
 import PostingList from '@/components/Posting/PostingList';
 import PostingFilter from '@/components/Posting/PostingFilter';
@@ -11,9 +12,12 @@ import { incrementViewCount } from '@/api/Posting';
 import type { ExtendedJobPosting } from '@/store/usePostingStore';
 import { useAuthStore } from '@/store/useAuthStore';
 import { useStatusStore } from '@/store/useStatusStore';
+import Toast from '@/components/common/UI/Toast';
+import { useToastStore } from '@/store/useToastStore';
 import { useGetAllScraps } from '@/hooks/scraps';
 
 const Posting = () => {
+  const { visible: toastVisible, message: toastMessage } = useToastStore();
   const isLoggedIn = useAuthStore((state) => state.isLoggedIn);
 
   const { data: scrapData } = useGetAllScraps(isLoggedIn);
@@ -30,16 +34,51 @@ const Posting = () => {
     toggleScrapStatus,
     updateViewCount,
     resetFilters,
+    setSearchKeyword,
+    setSourceType,
+    setSelectedSite,
+    setCurrentPage,
   } = usePostingStore();
+  const [searchParams] = useSearchParams();
+  const keywordFromUrl = searchParams.get('keyword') || '';
+  const sourceFromUrl = searchParams.get('source');
+  const siteFromUrl = searchParams.get('site') || '';
   const isManualWithoutLogin = !isLoggedIn && sourceType === 'manual';
-  const { fetchData } = useStatusStore();
+  const { fetchData, applications } = useStatusStore();
+
+  const appliedJobIds = useMemo(() => {
+    return new Set(applications.map((app) => String(app.jobPostingId)));
+  }, [applications]);
 
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
   const [selectedJobId, setSelectedJobId] = useState<string | number | null>(null);
 
-  // 페이지 진입 시 항상 자동 수집 모드로 초기화 (fetchPostings를 트리거하지 않는 무성 리셋 사용)
+  // 페이지 진입 및 URL 데이터 동기화 관리
   useEffect(() => {
-    resetFilters();
+    // 1. URL 파라미터가 있으면 스토어 상태 동기화
+    if (sourceFromUrl === 'auto' || sourceFromUrl === 'manual') {
+      setSourceType(sourceFromUrl);
+    }
+    if (siteFromUrl) {
+      setSelectedSite(siteFromUrl);
+    }
+    if (keywordFromUrl) {
+      setSearchKeyword(keywordFromUrl);
+    }
+  }, [
+    keywordFromUrl,
+    sourceFromUrl,
+    siteFromUrl,
+    setSearchKeyword,
+    setSourceType,
+    setSelectedSite,
+  ]);
+
+  // 2. 컴포넌트 언마운트 시에만 필터 초기화 수행
+  useEffect(() => {
+    return () => {
+      resetFilters();
+    };
   }, [resetFilters]);
 
   useEffect(() => {
@@ -63,7 +102,8 @@ const Posting = () => {
     if (mainElement) {
       mainElement.scrollTo({ top: 0, behavior: 'smooth' });
     }
-    fetchPostings(page, selectedSite, searchKeyword, scrapData);
+    // currentPage가 바뀌면 하단 useEffect가 실질적인 fetch를 수행합니다.
+    setCurrentPage(page);
   };
 
   const selectedJob = useMemo(() => {
@@ -111,6 +151,7 @@ const Posting = () => {
               <>
                 <PostingList
                   postings={postings}
+                  appliedJobIds={appliedJobIds}
                   onScrap={toggleScrapStatus}
                   onDetail={handleDetailOpen}
                 />
@@ -146,6 +187,7 @@ const Posting = () => {
         onClose={handleDetailClose}
         job={selectedJob}
       />
+      <Toast visible={toastVisible} message={toastMessage} />
     </div>
   );
 };

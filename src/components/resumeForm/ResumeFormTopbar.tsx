@@ -31,6 +31,17 @@ const ResumeFormTopbar = () => {
       alert('제목을 입력하세요.');
       return;
     }
+    const filteredData = {
+      ...data,
+      additionalInfo: data.additionalInfo.filter(
+        (item) => item.name || item.description || item.type,
+      ),
+    };
+    const hasInvalidItem = filteredData.additionalInfo.some((item) => !item.type || !item.date);
+    if (hasInvalidItem) {
+      alert('입력하신 수상/자격증/기타 항목의 날짜와 타입을 선택해주세요.');
+      return;
+    }
     try {
       const uploadPortfolioResult = await Promise.all(
         data.portfolio.map(async (p) => {

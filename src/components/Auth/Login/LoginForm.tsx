@@ -55,7 +55,7 @@ const LoginForm: React.FC<LoginFormProps> = ({
           <button
             type="button"
             onClick={onForgotPassword}
-            className="text-body font-medium text-btn-point"
+            className="text-body font-medium text-btn-point cursor-pointer"
           >
             비밀번호를 잊으셨나요?
           </button>
@@ -103,7 +103,11 @@ const LoginForm: React.FC<LoginFormProps> = ({
 
       <div className="text-center text-sm text-gray-500">
         계정이 없으신가요?
-        <button type="button" onClick={onSwitchRegister} className="font-bold text-btn-point ml-2">
+        <button
+          type="button"
+          onClick={onSwitchRegister}
+          className="font-bold text-btn-point ml-2 cursor-pointer"
+        >
           지금 가입하기
         </button>
       </div>

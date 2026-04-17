@@ -55,7 +55,11 @@ const router = createBrowserRouter([
   },
   {
     path: PATH.AUTH,
-    element: <Auth />,
+    element: <Auth mode="LOGIN" />,
+  },
+  {
+    path: PATH.SIGN_IN,
+    element: <Auth mode="REGISTER" />,
   },
   {
     path: PATH.RESUME_CREATE_FORM,

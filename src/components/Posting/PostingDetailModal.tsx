@@ -9,6 +9,7 @@ import {
   Building2,
   MessageSquare,
   Check,
+  Bookmark,
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { PATH } from '@/router/Path';
@@ -19,6 +20,12 @@ import ApplyModal from '@/components/status/ApplyModal';
 import { useStatusStore } from '@/store/useStatusStore';
 import { useAuthStore } from '@/store/useAuthStore';
 import Toast from '@/components/common/UI/Toast';
+import { formatFullDate, isExpired } from '@/utils/statusUtils';
+
+import { toggleScrap } from '@/api/Scrap';
+import { useGetAllScraps } from '@/hooks/scraps';
+import { useQueryClient } from '@tanstack/react-query';
+import clsx from 'clsx';
 
 interface PostingDetailModalProps {
   isOpen: boolean;
@@ -33,6 +40,8 @@ const PostingDetailModal = ({ isOpen, onClose, job }: PostingDetailModalProps) =
   const isLoggedIn = useAuthStore((state) => state.isLoggedIn);
   const toastTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const navigate = useNavigate();
+  const { data: scrapData } = useGetAllScraps(isLoggedIn);
+  const queryClient = useQueryClient();
 
   useEffect(() => {
     return () => {
@@ -44,6 +53,7 @@ const PostingDetailModal = ({ isOpen, onClose, job }: PostingDetailModalProps) =
 
   const isApplied =
     isLoggedIn && applications.some((app) => String(app.jobPostingId) === String(job.id));
+  const isScrapped = scrapData?.some((data) => String(data.jobPostingId) === String(job.id));
 
   const handleGoToSite = () => {
     if (job.url) {
@@ -122,13 +132,29 @@ const PostingDetailModal = ({ isOpen, onClose, job }: PostingDetailModalProps) =
           <div className="flex-1 overflow-y-auto p-6 sm:p-10 space-y-8 sm:space-y-12 custom-scrollbar bg-gray-50/30">
             <div className="grid grid-cols-2 gap-3 sm:gap-4">
               {[
-                { icon: MapPin, label: '근무 지역', value: job.location || '정보 없음' },
-                { icon: Briefcase, label: '경력 요구', value: job.experienceLevel || '경력 무관' },
-                { icon: Calendar, label: '마감 기한', value: job.deadline },
+                {
+                  icon: MapPin,
+                  label: '근무 지역',
+                  value: job.location || '정보 없음',
+                  raw: job.location,
+                },
+                {
+                  icon: Briefcase,
+                  label: '경력 요구',
+                  value: job.experienceLevel || '경력 무관',
+                  raw: job.experienceLevel,
+                },
+                {
+                  icon: Calendar,
+                  label: '마감 기한',
+                  value: job.deadline ? formatFullDate(job.deadline) : '정보 없음',
+                  raw: job.deadline,
+                },
                 {
                   icon: Globe,
                   label: '수집 경로',
-                  value: job.sourceType === 'auto' ? '자동 수집' : '사용자 등록',
+                  value: job.sourceType === 'auto' ? '자동 공고' : '수동 공고',
+                  raw: job.sourceType,
                 },
               ].map((item, idx) => (
                 <div
@@ -144,7 +170,11 @@ const PostingDetailModal = ({ isOpen, onClose, job }: PostingDetailModalProps) =
                       {item.label}
                     </p>
                     <p
-                      className="text-[13px] sm:text-[15px] font-black text-gray-800 break-words line-clamp-2 sm:line-clamp-3"
+                      className={`text-[13px] sm:text-[15px] font-black break-words line-clamp-2 sm:line-clamp-3 ${
+                        item.label === '마감 기한' && isExpired(item.raw)
+                          ? 'text-red-500'
+                          : 'text-gray-800'
+                      }`}
                       title={String(item.value)}
                     >
                       {item.value}
@@ -187,12 +217,41 @@ const PostingDetailModal = ({ isOpen, onClose, job }: PostingDetailModalProps) =
             >
               원문 <ExternalLink size={18} className="ml-1 sm:ml-2 sm:w-5 sm:h-5" />
             </Button>
-            <div className="flex-[2]">
+            {!isApplied && isLoggedIn && (
               <Button
+                onClick={async () => {
+                  const result = await toggleScrap(String(job.id));
+                  queryClient.invalidateQueries({ queryKey: ['scraps'] });
+
+                  if (result.added) {
+                    window.alert('스크랩 완료');
+                    return;
+                  } else {
+                    window.alert('스크랩 해제');
+                    return;
+                  }
+                }}
+                className={clsx(
+                  'flex-1 h-12 sm:h-14 rounded-xl sm:rounded-2xl text-base sm:text-lg',
+                  scrapData?.findIndex((data) => data.jobPostingId === job.id)
+                    ? 'text-btn-point border-btn-point bg-blue-50'
+                    : 'text-gray-400 border-gray-100',
+                )}
+              >
+                <Bookmark size={15} fill={isScrapped ? 'currentColor' : 'none'} strokeWidth={2.5} />
+                {!isScrapped ? '스크랩 하기' : '스크랩 해제'}
+              </Button>
+            )}
+
+            <div className="flex-2">
+              <Button
+                disabled={isExpired(job.deadline) && !isApplied}
                 className={`w-full h-12 sm:h-14 rounded-xl sm:rounded-2xl font-black text-base sm:text-lg ${
                   isApplied
                     ? 'bg-blue-50 text-blue-600 border border-blue-100 shadow-none'
-                    : 'shadow-lg shadow-purple-100'
+                    : isExpired(job.deadline)
+                      ? 'bg-gray-200 text-gray-700 border-gray-300 cursor-not-allowed shadow-none !opacity-100'
+                      : 'shadow-lg shadow-purple-100'
                 }`}
                 onClick={handleApplyClick}
               >
@@ -200,6 +259,8 @@ const PostingDetailModal = ({ isOpen, onClose, job }: PostingDetailModalProps) =
                   <span className="flex items-center justify-center gap-1.5 sm:gap-2">
                     <Check size={18} strokeWidth={3} className="sm:w-5 sm:h-5" /> 지원 확인
                   </span>
+                ) : isExpired(job.deadline) ? (
+                  '지원이 마감되었습니다'
                 ) : (
                   '지원하기'
                 )}
@@ -214,7 +275,9 @@ const PostingDetailModal = ({ isOpen, onClose, job }: PostingDetailModalProps) =
             companyName={job.companyName}
             title={job.title}
             onClose={() => setIsApplyModalOpen(false)}
-            onSuccess={() => setIsApplyModalOpen(false)}
+            onSuccess={() => {
+              setIsApplyModalOpen(false);
+            }}
           />
         )}
       </div>
