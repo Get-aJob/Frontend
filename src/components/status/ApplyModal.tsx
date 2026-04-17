@@ -50,8 +50,10 @@ const ApplyModal: React.FC<ApplyModalProps> = ({
       });
 
       await fetchData();
-      // 지원 성공 즉시 부모에 알림 (사이드바 배지 즉시 반영)
-      onSuccess();
+
+      // 지원 성공 즉시 부모에 알림 (사이드바 배지 즉시 반영) 이거 즉시 반영 안되네요?
+      //onSuccess();
+
       setIsSuccessModalOpen(true);
     } catch (err) {
       const error = err as AxiosError;
@@ -65,6 +67,7 @@ const ApplyModal: React.FC<ApplyModalProps> = ({
   // ✨ 모달을 닫을 때 부모(ScrapCard 등)에게 완료를 알림
   const handleConfirmClose = () => {
     setIsSuccessModalOpen(false);
+    onSuccess(); // onSuccess때문에 리렌더링 처리 되서 여기서 배치했습니다.
     onClose();
   };
 

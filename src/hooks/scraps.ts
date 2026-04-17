@@ -1,5 +1,5 @@
-import { getMyScraps, type ScrapItem, type ScrapSortType } from '@/api/Scrap';
-import { useQuery } from '@tanstack/react-query';
+import { getMyScraps, toggleScrap, type ScrapItem, type ScrapSortType } from '@/api/Scrap';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
 export const useGetAllScraps = (isLoggedIn: boolean) => {
   return useQuery<ScrapItem[], Error>({
@@ -37,5 +37,21 @@ export const useMyScraps = (
     // 💡 3. 유용한 옵션들
     placeholderData: (previousData) => previousData, // 페이지 전환 시 깜빡임 방지
     staleTime: 5 * 60 * 1000, // 5분 동안은 신선한 데이터로 간주
+  });
+};
+
+export const useToggleScraps = (currentPage: number, sortBy: ScrapSortType | undefined) => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (id: string) => {
+      await toggleScrap(id);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['scraps', currentPage, sortBy] });
+    },
+    onError: (error) => {
+      console.error('저장 실패:', error);
+      alert('저장 중 오류가 발생했습니다.');
+    },
   });
 };
