@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState } from 'react';
 import {
   X,
   ExternalLink,
@@ -7,24 +7,19 @@ import {
   Calendar,
   Globe,
   Building2,
-  MessageSquare,
   Check,
   Bookmark,
+  Edit2,
+  Trash2,
 } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
-import { PATH } from '@/router/Path';
+import JobActionsModals from './JobActionsModals';
+import { useJobActions } from '@/hooks/useJobActions';
 import type { ExtendedJobPosting } from '@/store/usePostingStore';
 import Button from '@/components/common/UI/Button';
 import JobCommentPanel from './Comment/JobCommentPanel';
 import ApplyModal from '@/components/status/ApplyModal';
-import { useStatusStore } from '@/store/useStatusStore';
-import { useAuthStore } from '@/store/useAuthStore';
-import Toast from '@/components/common/UI/Toast';
+import { useToastStore } from '@/store/useToastStore';
 import { formatFullDate, isExpired } from '@/utils/statusUtils';
-
-import { toggleScrap } from '@/api/Scrap';
-import { useGetAllScraps } from '@/hooks/scraps';
-import { useQueryClient } from '@tanstack/react-query';
 import clsx from 'clsx';
 
 interface PostingDetailModalProps {
@@ -35,75 +30,86 @@ interface PostingDetailModalProps {
 
 const PostingDetailModal = ({ isOpen, onClose, job }: PostingDetailModalProps) => {
   const [isApplyModalOpen, setIsApplyModalOpen] = useState(false);
-  const [showToast, setShowToast] = useState(false);
-  const { applications } = useStatusStore();
-  const isLoggedIn = useAuthStore((state) => state.isLoggedIn);
-  const toastTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const navigate = useNavigate();
-  const { data: scrapData } = useGetAllScraps(isLoggedIn);
-  const queryClient = useQueryClient();
+  const { showToast } = useToastStore();
 
-  useEffect(() => {
-    return () => {
-      if (toastTimeoutRef.current) clearTimeout(toastTimeoutRef.current);
-    };
-  }, []);
+  const {
+    isScrapped,
+    isApplied,
+    handleScrapClick,
+    handleEdit,
+    handleDeleteClick,
+    handleConfirmDelete,
+    handleGoToSite,
+    handleApplyClick,
+    handleScrapModalConfirm,
+    handleScrapModalClose,
+    states,
+  } = useJobActions(job);
 
   if (!isOpen || !job) return null;
-
-  const isApplied =
-    isLoggedIn && applications.some((app) => String(app.jobPostingId) === String(job.id));
-  const isScrapped = scrapData?.some((data) => String(data.jobPostingId) === String(job.id));
-
-  const handleGoToSite = () => {
-    if (job.url) {
-      window.open(job.url, '_blank', 'noopener,noreferrer');
-    } else {
-      alert('연결된 공고 주소가 없습니다.');
-    }
-  };
-
-  const handleApplyClick = () => {
-    if (isApplied) {
-      queryClient.invalidateQueries({ queryKey: ['scraps'] });
-      onClose();
-      navigate(PATH.STATUS);
-      return;
-    }
-    if (!isLoggedIn) {
-      setShowToast(true);
-      if (toastTimeoutRef.current) clearTimeout(toastTimeoutRef.current);
-      toastTimeoutRef.current = setTimeout(() => setShowToast(false), 3000);
-      return;
-    }
-    setIsApplyModalOpen(true);
-  };
 
   return (
     <>
       <div
-        className="fixed inset-0 bg-black/40 backdrop-blur-sm z-1100 flex items-center justify-center p-3 sm:p-4 animate-in fade-in duration-200"
-        onClick={onClose}
+        className="fixed inset-0 bg-slate-900/40 backdrop-blur-md z-1100 flex items-center justify-center p-3 sm:p-4 animate-in fade-in duration-300"
+        onClick={(e) => {
+          if (e.target === e.currentTarget) onClose();
+        }}
       >
         <div
-          // ✨ 모바일에서 둥근 모서리 값 축소(rounded-3xl), 높이 소폭 상향
-          className="bg-white rounded-3xl sm:rounded-[40px] w-full max-w-2xl max-h-[95vh] sm:max-h-[90vh] overflow-hidden shadow-2xl flex flex-col animate-in slide-in-from-bottom-8 duration-300 relative"
+          className="bg-white rounded-3xl sm:rounded-[40px] w-full max-w-2xl max-h-[95vh] sm:max-h-[90vh] overflow-hidden shadow-2xl flex flex-col animate-in zoom-in-95 slide-in-from-bottom-5 duration-300 ease-out relative"
           onClick={(e) => e.stopPropagation()}
         >
-          <button
-            onClick={onClose}
-            aria-label="닫기"
-            title="닫기"
-            // ✨ 모바일에서 닫기 버튼 위치 조정
-            className="absolute top-5 right-5 sm:top-8 sm:right-8 z-10 p-1.5 sm:p-2 bg-gray-50 rounded-full text-gray-400 hover:text-gray-600 transition-colors"
-          >
-            <X size={18} className="sm:w-5 sm:h-5" />
-          </button>
+          {/* 상단 액션 버튼 그룹 (스크랩, 수정, 삭제, 닫기) */}
+          <div className="absolute top-5 right-5 sm:top-8 sm:right-8 z-10 flex items-center gap-1.5 sm:gap-2">
+            <button
+              onClick={handleScrapClick}
+              className={clsx(
+                'p-1.5 sm:p-2 rounded-full transition-all duration-200 flex items-center justify-center border shadow-sm',
+                isScrapped
+                  ? 'text-btn-point border-btn-point bg-blue-50'
+                  : 'text-gray-400 border-gray-50 bg-gray-50 hover:text-btn-point hover:bg-purple-50',
+              )}
+              title={isScrapped ? '스크랩 취소' : '스크랩'}
+            >
+              <Bookmark
+                size={16}
+                fill={isScrapped ? 'currentColor' : 'none'}
+                className="sm:w-5 sm:h-5"
+              />
+            </button>
 
-          {/* 헤더 영역: 패딩 및 로고 크기 축소 */}
+            {job.sourceType === 'manual' && (
+              <>
+                <button
+                  onClick={handleEdit}
+                  className="p-1.5 sm:p-2 border border-gray-50 bg-gray-50 rounded-full text-gray-400 hover:text-blue-500 hover:bg-blue-50 transition-colors shadow-sm"
+                  title="수정"
+                >
+                  <Edit2 size={16} className="sm:w-5 sm:h-5" />
+                </button>
+                <button
+                  onClick={handleDeleteClick}
+                  className="p-1.5 sm:p-2 border border-gray-50 bg-gray-50 rounded-full text-gray-400 hover:text-red-500 hover:bg-red-50 transition-colors shadow-sm"
+                  title="삭제"
+                >
+                  <Trash2 size={16} className="sm:w-5 sm:h-5" />
+                </button>
+              </>
+            )}
+
+            <button
+              onClick={onClose}
+              aria-label="닫기"
+              title="닫기"
+              className="p-1.5 sm:p-2 bg-gray-50 rounded-full text-gray-400 hover:text-gray-600 transition-colors shadow-sm"
+            >
+              <X size={18} className="sm:w-5 sm:h-5" />
+            </button>
+          </div>
+
           <div className="p-6 sm:p-10 pb-4 sm:pb-8 border-b border-gray-50 shrink-0">
             <div className="flex items-start gap-4 sm:gap-6">
-              {/* ✨ 로고 크기 모바일 최적화 */}
               <div className="w-16 h-16 sm:w-24 sm:h-24 rounded-2xl sm:rounded-3xl border border-gray-100 flex items-center justify-center overflow-hidden bg-white shadow-sm shrink-0">
                 {job.companyLogo ? (
                   <img
@@ -119,17 +125,17 @@ const PostingDetailModal = ({ isOpen, onClose, job }: PostingDetailModalProps) =
                   </div>
                 )}
               </div>
-              <div className="flex-1 min-w-0 pt-1 sm:pt-2 pr-6 sm:pr-10">
-                {/* ✨ 글씨 크기 모바일 최적화 */}
-                <h2 className="text-lg sm:text-2xl font-black text-gray-900 leading-tight mb-1 sm:mb-2 break-words">
+              <div className="flex-1 min-w-0 pt-0.5 sm:pt-1">
+                <h2 className="text-lg sm:text-2xl font-black text-gray-900 leading-tight mb-1 sm:mb-2 break-words pr-24 sm:pr-40">
                   {job.title}
                 </h2>
-                <p className="text-sm sm:text-lg text-gray-500 font-bold">{job.companyName}</p>
+                <p className="text-sm sm:text-lg text-gray-500 font-bold pr-24 sm:pr-40">
+                  {job.companyName}
+                </p>
               </div>
             </div>
           </div>
 
-          {/* 본문 영역: 간격 조절 */}
           <div className="flex-1 overflow-y-auto p-6 sm:p-10 space-y-8 sm:space-y-12 custom-scrollbar bg-gray-50/30">
             <div className="grid grid-cols-2 gap-3 sm:gap-4">
               {[
@@ -160,7 +166,6 @@ const PostingDetailModal = ({ isOpen, onClose, job }: PostingDetailModalProps) =
               ].map((item, idx) => (
                 <div
                   key={idx}
-                  // ✨ 정보 카드 패딩 축소
                   className="bg-white p-3.5 sm:p-5 rounded-2xl sm:rounded-3xl border border-gray-100 shadow-sm flex items-center gap-3 sm:gap-4"
                 >
                   <div className="p-2 sm:p-2.5 bg-purple-50 rounded-xl text-btn-point shrink-0">
@@ -200,7 +205,7 @@ const PostingDetailModal = ({ isOpen, onClose, job }: PostingDetailModalProps) =
             {job.sourceType !== 'manual' && (
               <div className="space-y-4 sm:space-y-6 pt-2">
                 <h3 className="text-base sm:text-lg font-black text-gray-900 flex items-center gap-2 ml-1">
-                  <MessageSquare size={18} className="text-btn-point sm:w-5 sm:h-5" />
+                  <Globe size={18} className="text-btn-point sm:w-5 sm:h-5" />
                   댓글
                 </h3>
                 <JobCommentPanel jobId={String(job.id)} />
@@ -208,43 +213,16 @@ const PostingDetailModal = ({ isOpen, onClose, job }: PostingDetailModalProps) =
             )}
           </div>
 
-          {/* 푸터 영역: 버튼 높이 및 폰트 축소 */}
           <div className="p-5 sm:p-8 bg-white border-t border-gray-50 flex gap-3 sm:gap-4 shrink-0">
             <Button
               variant="outline"
-              // ✨ 모바일 버튼 높이 h-12(48px), 폰트 크기 조정
               className="flex-1 h-12 sm:h-14 rounded-xl sm:rounded-2xl font-black text-base sm:text-lg border-gray-200 text-gray-500"
               onClick={handleGoToSite}
             >
               원문 <ExternalLink size={18} className="ml-1 sm:ml-2 sm:w-5 sm:h-5" />
             </Button>
-            {!isApplied && isLoggedIn && (
-              <Button
-                onClick={async () => {
-                  const result = await toggleScrap(String(job.id));
-                  queryClient.invalidateQueries({ queryKey: ['scraps'] });
 
-                  if (result.added) {
-                    window.alert('스크랩 완료');
-                    return;
-                  } else {
-                    window.alert('스크랩 해제');
-                    return;
-                  }
-                }}
-                className={clsx(
-                  'flex-1 h-12 sm:h-14 rounded-xl sm:rounded-2xl text-base sm:text-lg',
-                  scrapData?.findIndex((data) => data.jobPostingId === job.id)
-                    ? 'text-btn-point border-btn-point bg-blue-50'
-                    : 'text-gray-400 border-gray-100',
-                )}
-              >
-                <Bookmark size={15} fill={isScrapped ? 'currentColor' : 'none'} strokeWidth={2.5} />
-                {!isScrapped ? '스크랩 하기' : '스크랩 해제'}
-              </Button>
-            )}
-
-            <div className="flex-2">
+            <div className="flex-1">
               <Button
                 disabled={isExpired(job.deadline) && !isApplied}
                 className={`w-full h-12 sm:h-14 rounded-xl sm:rounded-2xl font-black text-base sm:text-lg ${
@@ -254,7 +232,7 @@ const PostingDetailModal = ({ isOpen, onClose, job }: PostingDetailModalProps) =
                       ? 'bg-gray-200 text-gray-700 border-gray-300 cursor-not-allowed shadow-none !opacity-100'
                       : 'shadow-lg shadow-purple-100'
                 }`}
-                onClick={handleApplyClick}
+                onClick={() => handleApplyClick(() => setIsApplyModalOpen(true), onClose)}
               >
                 {isApplied ? (
                   <span className="flex items-center justify-center gap-1.5 sm:gap-2">
@@ -276,13 +254,22 @@ const PostingDetailModal = ({ isOpen, onClose, job }: PostingDetailModalProps) =
             companyName={job.companyName}
             title={job.title}
             onClose={() => setIsApplyModalOpen(false)}
-            onSuccess={async () => {
+            onSuccess={() => {
+              showToast('지원이 완료되었습니다.');
               setIsApplyModalOpen(false);
             }}
           />
         )}
+
+        <JobActionsModals
+          job={job}
+          states={states}
+          onConfirmDelete={() => handleConfirmDelete(onClose)}
+          onScrapConfirm={handleScrapModalConfirm}
+          onScrapClose={handleScrapModalClose}
+          isNested={true}
+        />
       </div>
-      <Toast visible={showToast} message="지원하기는 로그인 후 이용할 수 있어요" showLoginButton />
     </>
   );
 };

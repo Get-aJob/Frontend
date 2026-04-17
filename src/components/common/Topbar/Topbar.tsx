@@ -1,11 +1,11 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState } from 'react';
 import JobModal from '@/components/jobPostForm/JobModal';
 import { useAuthStore } from '@/store/useAuthStore';
-import Toast from '@/components/common/UI/Toast';
 import Button from '@/components/common/UI/Button';
 import Badge from '@/components/common/UI/Badge';
 import { MenuIcon } from 'lucide-react';
 import { useMobilesidebarStore } from '@/store/useMobileSidebarStore';
+import { useToastStore } from '@/store/useToastStore';
 
 export interface TopbarProps {
   title?: string;
@@ -16,23 +16,14 @@ export interface TopbarProps {
 
 const Topbar = ({ title, badge, showAddButton, unreadCount = 0 }: TopbarProps) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [showToast, setShowToast] = useState(false);
+  const { showToast } = useToastStore();
   const isLoggedIn = useAuthStore((state) => state.isLoggedIn);
-  const toastTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const toggle = useMobilesidebarStore((state) => state.toggle);
 
-  useEffect(() => {
-    return () => {
-      if (toastTimeoutRef.current) clearTimeout(toastTimeoutRef.current);
-    };
-  }, []);
-
   const handleAddButtonClick = () => {
     if (!isLoggedIn) {
-      setShowToast(true);
-      if (toastTimeoutRef.current) clearTimeout(toastTimeoutRef.current);
-      toastTimeoutRef.current = setTimeout(() => setShowToast(false), 3000);
+      showToast('공고 등록은 로그인 후 이용할 수 있어요.', true);
       return;
     }
     setIsModalOpen(true);
@@ -77,11 +68,6 @@ const Topbar = ({ title, badge, showAddButton, unreadCount = 0 }: TopbarProps) =
           )}
         </div>
       </header>
-      <Toast
-        visible={showToast}
-        message="공고 등록은 로그인 후 이용할 수 있어요."
-        showLoginButton
-      />
       <JobModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} />
     </>
   );
