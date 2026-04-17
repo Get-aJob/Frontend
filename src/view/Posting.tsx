@@ -12,12 +12,9 @@ import { incrementViewCount } from '@/api/Posting';
 import type { ExtendedJobPosting } from '@/store/usePostingStore';
 import { useAuthStore } from '@/store/useAuthStore';
 import { useStatusStore } from '@/store/useStatusStore';
-import Toast from '@/components/common/UI/Toast';
-import { useToastStore } from '@/store/useToastStore';
 import { useGetAllScraps } from '@/hooks/scraps';
 
 const Posting = () => {
-  const { visible: toastVisible, message: toastMessage } = useToastStore();
   const isLoggedIn = useAuthStore((state) => state.isLoggedIn);
 
   const { data: scrapData } = useGetAllScraps(isLoggedIn);
@@ -187,7 +184,6 @@ const Posting = () => {
         onClose={handleDetailClose}
         job={selectedJob}
       />
-      <Toast visible={toastVisible} message={toastMessage} />
     </div>
   );
 };
