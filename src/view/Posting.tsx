@@ -82,16 +82,7 @@ const Posting = () => {
     if (isLoggedIn) {
       fetchData();
     }
-  }, [
-    isLoggedIn,
-    searchKeyword,
-    sourceType,
-    selectedSite,
-    scrapData,
-    fetchPostings,
-    currentPage,
-    fetchData,
-  ]);
+  }, [isLoggedIn, searchKeyword, sourceType, selectedSite, fetchPostings, currentPage, fetchData]);
 
   const handlePageChange = (page: number) => {
     const mainElement = document.querySelector('main');

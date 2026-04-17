@@ -137,7 +137,10 @@ export const usePostingStore = create<PostingState>()(
         keyword?: string,
         scrapData?: ScrapItem[],
       ) => {
-        set({ isLoading: true, error: null });
+        // 기존 데이터가 없을 때만 로딩 상태 활성화 (깜빡임 방지)
+        if (get().postings.length === 0) {
+          set({ isLoading: true, error: null });
+        }
         try {
           const PAGE_SIZE = 30;
           const currentSourceType = get().sourceType;
