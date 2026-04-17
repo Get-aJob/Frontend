@@ -13,17 +13,6 @@ import {
 import { mapNotificationToItem, type INotificationItem } from '@/types/Notification';
 import { useNotificationStore } from '@/store/useNotificationStore';
 
-const mergeItemsById = (prev: INotificationItem[], next: INotificationItem[]) => {
-  const byId = new Map(prev.map((item) => [item.id, item]));
-
-  next.forEach((item) => {
-    const prevItem = byId.get(item.id);
-    byId.set(item.id, prevItem ? { ...prevItem, ...item } : item);
-  });
-
-  return Array.from(byId.values());
-};
-
 function Notification() {
   const navigate = useNavigate();
 
@@ -36,6 +25,7 @@ function Notification() {
 
   const unreadCount = useMemo(() => items.filter((n) => n.readAt === null).length, [items]);
   const socketEventVersion = useNotificationStore((state) => state.socketEventVersion);
+  const setGlobalUnreadCount = useNotificationStore((state) => state.setUnreadCount);
 
   const visibleItems = useMemo(() => {
     const sorted = [...items].sort(
@@ -54,7 +44,7 @@ function Notification() {
         unreadOnly: false,
       });
 
-      setItems((prev) => mergeItemsById(prev, res.notifications.map(mapNotificationToItem)));
+      setItems(res.notifications.map(mapNotificationToItem));
     } catch (error) {
       console.error('알림 목록 초기 로드 실패:', error);
       setInitialLoadError('알림 목록을 불러오지 못했습니다.');
@@ -73,13 +63,24 @@ function Notification() {
     void loadInitialNotifications();
   }, [socketEventVersion, loadInitialNotifications]);
 
-  const markRead = useCallback(async (id: string) => {
-    try {
-      const res = await markNotificationOnlyOne(id);
-      if (res.success && res.notification) {
-        const updated = mapNotificationToItem(res.notification);
-        setItems((prev) => prev.map((n) => (n.id === id ? updated : n)));
-        return;
+  useEffect(() => {
+    setGlobalUnreadCount(unreadCount);
+  }, [unreadCount, setGlobalUnreadCount]);
+
+  const markRead = useCallback(
+    async (id: string) => {
+      try {
+        const res = await markNotificationOnlyOne(id);
+        if (res.success && res.notification) {
+          const updated = mapNotificationToItem(res.notification);
+          setItems((prev) => prev.map((n) => (n.id === id ? updated : n)));
+          return;
+        }
+        const list = await fetchNotifications({ limit: 20, unreadOnly: false });
+        setItems(list.notifications.map(mapNotificationToItem));
+      } catch (e) {
+        console.error('읽음 처리 실패:', e);
+        alert('읽음 처리에 실패했습니다.');
       }
       const list = await fetchNotifications({ limit: 20, unreadOnly: false });
       setItems((prev) => mergeItemsById(prev, list.notifications.map(mapNotificationToItem)));
@@ -97,7 +98,7 @@ function Notification() {
         return;
       }
       const list = await fetchNotifications({ limit: 20, unreadOnly: false });
-      setItems((prev) => mergeItemsById(prev, list.notifications.map(mapNotificationToItem)));
+      setItems(list.notifications.map(mapNotificationToItem));
     } catch (e) {
       console.error('모두 읽음 실패:', e);
       alert('모두 읽음 처리에 실패했습니다.');
@@ -145,7 +146,7 @@ function Notification() {
           <button
             type="button"
             onClick={() => setLoginBannerDismissed(true)}
-            className="p-1 rounded-lg text-amber-800/70 hover:bg-amber-100/80 transition-colors"
+            className="cursor-pointer p-1 rounded-lg text-amber-800/70 hover:bg-amber-100/80 transition-colors"
             aria-label="배너 닫기"
           >
             <X size={18} />
