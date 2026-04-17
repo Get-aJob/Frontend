@@ -64,6 +64,9 @@ export const useJobActions = (job: JobPosting | null) => {
         }
       });
 
+      queryClient.invalidateQueries({ queryKey: ['scraps'] });
+      queryClient.invalidateQueries({ queryKey: ['schedules'] });
+
       if (result.added) {
         setScrapModalContent({
           title: '스크랩 완료',

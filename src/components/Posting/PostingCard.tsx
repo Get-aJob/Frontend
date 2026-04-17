@@ -9,6 +9,7 @@ import { usePostingStore } from '@/store/usePostingStore';
 import { incrementViewCount } from '@/api/Posting';
 import { useJobActions } from '@/hooks/useJobActions';
 import JobActionsModals from './JobActionsModals';
+import CompanyLogo from '@/components/common/UI/CompanyLogo';
 
 interface PostingCardProps {
   posting: JobPosting;
@@ -93,24 +94,14 @@ const PostingCard = ({ posting, isApplied, onDetail }: PostingCardProps) => {
       >
         <div className="flex justify-between items-start mb-5">
           <div className="flex items-center gap-4">
-            <div
-              className={`w-14 h-14 rounded-2xl bg-gray-50 border border-border-light overflow-hidden flex items-center justify-center shadow-sm cursor-default ${
+            <CompanyLogo
+              src={posting.companyLogo}
+              alt={posting.companyName}
+              className={`w-14 h-14 rounded-2xl bg-gray-50 border border-border-light overflow-hidden flex items-center justify-center shadow-sm ${
                 expired ? 'grayscale' : ''
               }`}
-              onClick={(e) => e.stopPropagation()}
-            >
-              {posting.companyLogo ? (
-                <img
-                  src={posting.companyLogo}
-                  alt={posting.companyName}
-                  className="w-full h-full object-contain p-1.5"
-                />
-              ) : (
-                <span className="text-xl font-black text-gray-300">
-                  {posting.companyName.charAt(0)}
-                </span>
-              )}
-            </div>
+              iconSize={24}
+            />
             <div>
               <h3 className="text-xs font-black text-gray-700 tracking-tight mb-1">
                 {posting.companyName}

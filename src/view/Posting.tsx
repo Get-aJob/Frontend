@@ -87,10 +87,10 @@ const Posting = () => {
     searchKeyword,
     sourceType,
     selectedSite,
-    scrapData,
     fetchPostings,
     currentPage,
     fetchData,
+    scrapData,
   ]);
 
   const handlePageChange = (page: number) => {
