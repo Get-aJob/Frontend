@@ -13,12 +13,12 @@ interface ScrapListProps {
   onClose: () => Promise<void>;
 }
 
-const ScrapList: React.FC<ScrapListProps> = ({ scraps, onUnscrap, onApplySuccess }) => {
+const ScrapList: React.FC<ScrapListProps> = ({ scraps, onUnscrap, onApplySuccess, onClose }) => {
   const navigate = useNavigate();
   const [job, setJob] = useState<ExtendedJobPosting | null>(null);
   const [isOpen, setIsOpen] = useState(false);
 
-  const onClose = () => {
+  const handleClose = () => {
     setJob(null);
     setIsOpen(false);
     onClose();
@@ -37,7 +37,7 @@ const ScrapList: React.FC<ScrapListProps> = ({ scraps, onUnscrap, onApplySuccess
           onApplySuccess={() => onApplySuccess()}
         />
       ))}
-      <PostingDetailModal job={job} onClose={onClose} isOpen={isOpen} />
+      <PostingDetailModal job={job} onClose={handleClose} isOpen={isOpen} />
       <div
         onClick={() => navigate(PATH.POSTING)}
         className="border-2 border-dashed border-gray-200 bg-transparent rounded-2xl flex flex-col items-center justify-center gap-3 text-gray-400 min-h-[140px] cursor-pointer hover:border-btn-point hover:bg-purple-50/50 hover:text-btn-point transition-all group"

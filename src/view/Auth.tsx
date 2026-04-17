@@ -3,6 +3,8 @@ import Login from '@/components/Auth/Login/Login';
 import Register from '@/components/Auth/Register/Register';
 import { useNavigate } from 'react-router-dom';
 import { PATH } from '@/router/Path';
+import { useAuthStore } from '@/store/useAuthStore';
+import { useEffect } from 'react';
 
 type AuthMode = 'LOGIN' | 'REGISTER';
 
@@ -11,6 +13,12 @@ interface AuthProps {
 }
 const Auth = ({ mode }: AuthProps) => {
   const navigate = useNavigate();
+  const isLoggedIn = useAuthStore((state) => state.isLoggedIn);
+  useEffect(() => {
+    if (isLoggedIn) {
+      navigate(PATH.ROOT);
+    }
+  }, [isLoggedIn, navigate]);
 
   const goToRegister = () => {
     navigate(PATH.SIGN_IN);
