@@ -65,6 +65,7 @@ const PostingDetailModal = ({ isOpen, onClose, job }: PostingDetailModalProps) =
 
   const handleApplyClick = () => {
     if (isApplied) {
+      queryClient.invalidateQueries({ queryKey: ['scraps'] });
       onClose();
       navigate(PATH.STATUS);
       return;
@@ -275,7 +276,7 @@ const PostingDetailModal = ({ isOpen, onClose, job }: PostingDetailModalProps) =
             companyName={job.companyName}
             title={job.title}
             onClose={() => setIsApplyModalOpen(false)}
-            onSuccess={() => {
+            onSuccess={async () => {
               setIsApplyModalOpen(false);
             }}
           />
