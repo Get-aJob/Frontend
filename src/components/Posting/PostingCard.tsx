@@ -9,7 +9,6 @@ import { getJobComments } from '@/api/Comment';
 import type { RawCommentData } from './Comment/useJobComment';
 import { usePostingStore } from '@/store/usePostingStore';
 import { toggleScrap } from '@/api/Scrap';
-import { incrementViewCount } from '@/api/Posting';
 import ConfirmModal from '@/components/common/UI/ConfirmModal';
 import { useToastStore } from '@/store/useToastStore';
 import { useQueryClient } from '@tanstack/react-query';
@@ -43,9 +42,6 @@ const PostingCard = ({ posting, isScrapped, isApplied, onScrap, onDetail }: Post
   const queryClient = useQueryClient();
 
   const handleCardClick = () => {
-    if (posting.sourceType !== 'manual') {
-      incrementViewCount(posting.id);
-    }
     onDetail(posting);
   };
 
