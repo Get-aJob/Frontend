@@ -58,7 +58,7 @@ export interface DirectJobRequest {
   companyName: string;
   location?: string;
   experience?: string;
-  companyLogo?: string;
+  companyLogo?: string | null;
   deadline?: string | null;
   deadlineText?: string | null;
   description?: string;
@@ -70,7 +70,7 @@ export interface ManualSaveRequest {
   companyName: string;
   externalId: string;
   sourceUrl: string;
-  companyLogo?: string;
+  companyLogo?: string | null;
   location?: string;
   experience?: string;
   deadline?: string;

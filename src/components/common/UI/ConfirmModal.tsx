@@ -1,4 +1,5 @@
 import Button from './Button';
+import clsx from 'clsx';
 
 interface ConfirmModalProps {
   isOpen: boolean;
@@ -9,6 +10,7 @@ interface ConfirmModalProps {
   onConfirm: () => void;
   onClose: () => void;
   isDanger?: boolean;
+  isNested?: boolean;
 }
 
 const ConfirmModal = ({
@@ -20,17 +22,22 @@ const ConfirmModal = ({
   onConfirm,
   onClose,
   isDanger = false,
+  isNested = false,
 }: ConfirmModalProps) => {
   if (!isOpen) return null;
 
   return (
     <div
-      // 💡 z-index를 최상위급인 9999로 설정하고 배경색 투명도를 살짝 조절했습니다.
-      className="fixed inset-0 flex items-center justify-center bg-black/60 backdrop-blur-sm z-[9999]"
-      onClick={onClose}
+      className={clsx(
+        'fixed inset-0 flex items-center justify-center z-[9999] animate-in fade-in duration-300',
+        isNested ? 'bg-slate-900/20 backdrop-blur-[2px]' : 'bg-slate-900/40 backdrop-blur-md',
+      )}
+      onClick={(e) => {
+        if (e.target === e.currentTarget) onClose();
+      }}
     >
       <div
-        className="bg-white rounded-(--radius-card) p-6 w-100 shadow-2xl animate-[fadeInUp_0.2s_ease]"
+        className="bg-white rounded-(--radius-card) p-6 w-100 shadow-2xl animate-in zoom-in-95 slide-in-from-bottom-4 duration-300 ease-out"
         onClick={(e) => e.stopPropagation()}
       >
         <h2 className="text-title font-extrabold text-gray-900 mb-2">{title}</h2>

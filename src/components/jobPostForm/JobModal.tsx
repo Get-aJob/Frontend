@@ -9,15 +9,23 @@ import CrawlBar from './CrawlBar';
 import { usePostingStore, type ExtendedJobPosting } from '@/store/usePostingStore';
 import type { DirectJobRequest } from '@/types/Posting';
 import { useToastStore } from '@/store/useToastStore';
+import clsx from 'clsx';
 
 interface JobModalProps {
   isOpen: boolean;
   onClose: () => void;
   mode?: 'create' | 'edit';
   initialData?: ExtendedJobPosting;
+  isNested?: boolean;
 }
 
-const JobModal = ({ isOpen, onClose, mode = 'create', initialData }: JobModalProps) => {
+const JobModal = ({
+  isOpen,
+  onClose,
+  mode = 'create',
+  initialData,
+  isNested = false,
+}: JobModalProps) => {
   const { createJob, updateJob, parseJobUrl } = usePostingStore();
   const { showToast } = useToastStore();
 
@@ -153,7 +161,7 @@ const JobModal = ({ isOpen, onClose, mode = 'create', initialData }: JobModalPro
         location,
         experience,
         description,
-        companyLogo: logo || undefined,
+        companyLogo: logo, // null이면 서버에서도 로고가 삭제되도록 보냄
         deadline: isAlwaysRecruit ? null : deadline,
         deadlineText: isAlwaysRecruit ? '상시채용' : '',
         sourceUrl: url || '',
@@ -180,15 +188,17 @@ const JobModal = ({ isOpen, onClose, mode = 'create', initialData }: JobModalPro
 
   return (
     <div
-      className="fixed inset-0 z-1200 flex items-center justify-center p-3 sm:p-4 bg-black/50 backdrop-blur-sm animate-in fade-in duration-200"
+      className={clsx(
+        'fixed inset-0 z-1200 flex items-center justify-center p-3 sm:p-4 animate-in fade-in duration-300',
+        isNested ? 'bg-slate-900/20 backdrop-blur-[2px]' : 'bg-slate-900/40 backdrop-blur-md',
+      )}
       onClick={(e) => {
         if (e.target === e.currentTarget) onClose();
       }}
     >
       <form
         onSubmit={(e: React.FormEvent) => handleRegister(e)}
-        // ✨ 모바일에서 둥근 정도(rounded-3xl)와 최대 높이 조절
-        className="bg-white w-full max-w-2xl rounded-3xl sm:rounded-4xl shadow-2xl overflow-hidden flex flex-col max-h-[95vh] sm:max-h-[90vh] animate-in slide-in-from-bottom-8 duration-300"
+        className="bg-white w-full max-w-2xl rounded-3xl sm:rounded-4xl shadow-2xl overflow-hidden flex flex-col max-h-[95vh] sm:max-h-[90vh] animate-in zoom-in-95 slide-in-from-bottom-5 duration-300 ease-out"
       >
         {/* 헤더: 모바일에서 높이 및 패딩 축소 */}
         <div className="px-5 sm:px-6 py-3.5 sm:py-4 border-b border-gray-100 flex items-center justify-between bg-white sticky top-0 z-10">

@@ -37,9 +37,9 @@ const Login: React.FC<LoginProps> = ({ onSwitchRegister }) => {
         navigate(PATH.ROOT);
       }
     } catch (error: unknown) {
-      let errorMessage = '로그인 중 오류가 발생했습니다.';
+      const errorMessage = '아이디 또는 비밀번호를 다시 확인해주세요.';
       if (axios.isAxiosError(error)) {
-        errorMessage = error.response?.data?.error || errorMessage;
+        console.error(error);
       }
       setErrorMsg(errorMessage);
     } finally {
