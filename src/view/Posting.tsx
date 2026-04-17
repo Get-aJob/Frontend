@@ -28,7 +28,6 @@ const Posting = () => {
     selectedSite,
     sourceType,
     searchKeyword,
-    toggleScrapStatus,
     updateViewCount,
     resetFilters,
     setSearchKeyword,
@@ -149,7 +148,6 @@ const Posting = () => {
                 <PostingList
                   postings={postings}
                   appliedJobIds={appliedJobIds}
-                  onScrap={toggleScrapStatus}
                   onDetail={handleDetailOpen}
                 />
                 <div className="mt-4 pb-24">

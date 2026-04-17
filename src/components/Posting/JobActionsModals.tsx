@@ -61,7 +61,7 @@ const JobActionsModals = ({
         title={states.scrapModalContent.title}
         message={states.scrapModalContent.message}
         confirmText={states.scrapModalContent.confirmText}
-        cancelText="닫기"
+        cancelText={states.scrapModalMode === 'confirm' ? '취소' : '닫기'}
         isDanger={states.scrapModalMode === 'confirm'}
         onConfirm={onScrapConfirm}
         onClose={onScrapClose}

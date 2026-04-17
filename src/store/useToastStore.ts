@@ -18,11 +18,11 @@ export const useToastStore = create<ToastState>((set) => ({
     if (toastTimer) clearTimeout(toastTimer);
     set({ visible: true, message, showLoginButton });
     toastTimer = setTimeout(() => {
-      set({ visible: false });
+      set({ visible: false, showLoginButton: false });
     }, 3000);
   },
   hideToast: () => {
     if (toastTimer) clearTimeout(toastTimer);
-    set({ visible: false });
+    set({ visible: false, showLoginButton: false });
   },
 }));

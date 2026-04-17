@@ -12,9 +12,7 @@ import JobActionsModals from './JobActionsModals';
 
 interface PostingCardProps {
   posting: JobPosting;
-  isScrapped?: boolean;
-  isApplied?: boolean;
-  onScrap: (id: string | number) => void;
+  isApplied: boolean;
   onDetail: (job: JobPosting) => void;
 }
 

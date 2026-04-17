@@ -9,6 +9,7 @@ import { toggleScrap } from '@/api/Scrap';
 import { useGetAllScraps } from '@/hooks/scraps';
 import type { JobPosting } from '@/types/Posting';
 import { PATH } from '@/router/Path';
+import type { ScrapItem } from '@/api/Scrap';
 
 export const useJobActions = (job: JobPosting | null) => {
   const navigate = useNavigate();
@@ -20,7 +21,7 @@ export const useJobActions = (job: JobPosting | null) => {
   const toggleScrapStatus = usePostingStore((state) => state.toggleScrapStatus);
   const { data: scrapData } = useGetAllScraps(isLoggedIn);
 
-  const isScrapped = scrapData?.some((s) => String(s.jobPostingId) === String(job?.id));
+  const isScrapped = !!scrapData?.some((s) => String(s.jobPostingId) === String(job?.id));
   const isApplied =
     isLoggedIn && applications.some((app) => String(app.jobPostingId) === String(job?.id));
 
@@ -36,10 +37,32 @@ export const useJobActions = (job: JobPosting | null) => {
 
   const handleConfirmScrap = async () => {
     if (!job) return;
+
+    // 상태 먼저 변경 (낙관적 업데이트)
+    toggleScrapStatus(job.id);
+
     try {
       const result = await toggleScrap(String(job.id));
-      toggleScrapStatus(job.id);
-      queryClient.invalidateQueries({ queryKey: ['scraps', 'all'] });
+
+      // 캐시 데이터 수동 업데이트 (깜빡임 방지)
+      queryClient.setQueryData(['scraps', 'all'], (old: ScrapItem[] | undefined) => {
+        if (!old) return [];
+        if (result.added) {
+          if (old.some((s) => String(s.jobPostingId) === String(job.id))) return old;
+          return [
+            ...old,
+            {
+              jobPostingId: String(job.id),
+              title: job.title,
+              companyName: job.companyName,
+              deadline: job.deadline,
+              isApplied: isApplied,
+            } as ScrapItem,
+          ];
+        } else {
+          return old.filter((s) => String(s.jobPostingId) !== String(job.id));
+        }
+      });
 
       if (result.added) {
         setScrapModalContent({
@@ -53,6 +76,9 @@ export const useJobActions = (job: JobPosting | null) => {
         setIsScrapModalOpen(false);
       }
     } catch (error: unknown) {
+      // 에러 발생 시 상태 롤백
+      toggleScrapStatus(job.id);
+
       const err = error as { response?: { status?: number } };
       if (err.response?.status === 401) {
         setScrapModalContent({
@@ -63,6 +89,8 @@ export const useJobActions = (job: JobPosting | null) => {
         setScrapModalMode('success');
         setIsScrapModalOpen(true);
       } else {
+        // 401 외의 에러는 토스트로 안내하고 모달 닫기
+        showToast('❌ 스크랩 처리 중 오류가 발생했습니다.');
         setIsScrapModalOpen(false);
       }
     }
@@ -99,9 +127,18 @@ export const useJobActions = (job: JobPosting | null) => {
   };
 
   const handleConfirmDelete = async (callback?: () => void) => {
-    if (!job) return;
+    if (!job || !job.externalId) {
+      showToast('❌ 오류: 삭제할 수 없는 공고이거나 식별자가 없습니다.');
+      setIsDeleteModalOpen(false);
+      return;
+    }
+
+    // 삭제 전 열려있을 수 있는 다른 자식 모달을 먼저 닫음
+    setIsEditModalOpen(false);
+    setIsScrapModalOpen(false);
+
     try {
-      await deleteJob(job.externalId!, 'manual');
+      await deleteJob(job.externalId, 'manual');
       showToast('공고가 삭제되었습니다.');
       if (callback) callback();
     } catch {
@@ -137,9 +174,9 @@ export const useJobActions = (job: JobPosting | null) => {
       handleConfirmScrap();
     } else {
       if (scrapModalContent.confirmText === '로그인하러 가기') {
-        navigate(PATH.AUTH || '/auth');
+        navigate(PATH.AUTH);
       } else {
-        navigate(PATH.SCRAP || '/scrap');
+        navigate(PATH.SCRAP);
       }
       setIsScrapModalOpen(false);
     }
@@ -147,7 +184,6 @@ export const useJobActions = (job: JobPosting | null) => {
 
   const handleScrapModalClose = () => {
     setIsScrapModalOpen(false);
-    setTimeout(() => queryClient.invalidateQueries({ queryKey: ['scraps', 'all'] }), 50);
   };
 
   return {
