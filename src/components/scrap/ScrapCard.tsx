@@ -8,6 +8,8 @@ import {
   parseDescription,
   type ExtendedJobPosting,
 } from '@/store/usePostingStore';
+import Badge from '@/components/common/UI/Badge';
+import { toDday, ddayVariant, isExpired } from '@/utils/statusUtils';
 
 interface ScrapCardProps {
   scrap: ScrapItem;
@@ -30,63 +32,6 @@ const getGradientForName = (name: string) => {
   return GRADIENTS[hash % GRADIENTS.length];
 };
 
-const calculateDday = (deadline: string) => {
-  if (!deadline || deadline.includes('상시') || deadline.includes('채용시'))
-    return {
-      text: '상시',
-      bg: 'bg-[#ecfdf5]',
-      color: 'text-[#059669]',
-      border: 'border-[#a7f3d0]',
-      isExpired: false,
-    };
-
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
-  const target = new Date(deadline);
-  target.setHours(0, 0, 0, 0);
-  const diffDays = Math.ceil((target.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
-
-  if (diffDays < 0)
-    return {
-      text: '마감',
-      bg: 'bg-gray-100',
-      color: 'text-gray-500',
-      border: 'border-gray-200',
-      isExpired: true,
-    };
-  if (diffDays === 0)
-    return {
-      text: 'D-Day',
-      bg: 'bg-rose-50',
-      color: 'text-rose-600',
-      border: 'border-rose-200',
-      isExpired: false,
-    };
-  if (diffDays <= 3)
-    return {
-      text: `D-${diffDays}`,
-      bg: 'bg-rose-50',
-      color: 'text-rose-600',
-      border: 'border-rose-200',
-      isExpired: false,
-    };
-  if (diffDays <= 7)
-    return {
-      text: `D-${diffDays}`,
-      bg: 'bg-amber-50',
-      color: 'text-amber-600',
-      border: 'border-amber-200',
-      isExpired: false,
-    };
-  return {
-    text: `D-${diffDays}`,
-    bg: 'bg-gray-50',
-    color: 'text-gray-600',
-    border: 'border-gray-200',
-    isExpired: false,
-  };
-};
-
 const ScrapCard: React.FC<ScrapCardProps> = ({
   scrap,
   onUnscrap,
@@ -99,7 +44,8 @@ const ScrapCard: React.FC<ScrapCardProps> = ({
   const [modalMode, setModalMode] = useState<'confirm' | 'success'>('confirm');
   const [modalMessage, setModalMessage] = useState('');
 
-  const dday = calculateDday(scrap.deadline);
+  const displayDday = toDday(scrap.deadline);
+  const expired = isExpired(scrap.deadline);
 
   const handleUnscrapClick = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -200,11 +146,7 @@ const ScrapCard: React.FC<ScrapCardProps> = ({
           </div>
 
           <div className="shrink-0 whitespace-nowrap mt-1">
-            <span
-              className={`text-[11.5px] font-extrabold px-2.5 py-1 rounded-md border ${dday.bg} ${dday.color} ${dday.border}`}
-            >
-              {dday.text}
-            </span>
+            <Badge variant={ddayVariant(displayDday)}>{displayDday}</Badge>
           </div>
         </div>
 
@@ -230,10 +172,10 @@ const ScrapCard: React.FC<ScrapCardProps> = ({
                 }
                 setIsApplyModalOpen(true);
               }}
-              disabled={scrap.isApplied || dday.isExpired}
+              disabled={scrap.isApplied || expired}
               className={`text-xs px-3 py-1.5 rounded-lg font-bold transition-all
                           ${
-                            dday.isExpired && !scrap.isApplied
+                            expired && !scrap.isApplied
                               ? 'bg-gray-100 text-gray-400 cursor-not-allowed border border-gray-200' // 마감됨
                               : scrap.isApplied
                                 ? 'bg-blue-50 text-blue-400 cursor-default' // 지원완료 (완료된 느낌)
