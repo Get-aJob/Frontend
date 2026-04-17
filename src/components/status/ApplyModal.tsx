@@ -53,8 +53,6 @@ const ApplyModal: React.FC<ApplyModalProps> = ({
 
       await fetchData();
       await syncUnreadCount();
-      // 지원 성공 즉시 부모에 알림 (사이드바 배지 즉시 반영)
-      onSuccess();
       setIsSuccessModalOpen(true);
     } catch (err) {
       const error = err as AxiosError;
