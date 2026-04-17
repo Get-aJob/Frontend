@@ -1,6 +1,8 @@
 import { useEffect, useState, useMemo } from 'react';
 import { useSchedules } from '@/hooks/useSchedules';
 import { getJobById } from '@/api/Posting';
+import { useToastStore } from '@/store/useToastStore';
+import { toLocalDateStr } from '@/utils/statusUtils';
 import type { ScheduleEvent, ViewType, EventFilterType } from '@/types/Calendar';
 import CalendarHeader from '@/components/calendar/CalendarHeader';
 import CalendarGrid from '@/components/calendar/CalendarGrid';
@@ -12,6 +14,7 @@ import { useAuthStore } from '@/store/useAuthStore';
 import type { ApplicationRecord } from '@/types/Status'; // ✨ 타입 임포트
 
 const Calendar = () => {
+  const { showToast } = useToastStore();
   const [view, setView] = useState<ViewType>('month');
   const [currentDate, setCurrentDate] = useState(new Date());
   const [filter, setFilter] = useState<EventFilterType>('all');
@@ -47,12 +50,20 @@ const Calendar = () => {
       end.setDate(start.getDate() + 6);
     }
     return {
-      startDate: start.toISOString().split('T')[0],
-      endDate: end.toISOString().split('T')[0],
+      startDate: toLocalDateStr(start),
+      endDate: toLocalDateStr(end),
     };
   }, [currentDate, view]);
 
-  const { data: scheduleRes } = useSchedules({ startDate, endDate });
+  const { data: scheduleRes, isError, error } = useSchedules({ startDate, endDate });
+
+  // 일정 데이터 로드 실패 시 에러 처리
+  useEffect(() => {
+    if (isError) {
+      console.error('스케줄 로드 실패:', error);
+      showToast('❌ 일정 데이터를 불러오는 데 실패했습니다.');
+    }
+  }, [isError, error, showToast]);
 
   const scheduleEvents = useMemo(() => {
     if (!scheduleRes?.schedules?.events) return [];

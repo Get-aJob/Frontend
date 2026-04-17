@@ -137,9 +137,19 @@ export const usePostingStore = create<PostingState>()(
         keyword?: string,
         scrapData?: ScrapItem[],
       ) => {
-        // 기존 데이터가 없을 때만 로딩 상태 활성화 (깜빡임 방지)
-        if (get().postings.length === 0) {
-          set({ isLoading: true, error: null });
+        const state = get();
+        // 필터나 페이지가 변경되었는지 확인
+        const isFilterChanged =
+          (site !== undefined && site !== state.selectedSite) ||
+          (keyword !== undefined && keyword !== state.searchKeyword) ||
+          page !== state.currentPage;
+
+        // 에러 초기화
+        set({ error: null });
+
+        // 데이터가 없거나 필터가 변경된 경우에만 로딩 상태 활성화
+        if (state.postings.length === 0 || isFilterChanged) {
+          set({ isLoading: true });
         }
         try {
           const PAGE_SIZE = 30;
@@ -216,7 +226,8 @@ export const usePostingStore = create<PostingState>()(
             totalPages: Math.ceil(totalCount / PAGE_SIZE) || 1,
             totalCount: totalCount,
             isLoading: false,
-            sourceSites: data.sourceSites || get().sourceSites,
+            sourceSites: data.sourceSites || state.sourceSites,
+            error: null,
           });
         } catch (error: unknown) {
           const err = error as Error;
@@ -236,28 +247,24 @@ export const usePostingStore = create<PostingState>()(
       },
 
       createJob: async (data) => {
-        set({ isLoading: true });
         try {
+          // 로딩 상태를 직접 제어하지 않고 fetchPostings의 배경 업데이트 기능을 활용
           await createDirectJob(data);
           await get().fetchPostings(get().currentPage);
         } catch (err) {
           set({ error: (err as Error).message });
           throw err;
-        } finally {
-          set({ isLoading: false });
         }
       },
 
       updateJob: async (externalId, data) => {
-        set({ isLoading: true });
         try {
           await updateDirectJob(externalId, data);
+          // 수정 후 조용히 목록 갱신
           await get().fetchPostings(get().currentPage);
         } catch (err) {
           set({ error: (err as Error).message });
           throw err;
-        } finally {
-          set({ isLoading: false });
         }
       },
 
@@ -266,7 +273,6 @@ export const usePostingStore = create<PostingState>()(
           set({ error: '유효하지 않은 공고 타입입니다: ' + type });
           return;
         }
-        set({ isLoading: true });
         try {
           if (type === 'manual') {
             await deleteManualJob(externalId);
@@ -275,7 +281,7 @@ export const usePostingStore = create<PostingState>()(
             await deleteDirectJob(externalId);
           }
 
-          // 💡 삭제 후 현재 페이지가 빈 페이지가 될 가능성 체크 (마지막 아이템 삭제 시)
+          // 삭제 후 현재 페이지 데이터 갱신
           const PAGE_SIZE = 30;
           const currentTotal = get().totalCount;
           const currentPage = get().currentPage;
@@ -286,8 +292,6 @@ export const usePostingStore = create<PostingState>()(
         } catch (err) {
           set({ error: (err as Error).message });
           throw err;
-        } finally {
-          set({ isLoading: false });
         }
       },
 
@@ -305,15 +309,12 @@ export const usePostingStore = create<PostingState>()(
       },
 
       saveParsedJob: async (data) => {
-        set({ isLoading: true });
         try {
           await manualSave(data);
           await get().fetchPostings(get().currentPage);
         } catch (err) {
           set({ error: (err as Error).message });
           throw err;
-        } finally {
-          set({ isLoading: false });
         }
       },
 

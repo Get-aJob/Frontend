@@ -1,7 +1,7 @@
 import { useEffect, useState, useCallback } from 'react';
 import type { JobPosting } from '@/types/Posting';
 import Badge from '@/components/common/UI/Badge';
-import { MessageSquare, Eye, Edit2, Trash2, Bookmark, Building2 } from 'lucide-react';
+import { MessageSquare, Eye, Edit2, Trash2, Bookmark } from 'lucide-react';
 import { ddayVariant, toDday, isExpired } from '@/utils/statusUtils';
 import { getJobComments } from '@/api/Comment';
 import type { RawCommentData } from './Comment/useJobComment';
@@ -9,6 +9,7 @@ import { usePostingStore } from '@/store/usePostingStore';
 import { incrementViewCount } from '@/api/Posting';
 import { useJobActions } from '@/hooks/useJobActions';
 import JobActionsModals from './JobActionsModals';
+import CompanyLogo from '@/components/common/UI/CompanyLogo';
 
 interface PostingCardProps {
   posting: JobPosting;
@@ -17,7 +18,6 @@ interface PostingCardProps {
 }
 
 const PostingCard = ({ posting, isApplied, onDetail }: PostingCardProps) => {
-  const [imgError, setImgError] = useState(false);
   const displayDday = toDday(posting.deadline);
   const expired = isExpired(posting.deadline);
 
@@ -94,22 +94,14 @@ const PostingCard = ({ posting, isApplied, onDetail }: PostingCardProps) => {
       >
         <div className="flex justify-between items-start mb-5">
           <div className="flex items-center gap-4">
-            <div
-              className={`w-14 h-14 rounded-2xl bg-gray-50 border border-border-light overflow-hidden flex items-center justify-center shadow-sm cursor-pointer ${
+            <CompanyLogo
+              src={posting.companyLogo}
+              alt={posting.companyName}
+              className={`w-14 h-14 rounded-2xl bg-gray-50 border border-border-light overflow-hidden flex items-center justify-center shadow-sm ${
                 expired ? 'grayscale' : ''
               }`}
-            >
-              {posting.companyLogo && !imgError ? (
-                <img
-                  src={posting.companyLogo}
-                  alt={posting.companyName}
-                  className="w-full h-full object-contain p-1.5"
-                  onError={() => setImgError(true)}
-                />
-              ) : (
-                <Building2 size={24} className="text-gray-300 opacity-60" />
-              )}
-            </div>
+              iconSize={24}
+            />
             <div>
               <h3 className="text-xs font-black text-gray-700 tracking-tight mb-1">
                 {posting.companyName}

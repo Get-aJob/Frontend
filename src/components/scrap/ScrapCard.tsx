@@ -3,12 +3,12 @@ import type { ScrapItem } from '@/api/Scrap';
 import ApplyModal from '@/components/status/ApplyModal';
 import ConfirmModal from '@/components/common/UI/ConfirmModal';
 import { getJobById } from '@/api/Posting';
-import { Building2 } from 'lucide-react';
 import {
   formatLocalDate,
   parseDescription,
   type ExtendedJobPosting,
 } from '@/store/usePostingStore';
+import CompanyLogo from '@/components/common/UI/CompanyLogo';
 import Badge from '@/components/common/UI/Badge';
 import { toDday, ddayVariant, isExpired } from '@/utils/statusUtils';
 
@@ -19,19 +19,6 @@ interface ScrapCardProps {
   setIsOpen: React.Dispatch<React.SetStateAction<boolean>>;
   setJob: React.Dispatch<React.SetStateAction<ExtendedJobPosting | null>>;
 }
-
-const GRADIENTS = [
-  'linear-gradient(135deg, #ff8f00, #e65100)',
-  'linear-gradient(135deg, #5c6bc0, #3949ab)',
-  'linear-gradient(135deg, #43a047, #2e7d32)',
-  'linear-gradient(135deg, #00acc1, #00838f)',
-  'linear-gradient(135deg, #8e24aa, #6a1b9a)',
-];
-
-const getGradientForName = (name: string) => {
-  const hash = name.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
-  return GRADIENTS[hash % GRADIENTS.length];
-};
 
 const ScrapCard: React.FC<ScrapCardProps> = ({
   scrap,
@@ -44,7 +31,6 @@ const ScrapCard: React.FC<ScrapCardProps> = ({
   const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
   const [modalMode, setModalMode] = useState<'confirm' | 'success'>('confirm');
   const [modalMessage, setModalMessage] = useState('');
-  const [imgError, setImgError] = useState(false);
 
   const displayDday = toDday(scrap.deadline);
   const expired = isExpired(scrap.deadline);
@@ -116,25 +102,12 @@ const ScrapCard: React.FC<ScrapCardProps> = ({
       >
         <div className="flex justify-between items-start gap-4">
           <div className="flex gap-3.5 min-w-0 flex-1">
-            <div
-              className="w-11 h-11 rounded-xl shrink-0 flex items-center justify-center font-bold text-white text-lg shadow-sm"
-              style={{
-                background: scrap.companyLogo
-                  ? 'transparent'
-                  : getGradientForName(scrap.companyName),
-              }}
-            >
-              {scrap.companyLogo && !imgError ? (
-                <img
-                  src={scrap.companyLogo}
-                  alt="logo"
-                  className="w-full h-full object-contain rounded-xl border border-gray-100"
-                  onError={() => setImgError(true)}
-                />
-              ) : (
-                <Building2 size={24} className="text-white opacity-80" />
-              )}
-            </div>
+            <CompanyLogo
+              src={scrap.companyLogo}
+              alt="logo"
+              className="w-11 h-11 rounded-xl shrink-0 flex items-center justify-center bg-gray-50 border border-gray-100 shadow-sm overflow-hidden"
+              iconSize={20}
+            />
 
             <div className="flex-1 min-w-0 flex flex-col justify-center">
               <h3 className="font-extrabold text-gray-900 text-[15px] truncate mb-0.5">

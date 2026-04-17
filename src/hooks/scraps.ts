@@ -36,7 +36,7 @@ export const useMyScraps = (
 
     // 💡 3. 유용한 옵션들
     placeholderData: (previousData) => previousData, // 페이지 전환 시 깜빡임 방지
-    staleTime: 0, // 💡 즉각적인 반영을 위해 staleTime을 0으로 설정
+    staleTime: 30 * 1000, // 30초 동안은 신선한 데이터로 간주하여 잦은 리펫칭 방지
   });
 };
 

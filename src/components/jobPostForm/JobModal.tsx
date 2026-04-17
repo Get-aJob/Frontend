@@ -161,7 +161,7 @@ const JobModal = ({
         location,
         experience,
         description,
-        companyLogo: logo || undefined,
+        companyLogo: logo, // null이면 서버에서도 로고가 삭제되도록 보냄
         deadline: isAlwaysRecruit ? null : deadline,
         deadlineText: isAlwaysRecruit ? '상시채용' : '',
         sourceUrl: url || '',

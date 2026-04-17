@@ -6,7 +6,6 @@ import {
   Briefcase,
   Calendar,
   Globe,
-  Building2,
   Check,
   Bookmark,
   Edit2,
@@ -20,6 +19,7 @@ import JobCommentPanel from './Comment/JobCommentPanel';
 import ApplyModal from '@/components/status/ApplyModal';
 import { useToastStore } from '@/store/useToastStore';
 import { formatFullDate, isExpired } from '@/utils/statusUtils';
+import CompanyLogo from '@/components/common/UI/CompanyLogo';
 import clsx from 'clsx';
 
 interface PostingDetailModalProps {
@@ -31,7 +31,6 @@ interface PostingDetailModalProps {
 const PostingDetailModal = ({ isOpen, onClose, job }: PostingDetailModalProps) => {
   const [isApplyModalOpen, setIsApplyModalOpen] = useState(false);
   const { showToast } = useToastStore();
-  const [imgError, setImgError] = useState(false);
 
   const {
     isScrapped,
@@ -111,20 +110,12 @@ const PostingDetailModal = ({ isOpen, onClose, job }: PostingDetailModalProps) =
 
           <div className="p-6 sm:p-10 pb-4 sm:pb-8 border-b border-gray-50 shrink-0">
             <div className="flex items-start gap-4 sm:gap-6">
-              <div className="w-16 h-16 sm:w-24 sm:h-24 rounded-2xl sm:rounded-3xl border border-gray-100 flex items-center justify-center overflow-hidden bg-white shadow-sm shrink-0">
-                {job.companyLogo && !imgError ? (
-                  <img
-                    src={job.companyLogo}
-                    className="w-full h-full object-contain p-2 sm:p-3"
-                    alt="로고"
-                    onError={() => setImgError(true)}
-                  />
-                ) : (
-                  <div className="p-4 bg-purple-50 rounded-2xl">
-                    <Building2 size={32} className="text-btn-point opacity-80" />
-                  </div>
-                )}
-              </div>
+              <CompanyLogo
+                src={job.companyLogo}
+                alt="로고"
+                className="w-16 h-16 sm:w-24 sm:h-24 rounded-2xl sm:rounded-3xl border border-gray-100 flex items-center justify-center overflow-hidden bg-gray-50 shadow-sm shrink-0"
+                iconSize={32}
+              />
               <div className="flex-1 min-w-0 pt-0.5 sm:pt-1">
                 <h2 className="text-lg sm:text-2xl font-black text-gray-900 leading-tight mb-1 sm:mb-2 break-words pr-24 sm:pr-40">
                   {job.title}
