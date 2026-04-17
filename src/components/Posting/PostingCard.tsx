@@ -6,10 +6,10 @@ import { ddayVariant, toDday, isExpired } from '@/utils/statusUtils';
 import { getJobComments } from '@/api/Comment';
 import type { RawCommentData } from './Comment/useJobComment';
 import { usePostingStore } from '@/store/usePostingStore';
-import { incrementViewCount } from '@/api/Posting';
-import { useJobActions } from '@/hooks/useJobActions';
-import JobActionsModals from './JobActionsModals';
-import CompanyLogo from '@/components/common/UI/CompanyLogo';
+import { toggleScrap } from '@/api/Scrap';
+import ConfirmModal from '@/components/common/UI/ConfirmModal';
+import { useToastStore } from '@/store/useToastStore';
+import { useQueryClient } from '@tanstack/react-query';
 
 interface PostingCardProps {
   posting: JobPosting;
@@ -33,9 +33,6 @@ const PostingCard = ({ posting, isApplied, onDetail }: PostingCardProps) => {
   } = useJobActions(posting);
 
   const handleCardClick = () => {
-    if (posting.sourceType !== 'manual') {
-      incrementViewCount(posting.id);
-    }
     onDetail(posting);
   };
 

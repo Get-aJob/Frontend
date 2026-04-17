@@ -5,7 +5,6 @@ import Button from '@/components/common/UI/Button';
 import { ExternalLink, Search, Bookmark } from 'lucide-react';
 import ConfirmModal from '@/components/common/UI/ConfirmModal';
 import { toggleScrap } from '@/api/Scrap';
-import { incrementViewCount } from '@/api/Posting';
 
 interface PostingActionButtonsProps {
   job: JobPosting;
@@ -30,7 +29,6 @@ const PostingActionButtons: React.FC<PostingActionButtonsProps> = ({
   // 상세보기 클릭 시 조회수 증가 및 상세 모달 오픈
   const handleDetailClick = (e: React.MouseEvent) => {
     e.stopPropagation();
-    incrementViewCount(job.id);
     onDetailClick();
   };
 
