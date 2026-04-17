@@ -217,11 +217,11 @@ const PostingDetailModal = ({ isOpen, onClose, job }: PostingDetailModalProps) =
             >
               원문 <ExternalLink size={18} className="ml-1 sm:ml-2 sm:w-5 sm:h-5" />
             </Button>
-            {!isApplied && (
+            {!isApplied && isLoggedIn && (
               <Button
                 onClick={async () => {
                   const result = await toggleScrap(String(job.id));
-                  queryClient.invalidateQueries({ queryKey: ['scraps', 'all'] });
+                  queryClient.invalidateQueries({ queryKey: ['scraps'] });
 
                   if (result.added) {
                     window.alert('스크랩 완료');
@@ -276,9 +276,7 @@ const PostingDetailModal = ({ isOpen, onClose, job }: PostingDetailModalProps) =
             title={job.title}
             onClose={() => setIsApplyModalOpen(false)}
             onSuccess={() => {
-              window.alert('지원이 완료되었습니다.');
               setIsApplyModalOpen(false);
-              navigate(PATH.STATUS);
             }}
           />
         )}

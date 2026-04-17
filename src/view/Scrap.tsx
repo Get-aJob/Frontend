@@ -1,60 +1,39 @@
-import { useEffect, useState, useCallback } from 'react';
+import { useState } from 'react';
 import type { ChangeEvent } from 'react';
-import { getMyScraps, toggleScrap, type ScrapItem } from '@/api/Scrap';
+
 import ScrapHeader from '@/components/scrap/ScrapHeader';
 import ScrapList from '@/components/scrap/ScrapList';
 import { LoaderCircle, Bookmark } from 'lucide-react';
 import EmptyState from '@/components/common/UI/EmptyState';
 import Pagination from '@/components/Posting/Pagination';
+import { useMyScraps, useToggleScraps } from '@/hooks/scraps';
+import { useQueryClient } from '@tanstack/react-query';
 
 const Scrap = () => {
-  const [scraps, setScraps] = useState<ScrapItem[]>([]);
   const [sortBy, setSortBy] = useState<'latest' | 'deadline'>('latest');
-  const [isLoading, setIsLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
-  const [totalCount, setTotalCount] = useState(0);
-  const [totalPage, setTotalPage] = useState(0);
 
   const PAGE_SIZE = 30;
-
-  const fetchScraps = useCallback(async () => {
-    setIsLoading(true);
-    try {
-      const data = await getMyScraps(currentPage, PAGE_SIZE, sortBy);
-      setScraps(data.scraps);
-      setTotalCount(data.pagination.totalCount);
-      const totalPages = Math.ceil(data.pagination.totalCount / PAGE_SIZE) || 1;
-      setTotalPage(totalPages);
-    } catch (error: unknown) {
-      console.error('스크랩 목록 로드 실패:', error);
-    } finally {
-      setIsLoading(false);
-    }
-  }, [currentPage, sortBy]);
-
-  useEffect(() => {
-    fetchScraps();
-  }, [fetchScraps]);
+  const queryClient = useQueryClient();
+  const { data, isLoading } = useMyScraps(currentPage, PAGE_SIZE, sortBy);
+  const { mutate } = useToggleScraps(currentPage, sortBy);
+  const totalPage = data ? Math.ceil(data?.pagination.totalCount / PAGE_SIZE) : 1;
+  const totalCount = data ? data.pagination.totalCount : 0;
 
   const handlePageChange = async (page: number) => {
     setCurrentPage(page);
   };
 
-  const handleUnscrap = async (id: string) => {
-    try {
-      await toggleScrap(id);
-      setScraps((prev) => prev.filter((item) => item.jobPostingId !== id));
-    } catch (error: unknown) {
-      console.error('스크랩 해제 실패:', error);
-      fetchScraps();
-      throw error;
-    }
+  const onClose = async () => {
+    queryClient.invalidateQueries({ queryKey: ['scraps', currentPage, sortBy] });
   };
 
-  const handleApplySuccess = (jobId: string) => {
-    setScraps((prev) =>
-      prev.map((item) => (item.jobPostingId === jobId ? { ...item, isApplied: true } : item)),
-    );
+  const handleUnscrap = async (id: string) => {
+    mutate(id);
+  };
+
+  const handleApplySuccess = () => {
+    queryClient.invalidateQueries({ queryKey: ['scraps'] });
   };
 
   const handleSortChange = (e: ChangeEvent<HTMLSelectElement>) => {
@@ -70,13 +49,13 @@ const Scrap = () => {
           <LoaderCircle size={36} className="animate-spin text-btn-point mb-4" />
           <p className="font-medium tracking-wide">저장된 공고를 불러오는 중입니다...</p>
         </div>
-      ) : scraps.length > 0 ? (
+      ) : data!.scraps.length > 0 ? (
         <div className="w-full">
           <ScrapList
-            scraps={scraps}
+            scraps={data!.scraps}
             onUnscrap={handleUnscrap}
             onApplySuccess={handleApplySuccess}
-            setScraps={setScraps}
+            onClose={onClose}
           />
           <Pagination
             currentPage={currentPage}

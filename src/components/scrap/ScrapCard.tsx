@@ -264,7 +264,9 @@ const ScrapCard: React.FC<ScrapCardProps> = ({
           jobPostingId={scrap.jobPostingId}
           companyName={scrap.companyName}
           title={scrap.title}
-          onClose={() => setIsApplyModalOpen(false)}
+          onClose={() => {
+            setIsApplyModalOpen(false);
+          }}
           onSuccess={() => {
             if (onApplySuccess) onApplySuccess();
           }}
