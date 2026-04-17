@@ -8,6 +8,8 @@ import { useNotificationStore } from '@/store/useNotificationStore';
 import { useMobilesidebarStore } from '@/store/useMobileSidebarStore';
 import { createNotificationSocket } from '@/socket/SocketClient';
 import { SOCKET_EVENT, type INotificationNewEventPayload } from '@/socket/events'; // ✨ 타입 임포트
+import Toast from '@/components/common/UI/Toast';
+import { useToastStore } from '@/store/useToastStore';
 
 const Layout = () => {
   const location = useLocation();
@@ -20,6 +22,8 @@ const Layout = () => {
   const unreadCount = useNotificationStore((state) => state.unreadCount);
 
   const closeSidebar = useMobilesidebarStore((state) => state.close);
+
+  const { visible: toastVisible, message: toastMessage, showLoginButton } = useToastStore();
 
   useEffect(() => {
     if (!isLoggedIn) {
@@ -107,6 +111,7 @@ const Layout = () => {
           </div>
         </main>
       </div>
+      <Toast visible={toastVisible} message={toastMessage} showLoginButton={showLoginButton} />
     </div>
   );
 };

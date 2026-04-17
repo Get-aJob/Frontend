@@ -3,35 +3,26 @@ import { create } from 'zustand';
 interface ToastState {
   visible: boolean;
   message: string;
-  toastTimeoutId: number | null;
-  showToast: (message: string) => void;
+  showLoginButton: boolean;
+  showToast: (message: string, showLoginButton?: boolean) => void;
   hideToast: () => void;
 }
 
-export const useToastStore = create<ToastState>((set, get) => ({
+let toastTimer: ReturnType<typeof setTimeout> | null = null;
+
+export const useToastStore = create<ToastState>((set) => ({
   visible: false,
   message: '',
-  toastTimeoutId: null,
-  showToast: (message: string) => {
-    // 기존 타이머가 있으면 제거하여 레이스 컨디션 방지
-    const currentTimeoutId = get().toastTimeoutId;
-    if (currentTimeoutId) {
-      clearTimeout(currentTimeoutId);
-    }
-
-    set({ visible: true, message });
-
-    const timeoutId = window.setTimeout(() => {
-      set({ visible: false, toastTimeoutId: null });
+  showLoginButton: false,
+  showToast: (message, showLoginButton = false) => {
+    if (toastTimer) clearTimeout(toastTimer);
+    set({ visible: true, message, showLoginButton });
+    toastTimer = setTimeout(() => {
+      set({ visible: false, showLoginButton: false });
     }, 3000);
-
-    set({ toastTimeoutId: timeoutId as unknown as number });
   },
   hideToast: () => {
-    const currentTimeoutId = get().toastTimeoutId;
-    if (currentTimeoutId) {
-      clearTimeout(currentTimeoutId);
-    }
-    set({ visible: false, toastTimeoutId: null });
+    if (toastTimer) clearTimeout(toastTimer);
+    set({ visible: false, showLoginButton: false });
   },
 }));
