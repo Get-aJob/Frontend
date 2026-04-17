@@ -9,7 +9,7 @@ interface NotificationListProps {
   onMarkRead: (id: string) => void;
 }
 
-function NotificationList({ items, onMove, onMarkRead }: NotificationListProps) {
+function NotificationList({ items, onMarkRead }: NotificationListProps) {
   return (
     <ul className="flex flex-col gap-3 list-none p-0 m-0">
       {items.map((item) => {
@@ -51,24 +51,16 @@ function NotificationList({ items, onMove, onMarkRead }: NotificationListProps) 
                     {item.title}
                   </h2>
 
-                  <p className="text-sm text-gray-600 mt-1 leading-relaxed line-clamp-2">{item.body}</p>
+                  <p className="text-sm text-gray-600 mt-1 leading-relaxed line-clamp-2">
+                    {item.body}
+                  </p>
 
                   <div className="flex flex-wrap gap-2 mt-4">
-                    {item.payload?.href && typeof item.payload.href === 'string' && (
-                      <button
-                        type="button"
-                        onClick={() => onMove(item)}
-                        className="text-sm font-semibold text-btn-point hover:underline"
-                      >
-                        바로가기
-                      </button>
-                    )}
-
                     {unread && (
                       <button
                         type="button"
                         onClick={() => onMarkRead(item.id)}
-                        className="text-sm font-medium text-gray-500 hover:text-gray-800"
+                        className="cursor-pointer text-sm font-medium text-gray-500 hover:text-gray-800"
                       >
                         읽음 처리
                       </button>
