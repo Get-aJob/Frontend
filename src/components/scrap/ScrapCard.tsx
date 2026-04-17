@@ -108,15 +108,11 @@ const ScrapCard: React.FC<ScrapCardProps> = ({
   return (
     <>
       {/* 💡 86라인: min-h-[140px]를 권장되는 min-h-35로 변경 */}
-      <div className="bg-white p-5 rounded-2xl border border-gray-200 hover:border-btn-point hover:shadow-[0_4px_20px_rgba(0,0,0,0.06)] hover:-translate-y-1 transition-all duration-200 flex flex-col justify-between min-h-35 cursor-pointer group">
-        <div
-          onClick={(e) => {
-            e.stopPropagation();
-            handleOnClick();
-            setIsOpen(true);
-          }}
-          className="flex justify-between items-start gap-4"
-        >
+      <div
+        onClick={handleOnClick}
+        className="bg-white p-5 rounded-2xl border border-gray-200 hover:border-btn-point hover:shadow-[0_4px_20px_rgba(0,0,0,0.06)] hover:-translate-y-1 transition-all duration-200 flex flex-col justify-between min-h-35 cursor-pointer group"
+      >
+        <div className="flex justify-between items-start gap-4">
           <div className="flex gap-3.5 min-w-0 flex-1">
             <div
               className="w-11 h-11 rounded-xl shrink-0 flex items-center justify-center font-bold text-white text-lg shadow-sm"
