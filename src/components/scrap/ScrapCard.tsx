@@ -3,6 +3,7 @@ import type { ScrapItem } from '@/api/Scrap';
 import ApplyModal from '@/components/status/ApplyModal';
 import ConfirmModal from '@/components/common/UI/ConfirmModal';
 import { getJobById } from '@/api/Posting';
+import { Building2 } from 'lucide-react';
 import {
   formatLocalDate,
   parseDescription,
@@ -43,6 +44,7 @@ const ScrapCard: React.FC<ScrapCardProps> = ({
   const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
   const [modalMode, setModalMode] = useState<'confirm' | 'success'>('confirm');
   const [modalMessage, setModalMessage] = useState('');
+  const [imgError, setImgError] = useState(false);
 
   const displayDday = toDday(scrap.deadline);
   const expired = isExpired(scrap.deadline);
@@ -122,14 +124,15 @@ const ScrapCard: React.FC<ScrapCardProps> = ({
                   : getGradientForName(scrap.companyName),
               }}
             >
-              {scrap.companyLogo ? (
+              {scrap.companyLogo && !imgError ? (
                 <img
                   src={scrap.companyLogo}
                   alt="logo"
                   className="w-full h-full object-contain rounded-xl border border-gray-100"
+                  onError={() => setImgError(true)}
                 />
               ) : (
-                scrap.companyName.charAt(0)
+                <Building2 size={24} className="text-white opacity-80" />
               )}
             </div>
 

@@ -1,7 +1,7 @@
 import { useEffect, useState, useCallback } from 'react';
 import type { JobPosting } from '@/types/Posting';
 import Badge from '@/components/common/UI/Badge';
-import { MessageSquare, Eye, Edit2, Trash2, Bookmark } from 'lucide-react';
+import { MessageSquare, Eye, Edit2, Trash2, Bookmark, Building2 } from 'lucide-react';
 import { ddayVariant, toDday, isExpired } from '@/utils/statusUtils';
 import { getJobComments } from '@/api/Comment';
 import type { RawCommentData } from './Comment/useJobComment';
@@ -17,6 +17,7 @@ interface PostingCardProps {
 }
 
 const PostingCard = ({ posting, isApplied, onDetail }: PostingCardProps) => {
+  const [imgError, setImgError] = useState(false);
   const displayDday = toDday(posting.deadline);
   const expired = isExpired(posting.deadline);
 
@@ -94,21 +95,19 @@ const PostingCard = ({ posting, isApplied, onDetail }: PostingCardProps) => {
         <div className="flex justify-between items-start mb-5">
           <div className="flex items-center gap-4">
             <div
-              className={`w-14 h-14 rounded-2xl bg-gray-50 border border-border-light overflow-hidden flex items-center justify-center shadow-sm cursor-default ${
+              className={`w-14 h-14 rounded-2xl bg-gray-50 border border-border-light overflow-hidden flex items-center justify-center shadow-sm cursor-pointer ${
                 expired ? 'grayscale' : ''
               }`}
-              onClick={(e) => e.stopPropagation()}
             >
-              {posting.companyLogo ? (
+              {posting.companyLogo && !imgError ? (
                 <img
                   src={posting.companyLogo}
                   alt={posting.companyName}
                   className="w-full h-full object-contain p-1.5"
+                  onError={() => setImgError(true)}
                 />
               ) : (
-                <span className="text-xl font-black text-gray-300">
-                  {posting.companyName.charAt(0)}
-                </span>
+                <Building2 size={24} className="text-gray-300 opacity-60" />
               )}
             </div>
             <div>

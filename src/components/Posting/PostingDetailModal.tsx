@@ -31,6 +31,7 @@ interface PostingDetailModalProps {
 const PostingDetailModal = ({ isOpen, onClose, job }: PostingDetailModalProps) => {
   const [isApplyModalOpen, setIsApplyModalOpen] = useState(false);
   const { showToast } = useToastStore();
+  const [imgError, setImgError] = useState(false);
 
   const {
     isScrapped,
@@ -111,17 +112,16 @@ const PostingDetailModal = ({ isOpen, onClose, job }: PostingDetailModalProps) =
           <div className="p-6 sm:p-10 pb-4 sm:pb-8 border-b border-gray-50 shrink-0">
             <div className="flex items-start gap-4 sm:gap-6">
               <div className="w-16 h-16 sm:w-24 sm:h-24 rounded-2xl sm:rounded-3xl border border-gray-100 flex items-center justify-center overflow-hidden bg-white shadow-sm shrink-0">
-                {job.companyLogo ? (
+                {job.companyLogo && !imgError ? (
                   <img
                     src={job.companyLogo}
                     className="w-full h-full object-contain p-2 sm:p-3"
                     alt="로고"
+                    onError={() => setImgError(true)}
                   />
                 ) : (
-                  <div className="text-xl sm:text-3xl font-black text-btn-point">
-                    {job.companyName?.charAt(0) || (
-                      <Building2 size={24} className="sm:w-8 sm:h-8" />
-                    )}
+                  <div className="p-4 bg-purple-50 rounded-2xl">
+                    <Building2 size={32} className="text-btn-point opacity-80" />
                   </div>
                 )}
               </div>
