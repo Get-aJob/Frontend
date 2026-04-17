@@ -1,6 +1,8 @@
 import { useEffect, useState, useMemo } from 'react';
-import { getSchedules } from '@/api/Schedules';
+import { useSchedules } from '@/hooks/useSchedules';
 import { getJobById } from '@/api/Posting';
+import { useToastStore } from '@/store/useToastStore';
+import { toLocalDateStr } from '@/utils/statusUtils';
 import type { ScheduleEvent, ViewType, EventFilterType } from '@/types/Calendar';
 import CalendarHeader from '@/components/calendar/CalendarHeader';
 import CalendarGrid from '@/components/calendar/CalendarGrid';
@@ -12,8 +14,8 @@ import { useAuthStore } from '@/store/useAuthStore';
 import type { ApplicationRecord } from '@/types/Status'; // ✨ 타입 임포트
 
 const Calendar = () => {
+  const { showToast } = useToastStore();
   const [view, setView] = useState<ViewType>('month');
-  const [scheduleEvents, setScheduleEvents] = useState<ScheduleEvent[]>([]);
   const [currentDate, setCurrentDate] = useState(new Date());
   const [filter, setFilter] = useState<EventFilterType>('all');
 
@@ -34,41 +36,39 @@ const Calendar = () => {
     }
   }, [fetchStatusData, isLoggedIn]);
 
-  useEffect(() => {
-    let isMounted = true;
-    const fetchSchedules = async () => {
-      let start = new Date(currentDate);
-      let end = new Date(currentDate);
-      if (view === 'month') {
-        start = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1);
-        end = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 12); // 정오로 맞춤
-      } else if (view === 'week') {
-        const day = currentDate.getDay();
-        start = new Date(currentDate);
-        start.setDate(currentDate.getDate() - day);
-        end = new Date(start);
-        end.setDate(start.getDate() + 6);
-      }
-      const startDate = start.toISOString().split('T')[0];
-      const endDate = end.toISOString().split('T')[0];
-
-      try {
-        const scheduleRes = await getSchedules({ startDate, endDate });
-        if (scheduleRes?.schedules?.events && isMounted) {
-          const deadlineEvents = scheduleRes.schedules.events.filter(
-            (e) => e.eventType === 'deadline',
-          );
-          setScheduleEvents(deadlineEvents);
-        }
-      } catch (error) {
-        console.error('스케줄 로드 실패:', error);
-      }
-    };
-    fetchSchedules();
-    return () => {
-      isMounted = false;
+  const { startDate, endDate } = useMemo(() => {
+    let start = new Date(currentDate);
+    let end = new Date(currentDate);
+    if (view === 'month') {
+      start = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1);
+      end = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 12);
+    } else if (view === 'week') {
+      const day = currentDate.getDay();
+      start = new Date(currentDate);
+      start.setDate(currentDate.getDate() - day);
+      end = new Date(start);
+      end.setDate(start.getDate() + 6);
+    }
+    return {
+      startDate: toLocalDateStr(start),
+      endDate: toLocalDateStr(end),
     };
   }, [currentDate, view]);
+
+  const { data: scheduleRes, isError, error } = useSchedules({ startDate, endDate });
+
+  // 일정 데이터 로드 실패 시 에러 처리
+  useEffect(() => {
+    if (isError) {
+      console.error('스케줄 로드 실패:', error);
+      showToast('❌ 일정 데이터를 불러오는 데 실패했습니다.');
+    }
+  }, [isError, error, showToast]);
+
+  const scheduleEvents = useMemo(() => {
+    if (!scheduleRes?.schedules?.events) return [];
+    return scheduleRes.schedules.events.filter((e) => e.eventType === 'deadline');
+  }, [scheduleRes]);
 
   const combinedEvents = useMemo(() => {
     const appliedEvents: ScheduleEvent[] = applications.map((app) => {
