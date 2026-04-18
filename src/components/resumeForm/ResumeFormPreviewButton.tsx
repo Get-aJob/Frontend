@@ -1,5 +1,5 @@
 import ResumeDocument from '@/features/pdf/templates/ResumeDocument';
-import { useGetResume } from '@/hooks/resume';
+import { useGetResume } from '@/hooks/useResume';
 import { useAuthStore } from '@/store/useAuthStore';
 import { usePreviewStore } from '@/store/usePdfPreviewStore';
 import { dataToResume } from '@/utils/resumeUtils';
