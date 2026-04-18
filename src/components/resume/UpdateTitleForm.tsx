@@ -1,4 +1,4 @@
-import { useUpdateResumeTitle } from '@/hooks/resume';
+import { useUpdateResumeTitle } from '@/hooks/useResume';
 import { useRef } from 'react';
 import { useForm } from 'react-hook-form';
 

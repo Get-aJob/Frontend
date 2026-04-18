@@ -2,7 +2,7 @@ import EmptyState from '@/components/common/UI/EmptyState';
 import CreateButton from '@/components/resume/CreateButton';
 import ResumeItem from '@/components/resume/ResumeItem';
 import PortFolioPreview from '@/components/resumeForm/PortFolioPreview';
-import { useResumeList } from '@/hooks/resume';
+import { useResumeList } from '@/hooks/useResume';
 import { usePreviewStore } from '@/store/usePdfPreviewStore';
 import { useResumeItemMenuStore } from '@/store/useResumeItemMenuStore';
 import { FileText } from 'lucide-react';
@@ -17,11 +17,6 @@ const Resume = () => {
   return (
     <div className="flex flex-col gap-8 relative">
       {isOpen && <PortFolioPreview name={name} />}
-      <div className="flex flex-col gap-1">
-        <p className="text-body text-gray-500 font-medium">
-          나만의 전문성을 보여줄 수 있는 이력서를 작성하고 관리하세요.
-        </p>
-      </div>
       {isAnyMenuOpen && <div className="absolute w-full h-full bg-black z-10 opacity-0" />}
       {isLoading && (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">

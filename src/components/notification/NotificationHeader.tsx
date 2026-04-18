@@ -16,14 +16,6 @@ function NotificationHeader({
 }: NotificationHeaderProps) {
   return (
     <header className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
-      <div>
-        <p className="text-sm font-medium text-btn-point tracking-widest uppercase mb-1">
-          NOTIFICATION
-        </p>
-        <h1 className="text-2xl font-bold text-gray-900 tracking-tight">알림</h1>
-        <p className="text-sm text-gray-500 mt-1">받은 알림을 확인하고 읽음 처리할 수 있습니다.</p>
-      </div>
-
       <div className="flex flex-wrap items-center gap-3">
         <div className="inline-flex rounded-full border border-border-light bg-white p-1 shadow-sm">
           <button

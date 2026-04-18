@@ -6,7 +6,7 @@ import { useAuthStore } from '@/store/useAuthStore';
 import { useToastStore } from '@/store/useToastStore';
 import { useStatusStore } from '@/store/useStatusStore';
 import { toggleScrap } from '@/api/Scrap';
-import { useGetAllScraps } from '@/hooks/scraps';
+import { useGetAllScraps } from '@/hooks/useScraps';
 import type { JobPosting } from '@/types/Posting';
 import { PATH } from '@/router/Path';
 import type { ScrapItem } from '@/api/Scrap';

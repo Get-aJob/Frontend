@@ -12,7 +12,7 @@ import { incrementViewCount } from '@/api/Posting';
 import type { ExtendedJobPosting } from '@/store/usePostingStore';
 import { useAuthStore } from '@/store/useAuthStore';
 import { useStatusStore } from '@/store/useStatusStore';
-import { useGetAllScraps } from '@/hooks/scraps';
+import { useGetAllScraps } from '@/hooks/useScraps';
 
 const Posting = () => {
   const isLoggedIn = useAuthStore((state) => state.isLoggedIn);

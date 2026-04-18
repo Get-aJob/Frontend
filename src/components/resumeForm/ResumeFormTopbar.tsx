@@ -4,7 +4,7 @@ import { useFormContext, type SubmitHandler } from 'react-hook-form';
 import { useNavigate, useParams } from 'react-router-dom';
 import { ChevronLeft, Download, LoaderCircle, Save } from 'lucide-react';
 import ResumeDownloadButton from './ResumeDownloadButton';
-import { useGetResume, useSaveResume, useUploadPortfolio } from '@/hooks/resume';
+import { useGetResume, useSaveResume, useUploadPortfolio } from '@/hooks/useResume';
 import { useEffect, useState } from 'react';
 import { dataToResume } from '@/utils/resumeUtils';
 

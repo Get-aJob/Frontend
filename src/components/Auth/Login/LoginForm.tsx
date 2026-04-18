@@ -78,7 +78,7 @@ const LoginForm: React.FC<LoginFormProps> = ({
         </Button>
 
         {/* ✨ 구글 공식 버튼 복구 (백엔드 정상 작동) */}
-        <div className="w-full flex justify-center [&>div]:w-full">
+        <div className="w-full flex justify-center [&>div]:min-w-full">
           <GoogleLogin
             onSuccess={(credentialResponse) => {
               onGoogleLogin(credentialResponse.credential);

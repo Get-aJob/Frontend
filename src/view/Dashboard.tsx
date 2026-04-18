@@ -71,11 +71,6 @@ const Dashboard = () => {
 
   return (
     <div className="flex flex-col gap-8 pb-10">
-      <div className="flex flex-col gap-1">
-        <h2 className="text-2xl font-bold text-slate-900 tracking-tight">통계 분석</h2>
-        <p className="text-body text-gray-500 font-medium">활동 성과와 지원 추이를 확인하세요.</p>
-      </div>
-
       {/* 분리된 컴포넌트들 호출 */}
       <StatCards applications={applications} statuses={statuses} />
       <MonthlyChart data={monthlyData} />
