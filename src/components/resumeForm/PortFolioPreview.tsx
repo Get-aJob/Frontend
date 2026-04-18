@@ -32,7 +32,7 @@ const PortFolioPreview = ({ name }: PortFolioPreviewProps) => {
   if (!isOpen || !previewUrl) return null;
 
   return (
-    <div className="fixed inset-0 flex justify-center items-center top-0 left-0 w-full h-full bg-black/50 backdrop-blur-sm z-30">
+    <div className="fixed inset-0 flex justify-center items-center top-0 left-0 w-full h-full bg-slate-900/40  backdrop-blur-sm z-40">
       <div
         ref={previewRef}
         onClick={(e) => e.stopPropagation()}
