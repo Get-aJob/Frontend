@@ -1,5 +1,5 @@
 import { downloadResumePdf } from '@/features/pdf/utiles/generatePdf';
-import { useGetResume } from '@/hooks/resume';
+import { useGetResume } from '@/hooks/useResume';
 import { useAuthStore } from '@/store/useAuthStore';
 import type { ResumeFormInputs } from '@/types/ResumeFormType';
 import { dataToResume } from '@/utils/resumeUtils';

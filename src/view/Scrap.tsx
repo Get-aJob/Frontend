@@ -6,7 +6,7 @@ import ScrapList from '@/components/scrap/ScrapList';
 import { LoaderCircle, Bookmark } from 'lucide-react';
 import EmptyState from '@/components/common/UI/EmptyState';
 import Pagination from '@/components/Posting/Pagination';
-import { useMyScraps, useToggleScraps } from '@/hooks/scraps';
+import { useMyScraps, useToggleScraps } from '@/hooks/useScraps';
 import { useQueryClient } from '@tanstack/react-query';
 
 const Scrap = () => {

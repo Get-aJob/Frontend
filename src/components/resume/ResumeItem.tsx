@@ -2,7 +2,7 @@ import { MoreVertical } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useResumeItemMenuStore } from '@/store/useResumeItemMenuStore';
-import { useDeleteResume, useDuplicateResume } from '@/hooks/resume';
+import { useDeleteResume, useDuplicateResume } from '@/hooks/useResume';
 import UpdateTitleForm from './UpdateTitleForm';
 import ResumeDownloadButton from '../resumeForm/ResumeDownloadButton';
 import ResumeFormPreviewButton from '../resumeForm/ResumeFormPreviewButton';
